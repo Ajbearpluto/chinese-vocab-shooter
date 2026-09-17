@@ -1,0 +1,21 @@
+{
+  "name": "三角洲字點：特種識字部隊",
+  "short_name": "DeltaLexicon",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0f0d",
+  "theme_color": "#111a14",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

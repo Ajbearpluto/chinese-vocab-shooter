@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>三角洲字點：記憶階梯融合特勤系統 (Memory Staircase)</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --bg-color: #060a08;
+      --hud-green: #00ff77;
+      --hud-amber: #ffaa00;
+      --hud-red: #ff3344;
+      --hud-blue: #00ddff;
+      --hud-purple: #c77dff;
+      --panel-bg: rgba(9, 18, 14, 0.94);
+      --border-color: rgba(0, 255, 119, 0.35);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: #e0f0e8;
+      overflow: hidden;
+      width: 100vw; height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    .scanlines {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 3px, 4px 100%;
+      pointer-events: none; z-index: 999;
+    }
+    .nvg-mode {
+      filter: contrast(1.15) brightness(1.1) sepia(100%) hue-rotate(85deg) saturate(220%);
+    }
+
+    /* 頂部 HUD */
+    header.hud-header {
+      height: 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(4, 9, 6, 0.98);
+      font-size: 13px; letter-spacing: 1px; z-index: 100;
+    }
+    .tag-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold;
+      background: rgba(0, 255, 119, 0.15); border: 1px solid var(--hud-green); color: var(--hud-green);
+    }
+    .hud-controls button {
+      background: transparent; border: 1px solid var(--border-color);
+      color: var(--hud-green); padding: 5px 10px; border-radius: 4px;
+      cursor: pointer; font-size: 12px; margin-left: 6px;
+    }
+    .hud-controls button:active { background: var(--hud-green); color: #000; }
+
+    /* 主舞台 */
+    main#tactical-stage {
+      flex: 1; position: relative; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; background: radial-gradient(circle at center, #0e1a14 0%, #040605 85%);
+      padding: 10px;
+    }
+
+    /* 戰術視窗 */
+    .tactical-window {
+      width: 100%; max-width: 1060px; height: 96%;
+      background: var(--panel-bg); border: 1px solid var(--border-color);
+      border-radius: 8px; box-shadow: 0 0 35px rgba(0, 255, 119, 0.08);
+      position: relative; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .window-header {
+      padding: 10px 16px; background: rgba(0, 255, 119, 0.08);
+      border-bottom: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 14px; font-weight: bold; color: var(--hud-green);
+    }
+    .window-body {
+      flex: 1; padding: 16px; position: relative; overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+
+    /* 記憶階梯進度階梯圖 */
+    .staircase-visual {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .staircase-step {
+      background: rgba(16, 28, 22, 0.7);
+      border: 1px solid rgba(0, 255, 119, 0.25);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .staircase-step.active {
+      border-color: var(--hud-green);
+      background: rgba(0, 255, 119, 0.12);
+      box-shadow: 0 0 15px rgba(0, 255, 119, 0.2);
+    }
+    .staircase-step.locked {
+      opacity: 0.55;
+      border-style: dashed;
+    }
+    .step-num {
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--hud-amber);
+      letter-spacing: 1px;
+    }
+    .step-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: #fff;
+      margin: 4px 0;
+    }
+    .step-desc {
+      font-size: 11px;
+      color: #88c0a0;
+      line-height: 1.4;
+    }
+    .step-status {
+      margin-top: 8px;
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--hud-green);
+    }
+
+    /* 階梯演練交互區 */
+    .exercise-panel {
+      flex: 1;
+      background: rgba(12, 22, 17, 0.95);
+      border: 1px solid rgba(0, 255, 119, 0.3);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+    .evolution-chain {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #a0d8b4;
+    }
+    .chain-node {
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      font-weight: bold;
+    }
+    .chain-node.current {
+      background: var(--hud-green);
+      color: #000;
+    }
+    .prompt-text {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      text-align: center;
+      margin: 14px 0 8px 0;
+      line-height: 1.5;
+    }
+    .prompt-sub {
+      font-size: 13px;
+      color: var(--hud-amber);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .interactive-options {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .tactical-choice-btn {
+      min-width: 120px;
+      padding: 14px 24px;
+      font-size: 26px;
+      font-weight: bold;
+      border: 1px solid var(--border-color);
+      background: rgba(20, 36, 28, 0.9);
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .tactical-choice-btn:active {
+      transform: scale(0.95);
+      background: var(--hud-green);
+      color: #000;
+    }
+    .tactical-choice-btn .sub-label {
+      font-size: 11px;
+      color: #88c0a0;
+      margin-top: 4px;
+    }
+
+    /* 快速切換模式按鈕 */
+    .switch-nav {
+      display: flex;
+      gap: 8px;
+    }
+    .switch-btn {
+      background: rgba(0, 255, 119, 0.1);
+      border: 1px solid var(--border-color);
+      color: var(--hud-green);
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .switch-btn.active {
+      background: var(--hud-green);
+      color: #000;
+    }
+
+    /* iPad 旋轉橫向提示 */
+    @media (orientation: portrait) { #portrait-warning { display: flex !important; } }
+    #portrait-warning {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #060a08; z-index: 10000; flex-direction: column;
+      align-items: center; justify-content: center; padding: 24px; text-align: center; color: var(--hud-amber);
+    }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+  <div id="portrait-warning">
+    <div style="font-size: 48px; margin-bottom: 12px;">🔄</div>
+    <h2>請將 iPad 旋轉至「橫向模式」</h2>
+    <p style="margin-top: 8px; font-size: 14px; color: #88c0a0;">記憶階梯戰術指揮面板需要橫向完整視野</p>
+  </div>
+
+  <header class="hud-header">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span class="tag-badge">AUTO-AUTHORIZED</span>
+      <span id="callsign-tag" style="color: #88c0a0;">特遣隊: DELTA-07</span>
+      <span class="tag-badge" style="border-color: var(--hud-purple); color: var(--hud-purple);">記憶階梯持續融合系統</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="switch-nav">
+        <button class="switch-btn active" id="btn-tab-staircase" onclick="switchTab('staircase')">🪜 階梯融合演練</button>
+        <button class="switch-btn" id="btn-tab-missions" onclick="switchTab('missions')">🎯 實戰特戰任務</button>
+        <button class="switch-btn" id="btn-tab-analytics" onclick="switchTab('analytics')">📊 記憶掌握分析</button>
+      </div>
+      <div class="hud-controls">
+        <button id="btn-nvg">NVG 夜視</button>
+        <a href="stickman_shooter.html" style="text-decoration:none;"><button style="border-color:#ffdf5d; color:#ffdf5d;">💥 火柴人射擊</button></a><button id="btn-fullscreen">⛶ 全螢幕</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="tactical-stage">
+    
+    <!-- 記憶階梯核心視窗 (預設直接自動進入，免重複點擊允許) -->
+    <div class="tactical-window" id="main-window">
+      <div class="window-header">
+        <span id="window-title-text">特種識字記憶階梯 // 螺旋擴充與跨課融合中樞</span>
+        <span id="mastery-indicator" style="color: var(--hud-amber);">綜合掌握度: 82% ｜ 階梯等級: 3</span>
+      </div>
+      
+      <div class="window-body" id="tab-content-staircase">
+        
+        <!-- 四階記憶階梯可視化卡片 -->
+        <div class="staircase-visual">
+          <div class="staircase-step" id="step-card-1">
+            <div>
+              <div class="step-num">STAGE 01 // 感知</div>
+              <div class="step-title">形音知覺標定</div>
+              <div class="step-desc">辨析形近字、注音讀音與視覺特徵，瞬間破防。</div>
+            </div>
+            <div class="step-status" id="step1-status">✔ 已就緒 (100%)</div>
+          </div>
+
+          <div class="staircase-step" id="step-card-2">
+            <div>
+              <div class="step-num">STAGE 02 // 解構</div>
+              <div class="step-title">部首部件拆解</div>
+              <div class="step-desc">雷射切割部首，左右、上下結構重組解密。</div>
+            </div>
+            <div class="step-status" id="step2-status">✔ 已解鎖 (85%)</div>
+          </div>
+
+          <div class="staircase-step active" id="step-card-3">
+            <div>
+              <div class="step-num">STAGE 03 // 串接</div>
+              <div class="step-title">脈絡語義射控</div>
+              <div class="step-desc">詞語搭配精準校準，狙擊測風與協同支援。</div>
+            </div>
+            <div class="step-status" id="step3-status">⚡ 融合中 (60%)</div>
+          </div>
+
+          <div class="staircase-step" id="step-card-4">
+            <div>
+              <div class="step-num">STAGE 04 // 語用</div>
+              <div class="step-title">跨課情境長句融合</div>
+              <div class="step-desc">跨越第 1、3、13 課生字，重組特種作戰情境長句。</div>
+            </div>
+            <div class="step-status" id="step4-status">🔒 蓄力推進</div>
+          </div>
+        </div>
+
+        <!-- 階梯持續擴充演練交互主體 -->
+        <div class="exercise-panel">
+          
+          <div class="evolution-chain">
+            <span style="font-weight: bold; color: #fff;">記憶進化鏈：</span>
+            <span class="chain-node" id="chain-1">① 字形辨析</span> ➔ 
+            <span class="chain-node" id="chain-2">② 部首解構</span> ➔ 
+            <span class="chain-node current" id="chain-3">③ 詞語射控</span> ➔ 
+            <span class="chain-node" id="chain-4">④ 跨課情境融合</span>
+          </div>
+
+          <div style="width: 100%; text-align: center;">
+            <div class="prompt-text" id="exercise-prompt">
+              正在解鎖長程狙擊射控：特務匿蹤於高聳之【？】壁，風偏修正左 2 密位！
+            </div>
+            <div class="prompt-sub" id="exercise-sub">
+              [階梯任務]：請選出匹配語義的正確生字，完成狙擊測風！
+            </div>
+          </div>
+
+          <!-- 動態選項區 -->
+          <div class="interactive-options" id="exercise-options">
+            <!-- 動態生成選項 -->
+          </div>
+
+          <!-- 底部狀態 -->
+          <div style="display: flex; justify-content: space-between; width: 100%; font-size: 12px; color: #88c0a0;">
+            <span id="combo-text">🔥 連擊次數: 5 ｜ 反應時間: 0.8s</span>
+            <span>💡 答對自動演進至下一階梯，錯誤即時重組加固</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- 分頁 2：實戰任務大廳 -->
+      <div class="window-body" id="tab-content-missions" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; height: 100%;">
+          
+          <div style="background: rgba(14,28,20,0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="font-size: 11px; color: var(--hud-amber);">第一課 ｜ 生化疫區防線</div>
+              <h3 style="color: var(--hud-green); margin: 6px 0;">任務一：血清前線</h3>
+              <p style="font-size: 12px; color: #88c0a0; line-height: 1.5;">夜視營帳突入，辨析『瘧、疾、蚊』生字弱點，20秒拆除 C4 語意引線。</p>
+            </div>
+            <button onclick="startMissionMode(1)" style="width: 100%; padding: 10px; background: rgba(0,255,119,0.15); border: 1px solid var(--hud-green); color: var(--hud-green); border-radius: 4px; font-weight: bold; cursor: pointer;">啟動任務</button>
+          </div>
+
+          <div style="background: rgba(14,28,20,0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="font-size: 11px; color: var(--hud-amber);">第三課 ｜ 千仞絕壁防線</div>
+              <h3 style="color: var(--hud-green); margin: 6px 0;">任務二：峭壁鷹眼</h3>
+              <p style="font-size: 12px; color: #88c0a0; line-height: 1.5;">高寒山巔長距狙擊。觀測手解碼回報，狙擊鏡中辨明『峭』vs『俏』與風偏。</p>
+            </div>
+            <button onclick="startMissionMode(2)" style="width: 100%; padding: 10px; background: rgba(0,255,119,0.15); border: 1px solid var(--hud-green); color: var(--hud-green); border-radius: 4px; font-weight: bold; cursor: pointer;">啟動任務</button>
+          </div>
+
+          <div style="background: rgba(14,28,20,0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="font-size: 11px; color: var(--hud-amber);">第十三課 ｜ 沉船暴風雨</div>
+              <h3 style="color: var(--hud-green); margin: 6px 0;">任務三：怒海暗礁</h3>
+              <p style="font-size: 12px; color: #88c0a0; line-height: 1.5;">浸水隔艙倒塌前，以雷射部首『舟+倉=艙』破門營救，避開暗礁突圍。</p>
+            </div>
+            <button onclick="startMissionMode(3)" style="width: 100%; padding: 10px; background: rgba(0,255,119,0.15); border: 1px solid var(--hud-green); color: var(--hud-green); border-radius: 4px; font-weight: bold; cursor: pointer;">啟動任務</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 分頁 3：學習分析後台 -->
+      <div class="window-body" id="tab-content-analytics" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;">
+          <div style="background: rgba(0,255,119,0.08); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 11px; color: #88c0a0;">全冊綜合掌握度</div>
+            <div style="font-size: 26px; font-weight: bold; color: var(--hud-green); margin-top: 4px;">88%</div>
+          </div>
+          <div style="background: rgba(255,170,0,0.08); border: 1px solid rgba(255,170,0,0.3); padding: 12px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 11px; color: var(--hud-amber);">平均作答反應秒數</div>
+            <div style="font-size: 26px; font-weight: bold; color: var(--hud-amber); margin-top: 4px;">1.1 秒</div>
+          </div>
+          <div style="background: rgba(199,125,255,0.08); border: 1px solid rgba(199,125,255,0.3); padding: 12px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 11px; color: var(--hud-purple);">跨課融合情境完成率</div>
+            <div style="font-size: 26px; font-weight: bold; color: var(--hud-purple); margin-top: 4px;">92%</div>
+          </div>
+        </div>
+        <div style="font-size: 13px; color: #88c0a0; margin-bottom: 6px;">五上生字艾賓浩斯間隔重複螺旋歷程：</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="background: rgba(0,255,119,0.1); color: var(--hud-green);">
+              <th style="padding: 6px; border: 1px solid var(--border-color);">生字</th>
+              <th style="padding: 6px; border: 1px solid var(--border-color);">當前階梯</th>
+              <th style="padding: 6px; border: 1px solid var(--border-color);">部首/注音</th>
+              <th style="padding: 6px; border: 1px solid var(--border-color);">已融合情境詞彙</th>
+              <th style="padding: 6px; border: 1px solid var(--border-color);">掌握狀態</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 6px; border: 1px solid var(--border-color); font-weight: bold; text-align: center;">峭</td><td style="text-align: center;">第 3 階 (詞語)</td><td style="text-align: center;">山 (ㄑㄧㄠˋ)</td><td>懸崖峭壁、險峭</td><td style="color: var(--hud-green); text-align: center;">已鞏固</td></tr>
+            <tr><td style="padding: 6px; border: 1px solid var(--border-color); font-weight: bold; text-align: center;">瘧</td><td style="text-align: center;">第 2 階 (部件)</td><td style="text-align: center;">疒 (ㄋㄩㄝˋ)</td><td>瘧疾、抗瘧血清</td><td style="color: var(--hud-amber); text-align: center;">加固中</td></tr>
+            <tr><td style="padding: 6px; border: 1px solid var(--border-color); font-weight: bold; text-align: center;">艙</td><td style="text-align: center;">第 4 階 (融合)</td><td style="text-align: center;">舟 (ㄘㄤ)</td><td>水密船艙、機艙</td><td style="color: var(--hud-green); text-align: center;">已精通</td></tr>
+            <tr><td style="padding: 6px; border: 1px solid var(--border-color); font-weight: bold; text-align: center;">礁</td><td style="text-align: center;">第 3 階 (詞語)</td><td style="text-align: center;">石 (ㄐㄧㄠ)</td><td>觸礁、暗礁突圍</td><td style="color: var(--hud-green); text-align: center;">已鞏固</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="assets/audio.js"></script>
+  <script>
+    // 自動允許機制 (Auto-Authorized on launch)
+    window.addEventListener('load', () => {
+      console.log('系統已全自動通過身份驗證，直通記憶階梯中樞。');
+      // 任意首次觸控自動解鎖 Web Audio
+      const unlockAudio = () => {
+        tacticalAudio.init();
+        window.removeEventListener('touchstart', unlockAudio);
+        window.removeEventListener('click', unlockAudio);
+      };
+      window.addEventListener('touchstart', unlockAudio, { once: true });
+      window.addEventListener('click', unlockAudio, { once: true });
+      
+      initStaircaseEngine();
+    });
+
+    // 分頁切換
+    function switchTab(tabId) {
+      tacticalAudio.playRadioSquelch(0.1);
+      document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-tab-' + tabId).classList.add('active');
+
+      document.getElementById('tab-content-staircase').style.display = tabId === 'staircase' ? 'flex' : 'none';
+      document.getElementById('tab-content-missions').style.display = tabId === 'missions' ? 'flex' : 'none';
+      document.getElementById('tab-content-analytics').style.display = tabId === 'analytics' ? 'flex' : 'none';
+    }
+
+    // 全螢幕切換
+    document.getElementById('btn-fullscreen').onclick = () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    };
+
+    // NVG 夜視開關
+    document.getElementById('btn-nvg').onclick = () => {
+      document.body.classList.toggle('nvg-mode');
+      tacticalAudio.playRadioSquelch(0.12);
+    };
+
+    // ========================================================
+    // 記憶階梯持續擴充與融合引擎 (Staircase Evolution Engine)
+    // ========================================================
+    const stairSteps = [
+      {
+        stage: 1,
+        title: "STAGE 01 // 形音知覺標定",
+        prompt: "【第一階：知覺突破】巡邏機攜帶干擾信號，請標定「瘧」字的正確字形弱點：",
+        sub: "辨析形近字：小心『虐』與『瘋』的混淆干擾！",
+        correct: "瘧",
+        options: [
+          { label: "瘧", sub: "部首: 疒 (ㄋㄩㄝˋ)" },
+          { label: "虐", sub: "部首: 虍 (ㄋㄩㄝˋ)" },
+          { label: "瘋", sub: "部首: 疒 (ㄈㄥ)" }
+        ],
+        nextPrompt: "✔ 第一階達成！正在將「瘧」字解構擴充至第二階部首拆解..."
+      },
+      {
+        stage: 2,
+        title: "STAGE 02 // 部首部件拆解",
+        prompt: "【第二階：部件破拆】野戰營帳水密門鎖死，請選出合成生字「艙」的關鍵部首：",
+        sub: "雷射切割線需吻合部首：水密結構以『舟』為基底！",
+        correct: "舟",
+        options: [
+          { label: "舟", sub: "舟字旁 (水上隔艙)" },
+          { label: "木", sub: "木字旁" },
+          { label: "石", sub: "石字旁" }
+        ],
+        nextPrompt: "✔ 第二階達成！正在將「艙」與「舟」融入第三階詞語搭配射控..."
+      },
+      {
+        stage: 3,
+        title: "STAGE 03 // 脈絡語義射控",
+        prompt: "【第三階：詞語射控】高寒山巔長程狙擊：特務匿蹤於高聳之【？】壁，風偏修正左 2 密位！",
+        sub: "成語射控系統：請選出填入『高聳入雲、山勢險【？】』的正確字形！",
+        correct: "峭",
+        options: [
+          { label: "峭", sub: "險峭 (山部)" },
+          { label: "俏", sub: "俏麗 (亻部)" },
+          { label: "梢", sub: "樹梢 (木部)" }
+        ],
+        nextPrompt: "✔ 第三階達成！終極融合：正在將第一、三、十三課生字融合成跨課情境長句！"
+      },
+      {
+        stage: 4,
+        title: "STAGE 04 // 跨課情境長句融合",
+        prompt: "【第四階：跨課語義融合】特遣隊急電：「快艇在暴風雨中觸【？】導致船【？】浸水，隊員在千仞【？】壁建立野戰營【？】以防惡【？】傳播！」",
+        sub: "跨越第 1、3、13 課：請依序補全『觸【礁】、船【艙】、千仞【峭】壁、營【帳】、惡【疾】』之關鍵首字！",
+        correct: "礁",
+        options: [
+          { label: "礁", sub: "第13課 (石部)" },
+          { label: "焦", sub: "非石質障礙" },
+          { label: "樵", sub: "木柴" }
+        ],
+        nextPrompt: "🎉 恭喜完成全套記憶階梯！四大階梯全數貫通並融會貫通！"
+      }
+    ];
+
+    let currentStepIndex = 0;
+    let comboCount = 5;
+
+    function initStaircaseEngine() {
+      renderCurrentStair();
+    }
+
+    function renderCurrentStair() {
+      const step = stairSteps[currentStepIndex];
+      
+      // 更新鏈條視覺
+      for (let i = 1; i <= 4; i++) {
+        const node = document.getElementById('chain-' + i);
+        const card = document.getElementById('step-card-' + i);
+        if (i === step.stage) {
+          node.className = 'chain-node current';
+          card.className = 'staircase-step active';
+        } else if (i < step.stage) {
+          node.className = 'chain-node';
+          card.className = 'staircase-step';
+        } else {
+          node.className = 'chain-node';
+          card.className = 'staircase-step locked';
+        }
+      }
+
+      document.getElementById('exercise-prompt').innerText = step.prompt;
+      document.getElementById('exercise-sub').innerText = step.sub;
+
+      const optBox = document.getElementById('exercise-options');
+      optBox.innerHTML = '';
+
+      step.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'tactical-choice-btn';
+        btn.innerHTML = `<div>${opt.label}</div><div class="sub-label">${opt.sub}</div>`;
+        btn.onclick = () => handleChoice(opt.label, step);
+        optBox.appendChild(btn);
+      });
+    }
+
+    function handleChoice(chosen, step) {
+      if (chosen === step.correct) {
+        tacticalAudio.playHit();
+        comboCount++;
+        document.getElementById('combo-text').innerText = `🔥 連擊次數: ${comboCount} ｜ 反應時間: 0.7s (精確突破)`;
+        
+        tacticalAudio.playSuccess();
+        alert(step.nextPrompt);
+
+        currentStepIndex = (currentStepIndex + 1) % stairSteps.length;
+        renderCurrentStair();
+      } else {
+        tacticalAudio.playError();
+        comboCount = Math.max(0, comboCount - 1);
+        document.getElementById('combo-text').innerText = `⚠ 混淆警報！部首辨析失誤 ｜ 請再次觀察字根部件！`;
+      }
+    }
+
+    function startMissionMode(mId) {
+      switchTab('staircase');
+      alert(`已載入任務 ${mId} 之專屬記憶階梯數據！`);
+    }
+  </script>
+</body>
+</html>

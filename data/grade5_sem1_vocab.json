@@ -1,0 +1,658 @@
+{
+  "grade": 5,
+  "semester": 1,
+  "description": "國小五年級國語生字特種戰術語意資料庫",
+  "lessons": [
+    {
+      "lesson_id": 1,
+      "title": "第一課：熱帶疫區前線 (荒漠營救)",
+      "theme": "野戰帳篷防護與疫情防線",
+      "characters": [
+        {
+          "char": "蚊",
+          "bopomofo": "ㄨㄣˊ",
+          "radical": "虫",
+          "strokes": 10,
+          "distractors": [
+            "紋",
+            "雯",
+            "紊"
+          ],
+          "components": [
+            "虫",
+            "文"
+          ],
+          "words": [
+            "蚊蟲",
+            "防蚊帳",
+            "按蚊"
+          ],
+          "tactical_clue": "生化病媒實體，配備口器穿透防護服，弱點在於『虫』部生物核心。"
+        },
+        {
+          "char": "帳",
+          "bopomofo": "ㄓㄤˋ",
+          "radical": "巾",
+          "strokes": 11,
+          "distractors": [
+            "脹",
+            "悵",
+            "張"
+          ],
+          "components": [
+            "巾",
+            "長"
+          ],
+          "words": [
+            "野戰帳篷",
+            "營帳",
+            "帷帳"
+          ],
+          "tactical_clue": "前線臨時庇護所，使用防彈『巾』布搭建。"
+        },
+        {
+          "char": "洲",
+          "bopomofo": "ㄓㄡ",
+          "radical": "水",
+          "strokes": 9,
+          "distractors": [
+            "州",
+            "洲",
+            "舟"
+          ],
+          "components": [
+            "氵",
+            "州"
+          ],
+          "words": [
+            "亞洲",
+            "綠洲",
+            "跨洲特遣隊"
+          ],
+          "tactical_clue": "特種部隊作戰之廣闊大陸，三點水旁為水陸交會界線。"
+        },
+        {
+          "char": "瘧",
+          "bopomofo": "ㄋㄩㄝˋ",
+          "radical": "疒",
+          "strokes": 14,
+          "distractors": [
+            "虐",
+            "療",
+            "瘋"
+          ],
+          "components": [
+            "疒",
+            "虐"
+          ],
+          "words": [
+            "瘧疾",
+            "抗瘧血清",
+            "寒熱病"
+          ],
+          "tactical_clue": "致命生化病原體代號，由病字頭『疒』封印其生化毒性。"
+        },
+        {
+          "char": "疾",
+          "bopomofo": "ㄐㄧˊ",
+          "radical": "疒",
+          "strokes": 10,
+          "distractors": [
+            "嫉",
+            "矢",
+            "痴"
+          ],
+          "components": [
+            "疒",
+            "矢"
+          ],
+          "words": [
+            "疾馳",
+            "疫情惡疾",
+            "眼疾手快"
+          ],
+          "tactical_clue": "迅捷如飛矢之毒素傳播，特警需以最快速度處置。"
+        },
+        {
+          "char": "募",
+          "bopomofo": "ㄇㄨˋ",
+          "radical": "力",
+          "strokes": 13,
+          "distractors": [
+            "墓",
+            "慕",
+            "暮"
+          ],
+          "components": [
+            "莫",
+            "力"
+          ],
+          "words": [
+            "募集物資",
+            "募兵",
+            "籌募"
+          ],
+          "tactical_clue": "底部具備『力』部引擎，用於前線緊急呼叫後方補給空投。"
+        },
+        {
+          "char": "集",
+          "bopomofo": "ㄐㄧˊ",
+          "radical": "隹",
+          "strokes": 12,
+          "distractors": [
+            "焦",
+            "隼",
+            "雀"
+          ],
+          "components": [
+            "隹",
+            "木"
+          ],
+          "words": [
+            "集合點",
+            "聚集",
+            "特戰集團"
+          ],
+          "tactical_clue": "隊員如同飛鳥停歇於林木，為戰術集結撤離點之標記。"
+        },
+        {
+          "char": "存",
+          "bopomofo": "ㄘㄨㄣˊ",
+          "radical": "子",
+          "strokes": 6,
+          "distractors": [
+            "在",
+            "友",
+            "孝"
+          ],
+          "components": [
+            "𠂇",
+            "子"
+          ],
+          "words": [
+            "存活",
+            "生機尚存",
+            "戰略儲存"
+          ],
+          "tactical_clue": "生命指標監測代碼，守護基地最後生存信號。"
+        },
+        {
+          "char": "叮",
+          "bopomofo": "ㄉㄧㄥ",
+          "radical": "口",
+          "strokes": 5,
+          "distractors": [
+            "盯",
+            "釘",
+            "町"
+          ],
+          "components": [
+            "口",
+            "丁"
+          ],
+          "words": [
+            "叮咬",
+            "千叮嚀",
+            "叮囑"
+          ],
+          "tactical_clue": "無線電緊迫提醒，警示隊員注意微型刺針穿透。"
+        },
+        {
+          "char": "死",
+          "bopomofo": "ㄙˇ",
+          "radical": "歹",
+          "strokes": 6,
+          "distractors": [
+            "列",
+            "殊",
+            "殉"
+          ],
+          "components": [
+            "歹",
+            "匕"
+          ],
+          "words": [
+            "死線",
+            "視死如歸",
+            "起死回生"
+          ],
+          "tactical_clue": "防線臨界值，必須在計時器歸零前完成生化疫苗注入。"
+        }
+      ]
+    },
+    {
+      "lesson_id": 3,
+      "title": "第三課：千仞絕壁 (峭壁反狙擊)",
+      "theme": "高寒山巔長距狙擊與索降突破",
+      "characters": [
+        {
+          "char": "峭",
+          "bopomofo": "ㄑㄧㄠˋ",
+          "radical": "山",
+          "strokes": 10,
+          "distractors": [
+            "俏",
+            "悄",
+            "梢"
+          ],
+          "components": [
+            "山",
+            "肖"
+          ],
+          "words": [
+            "峭壁",
+            "險峭",
+            "陡峭"
+          ],
+          "tactical_clue": "立於高山之立面，狙擊鏡中需辨明『山』字而非『亻』。"
+        },
+        {
+          "char": "聳",
+          "bopomofo": "ㄙㄨㄥˇ",
+          "radical": "耳",
+          "strokes": 17,
+          "distractors": [
+            "茸",
+            "聶",
+            "聳"
+          ],
+          "components": [
+            "從",
+            "耳"
+          ],
+          "words": [
+            "高聳入雲",
+            "聳立",
+            "危言聳聽"
+          ],
+          "tactical_clue": "高拔之山峰，底部由『耳』聽風聲，指示高空強側風修正。"
+        },
+        {
+          "char": "飢",
+          "bopomofo": "ㄐㄧ",
+          "radical": "食",
+          "strokes": 10,
+          "distractors": [
+            "肌",
+            "譏",
+            "嘰"
+          ],
+          "components": [
+            "飠",
+            "几"
+          ],
+          "words": [
+            "飢餓",
+            "如飢似渴",
+            "充飢"
+          ],
+          "tactical_clue": "體力消耗臨界警告，食部標記能量包所在位置。"
+        },
+        {
+          "char": "隱",
+          "bopomofo": "ㄧㄣˇ",
+          "radical": "阜",
+          "strokes": 17,
+          "distractors": [
+            "穩",
+            "癮",
+            "慇"
+          ],
+          "components": [
+            "阝",
+            "急"
+          ],
+          "words": [
+            "隱蔽",
+            "匿蹤隱形",
+            "若隱若現"
+          ],
+          "tactical_clue": "敵軍特工光學迷彩標記，需切換熱成像透視岩石後方。"
+        },
+        {
+          "char": "銳",
+          "bopomofo": "ㄖㄨㄟˋ",
+          "radical": "金",
+          "strokes": 15,
+          "distractors": [
+            "悅",
+            "說",
+            "銳"
+          ],
+          "components": [
+            "金",
+            "兌"
+          ],
+          "words": [
+            "銳利",
+            "養精蓄銳",
+            "精銳部隊"
+          ],
+          "tactical_clue": "鎢鋼鎢芯穿甲彈之特徵，金屬破甲係數最大值。"
+        },
+        {
+          "char": "韌",
+          "bopomofo": "ㄖㄣˋ",
+          "radical": "韋",
+          "strokes": 12,
+          "distractors": [
+            "刃",
+            "忍",
+            "韌"
+          ],
+          "components": [
+            "韋",
+            "刃"
+          ],
+          "words": [
+            "堅韌",
+            "韌帶",
+            "柔韌有力"
+          ],
+          "tactical_clue": "克夫拉防彈纖維與戰術索降繩之拉力核心。"
+        },
+        {
+          "char": "挫",
+          "bopomofo": "ㄘㄨㄛˋ",
+          "radical": "手",
+          "strokes": 10,
+          "distractors": [
+            "坐",
+            "座",
+            "挫"
+          ],
+          "components": [
+            "扌",
+            "坐"
+          ],
+          "words": [
+            "挫折",
+            "受挫",
+            "越挫越勇"
+          ],
+          "tactical_clue": "戰術受阻代碼，手部受傷亦不可動搖意志，迅速重組破壁。"
+        },
+        {
+          "char": "折",
+          "bopomofo": "ㄓㄜˊ",
+          "radical": "手",
+          "strokes": 7,
+          "distractors": [
+            "析",
+            "拆",
+            "逝"
+          ],
+          "components": [
+            "扌",
+            "斤"
+          ],
+          "words": [
+            "折斷",
+            "不折不撓",
+            "挫折"
+          ],
+          "tactical_clue": "斤斧斷木之勢，亦可為戰術回折反突擊路徑。"
+        },
+        {
+          "char": "箭",
+          "bopomofo": "ㄐㄧㄢˋ",
+          "radical": "竹",
+          "strokes": 15,
+          "distractors": [
+            "煎",
+            "前",
+            "剪"
+          ],
+          "components": [
+            "竹",
+            "前"
+          ],
+          "words": [
+            "箭在弦上",
+            "火箭筒",
+            "光子箭"
+          ],
+          "tactical_clue": "竹字頭輕盈彈道，直線穿透風雨的高速拋射物。"
+        },
+        {
+          "char": "扯",
+          "bopomofo": "ㄔㄜˇ",
+          "radical": "手",
+          "strokes": 7,
+          "distractors": [
+            "址",
+            "趾",
+            "批"
+          ],
+          "components": [
+            "扌",
+            "止"
+          ],
+          "words": [
+            "拉扯",
+            "牽扯",
+            "撕扯"
+          ],
+          "tactical_clue": "近身防衛絞殺手勢，利用手部力量解除敵方武器。"
+        }
+      ]
+    },
+    {
+      "lesson_id": 13,
+      "title": "第十三課：怒海暗礁 (沉船突入與避障)",
+      "theme": "暴風雨船艙浸水 CQB 與暗礁突圍",
+      "characters": [
+        {
+          "char": "艙",
+          "bopomofo": "ㄘㄤ",
+          "radical": "舟",
+          "strokes": 16,
+          "distractors": [
+            "蒼",
+            "滄",
+            "槍"
+          ],
+          "components": [
+            "舟",
+            "倉"
+          ],
+          "words": [
+            "船艙",
+            "機艙",
+            "壓力密封艙"
+          ],
+          "tactical_clue": "特戰突擊艦封閉空間，舟部為水密隔艙之結構基石。"
+        },
+        {
+          "char": "礁",
+          "bopomofo": "ㄐㄧㄠ",
+          "radical": "石",
+          "strokes": 17,
+          "distractors": [
+            "焦",
+            "瞧",
+            "蕉"
+          ],
+          "components": [
+            "石",
+            "焦"
+          ],
+          "words": [
+            "暗礁",
+            "觸礁",
+            "珊瑚礁"
+          ],
+          "tactical_clue": "水下隱藏之巨石障礙，聲納必須鎖定『石』部頻譜以防撞擊。"
+        },
+        {
+          "char": "擱",
+          "bopomofo": "ㄍㄜ",
+          "radical": "手",
+          "strokes": 17,
+          "distractors": [
+            "閣",
+            "格",
+            "洛"
+          ],
+          "components": [
+            "扌",
+            "閣"
+          ],
+          "words": [
+            "擱淺",
+            "耽擱",
+            "擱置"
+          ],
+          "tactical_clue": "艦艇受困淺灘，需以特戰牽引絞盤將艦身推離。"
+        },
+        {
+          "char": "筏",
+          "bopomofo": "ㄈㄚˊ",
+          "radical": "竹",
+          "strokes": 12,
+          "distractors": [
+            "伐",
+            "代",
+            "閥"
+          ],
+          "components": [
+            "竹",
+            "伐"
+          ],
+          "words": [
+            "充氣救生筏",
+            "竹筏",
+            "橡皮艇筏"
+          ],
+          "tactical_clue": "沉船緊急撤離水面載具，竹部代表浮力結構。"
+        },
+        {
+          "char": "塌",
+          "bopomofo": "ㄊㄚ",
+          "radical": "土",
+          "strokes": 13,
+          "distractors": [
+            "蹋",
+            "搭",
+            "榻"
+          ],
+          "components": [
+            "土",
+            "𦐇"
+          ],
+          "words": [
+            "倒塌",
+            "坍塌",
+            "天崩地裂"
+          ],
+          "tactical_clue": "砲擊導致天花板土石崩落，倒計時內必須撐起液壓頂桿。"
+        },
+        {
+          "char": "烈",
+          "bopomofo": "ㄌㄧㄝˋ",
+          "radical": "火",
+          "strokes": 10,
+          "distractors": [
+            "例",
+            "列",
+            "裂"
+          ],
+          "components": [
+            "列",
+            "灬"
+          ],
+          "words": [
+            "烈火",
+            "激烈交火",
+            "轟轟烈烈"
+          ],
+          "tactical_clue": "底部四點火『灬』燃燒，代表戰場極高溫度熱源。"
+        },
+        {
+          "char": "暈",
+          "bopomofo": "ㄩㄣˋ",
+          "radical": "日",
+          "strokes": 13,
+          "distractors": [
+            "軍",
+            "運",
+            "揮"
+          ],
+          "components": [
+            "日",
+            "軍"
+          ],
+          "words": [
+            "暈眩",
+            "眩暈彈",
+            "海浪眩暈"
+          ],
+          "tactical_clue": "遭遇閃光震撼彈或巨浪衝擊之狀態干擾，需啟動抗眩目鏡。"
+        },
+        {
+          "char": "捲",
+          "bopomofo": "ㄐㄩㄢˇ",
+          "radical": "手",
+          "strokes": 11,
+          "distractors": [
+            "券",
+            "卷",
+            "圈"
+          ],
+          "components": [
+            "扌",
+            "卷"
+          ],
+          "words": [
+            "風暴席捲",
+            "捲土重來",
+            "捲尺"
+          ],
+          "tactical_clue": "漩渦與巨浪之手，能吞噬小型登陸艇，需反向加速突圍。"
+        },
+        {
+          "char": "爐",
+          "bopomofo": "ㄌㄨˊ",
+          "radical": "火",
+          "strokes": 20,
+          "distractors": [
+            "蘆",
+            "盧",
+            "鱸"
+          ],
+          "components": [
+            "火",
+            "盧"
+          ],
+          "words": [
+            "鍋爐室",
+            "熔爐",
+            "戰術反應爐"
+          ],
+          "tactical_clue": "動力心臟即將過熱爆炸，需手動轉動閥門降溫。"
+        },
+        {
+          "char": "渾",
+          "bopomofo": "ㄏㄨㄣˊ",
+          "radical": "水",
+          "strokes": 12,
+          "distractors": [
+            "軍",
+            "揮",
+            "運"
+          ],
+          "components": [
+            "氵",
+            "軍"
+          ],
+          "words": [
+            "渾身解數",
+            "水質渾濁",
+            "渾水摸魚"
+          ],
+          "tactical_clue": "海底泥沙翻湧導致視野受阻，需切換主動聲納探測。"
+        }
+      ]
+    }
+  ]
+}
