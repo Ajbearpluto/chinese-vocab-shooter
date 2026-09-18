@@ -1,492 +1,1151 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>國語生字特訓：視網膜級極簡學堂 (Apple Style Unified Canvas)</title>
+  <title>三角洲字點：特種特警射擊戰役 (Hardcore Shooter)</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0; padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-      touch-action: manipulation;
-    }
-    :root {
-      --bg-global: #F5F5F7;
-      --card-bg: #FFFFFF;
-      --card-border: rgba(0, 0, 0, 0.06);
-      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
-      --card-shadow-hover: 0 14px 32px rgba(0, 0, 0, 0.08);
-      --text-primary: #1D1D1F;
-      --text-secondary: #6E6E73;
-      --text-tertiary: #86868B;
-      --apple-blue: #0071E3;
-      --apple-blue-light: rgba(0, 113, 227, 0.08);
-      --mint-green: #34C759;
-      --mint-green-light: rgba(52, 199, 89, 0.12);
-      --coral-red: #FF3B30;
-      --coral-red-light: rgba(255, 59, 48, 0.12);
-      --radius-sm: 10px;
-      --radius-md: 18px;
-      --radius-lg: 24px;
-      --spring-ease: cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    html, body {
-      background: var(--bg-global);
-      color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro TC", "SF Pro Display", "PingFang TC", "Noto Sans TC", sans-serif;
-      overflow: hidden;
-      width: 100vw; height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-    #app-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 100vw; height: 100vh;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px 24px 20px 24px;
-      position: relative;
-    }
-
-    /* 頂部全域輕量狀態列 (Top Status Bar) */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 58px;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
-      padding: 0 20px;
-      box-shadow: var(--card-shadow);
-      z-index: 10;
-    }
-    .user-profile-badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-    }
-    .avatar-circle {
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #0071E3, #42a5f5);
-      color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; font-weight: 700;
-      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
-    }
-    .user-name-text {
-      font-size: 14px; font-weight: 600; color: var(--text-primary);
-    }
-    .user-title-tag {
-      font-size: 11px; font-weight: 500; color: var(--text-secondary);
-      background: var(--bg-global);
-      padding: 2px 8px; border-radius: 6px;
-    }
-
-    .vitals-group {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .vital-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .hp-dots {
-      display: flex; gap: 4px;
-    }
-    .hp-dot {
-      width: 9px; height: 9px; border-radius: 50%;
-      background: var(--mint-green);
-      transition: all 0.25s;
-    }
-    .hp-dot.lost {
-      background: rgba(0, 0, 0, 0.12);
-    }
-    .san-badge {
-      color: var(--apple-blue);
-      background: var(--apple-blue-light);
-      padding: 3px 10px; border-radius: 12px;
-      font-weight: 700;
-    }
-    .score-badge {
-      font-size: 15px; font-weight: 800; color: var(--apple-blue);
-    }
-
-    .top-actions {
-      display: flex; align-items: center; gap: 10px;
-    }
-    .icon-btn {
-      background: #FFFFFF;
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 12px; font-weight: 600;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s var(--spring-ease);
-    }
-    .icon-btn:hover, .icon-btn:active {
-      background: var(--card-bg);
-      color: var(--apple-blue);
-      border-color: var(--apple-blue);
-      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.12);
-    }
-
-    /* 中央字形聚焦舞台 (Center Stage) */
-    .center-stage {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      padding: 10px 0;
-    }
-    .prompt-container {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-    .prompt-badge {
-      display: inline-block;
-      font-size: 12px; font-weight: 600;
-      color: var(--apple-blue);
-      background: var(--apple-blue-light);
-      padding: 4px 14px; border-radius: 20px;
-      margin-bottom: 12px;
-      letter-spacing: 0.5px;
-    }
-    .prompt-title {
-      font-size: 26px; font-weight: 800;
-      color: var(--text-primary);
-      margin-bottom: 8px;
-      letter-spacing: -0.3px;
-    }
-    .prompt-hint {
-      font-size: 15px; font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    /* 視網膜級生字卡片展示區 */
-    .cards-deck {
-      display: flex;
-      gap: 24px;
-      justify-content: center;
-      width: 100%;
-      max-width: 860px;
-    }
-    .word-card {
-      flex: 1;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
-      padding: 38px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: var(--card-shadow);
-      transition: all 0.3s var(--spring-ease);
-      position: relative;
-    }
-    .word-card:hover {
-      transform: scale(1.03);
-      box-shadow: var(--card-shadow-hover);
-      border-color: rgba(0, 113, 227, 0.25);
-    }
-    .word-card:active {
-      transform: scale(0.98);
-    }
-    .card-char {
-      font-size: 68px;
-      font-weight: 900;
-      color: var(--text-primary);
-      line-height: 1.1;
-      margin-bottom: 10px;
-    }
-    .card-zhuyin {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      background: var(--bg-global);
-      padding: 4px 14px;
-      border-radius: 12px;
-    }
-    .key-hint {
-      position: absolute; top: 12px; left: 16px;
-      font-size: 11px; font-weight: 700; color: var(--text-tertiary);
-    }
-
-    /* 狀態回饋動態 */
-    .word-card.correct-feedback {
-      border-color: var(--mint-green) !important;
-      background: var(--mint-green-light) !important;
-      box-shadow: 0 0 24px rgba(52, 199, 89, 0.35) !important;
-      transform: scale(1.04) !important;
-    }
-    .word-card.shake-feedback {
-      border-color: var(--coral-red) !important;
-      background: var(--coral-red-light) !important;
-      animation: appleShake 0.4s var(--spring-ease);
-    }
-    @keyframes appleShake {
-      0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-8px); }
-      40% { transform: translateX(8px); }
-      60% { transform: translateX(-5px); }
-      80% { transform: translateX(5px); }
-    }
-
-    /* 底部水平膠囊導覽列 (Dock-style Pill Navigation) */
-    .bottom-dock-container {
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
-      padding: 8px 12px;
-      box-shadow: var(--card-shadow);
-      z-index: 10;
-    }
-    .dock-scroll-strip {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      padding: 4px 0;
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    .dock-scroll-strip::-webkit-scrollbar { display: none; }
-    .dock-pill {
-      flex-shrink: 0;
-      background: #FFFFFF;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 30px;
-      padding: 8px 18px;
-      font-size: 13px; font-weight: 600;
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: flex; align-items: center; gap: 6px;
-      transition: all 0.25s var(--spring-ease);
-    }
-    .dock-pill:hover {
-      border-color: var(--apple-blue);
-      color: var(--apple-blue);
-      transform: translateY(-1px);
-    }
-    .dock-pill.active {
-      background: var(--apple-blue);
-      color: #FFFFFF;
-      border-color: var(--apple-blue);
-      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
-    }
-    .dock-pill.hell-mode {
-      border-color: rgba(255, 59, 48, 0.3);
-      color: var(--coral-red);
-    }
-    .dock-pill.hell-mode.active {
-      background: var(--coral-red);
-      color: #FFFFFF;
-      box-shadow: 0 4px 12px rgba(255, 59, 48, 0.35);
-    }
-
-    /* 登入建立檔案 Modal Sheet */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 100;
-      opacity: 1; transition: opacity 0.3s var(--spring-ease);
-    }
-    .modal-card {
-      background: #FFFFFF;
-      width: 90%; max-width: 440px;
-      border-radius: var(--radius-lg);
-      padding: 36px 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-      border: 1px solid var(--card-border);
-      text-align: center;
-      animation: modalSlideUp 0.35s var(--spring-ease);
-    }
-    @keyframes modalSlideUp {
-      from { transform: translateY(24px) scale(0.96); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
-    }
-    .modal-icon {
-      width: 56px; height: 56px; border-radius: 50%;
-      background: var(--apple-blue-light); color: var(--apple-blue);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 26px; margin: 0 auto 16px auto;
-    }
-    .modal-title {
-      font-size: 22px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;
-    }
-    .modal-desc {
-      font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5;
-    }
-    .apple-input {
-      width: 100%; height: 48px;
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      border-radius: var(--radius-sm);
-      padding: 0 16px;
-      font-size: 16px; color: var(--text-primary);
-      outline: none; margin-bottom: 20px;
-      transition: all 0.2s;
-    }
-    .apple-input:focus {
-      border-color: var(--apple-blue);
-      box-shadow: 0 0 0 3px var(--apple-blue-light);
-    }
-    .apple-btn-primary {
-      width: 100%; height: 48px;
-      background: var(--apple-blue);
-      color: #FFFFFF; border: none;
-      border-radius: var(--radius-sm);
-      font-size: 16px; font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0, 113, 227, 0.3);
-      transition: all 0.2s;
-    }
-    .apple-btn-primary:hover {
-      background: #0077ED;
-      transform: translateY(-1px);
-    }
-    .apple-btn-primary:active {
-      transform: translateY(1px);
-    }
-
-    /* 排行榜 Sheet */
-    .leaderboard-list {
-      max-height: 280px; overflow-y: auto; text-align: left; margin-bottom: 20px;
-    }
-    .rank-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,0.05);
-      font-size: 14px;
-    }
-    .rank-num { font-weight: 800; color: var(--apple-blue); width: 24px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: none; }
+    body { background: #070B10; color: #F5F7FA; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang TC', sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
+    #game-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+    .hud-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 14px 20px; z-index: 10; }
+    .hud-top-bar { display: flex; justify-content: space-between; align-items: flex-start; pointer-events: auto; }
+    .hud-card { background: rgba(18, 26, 38, 0.94); backdrop-filter: blur(16px); border: 1px solid rgba(0, 255, 136, 0.35); border-radius: 14px; padding: 10px 18px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75); display: flex; align-items: center; gap: 14px; }
+    .target-box { text-align: center; min-width: 440px; border-color: #00FF88; box-shadow: 0 0 28px rgba(0, 255, 136, 0.25); flex-direction: column; gap: 4px; }
+    .mission-prompt { font-size: 28px; font-weight: 900; color: #FFDF5D; text-shadow: 0 0 16px rgba(255, 223, 93, 0.6); }
+    .hp-bar-outer { width: 130px; height: 8px; background: #16221D; border-radius: 4px; overflow: hidden; border: 1px solid #23382F; margin-top: 4px; }
+    .hp-bar-inner { width: 100%; height: 100%; background: linear-gradient(90deg, #FF3344, #00FF88); transition: width 0.2s; }
+    .stat-val { font-size: 18px; font-weight: 900; color: #00FF88; margin-left: 4px; }
+    .hud-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 700; color: #FFF; cursor: pointer; transition: all 0.2s; }
+    .hud-btn:hover { background: #FFF; color: #000; box-shadow: 0 0 14px rgba(255, 255, 255, 0.4); }
+    .admin-btn { border-color: #0071E3 !important; color: #64B5F6 !important; background: rgba(0, 113, 227, 0.15) !important; }
+    .admin-btn:hover { background: #0071E3 !important; color: #FFF !important; }
+    .bottom-dock { pointer-events: auto; background: rgba(14, 20, 28, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 22px; padding: 8px 14px; margin: 0 auto; max-width: 960px; width: 95%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); }
+    .dock-strip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+    .dock-strip::-webkit-scrollbar { display: none; }
+    .dock-pill { flex-shrink: 0; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 30px; padding: 7px 16px; font-size: 12px; font-weight: 700; color: #A0B0C0; cursor: pointer; transition: all 0.2s; }
+    .dock-pill.active { background: #00FF88; color: #040806; border-color: #00FF88; box-shadow: 0 0 16px rgba(0, 255, 136, 0.4); }
+    .dock-pill.hell-mode { border-color: rgba(255, 51, 68, 0.4); color: #FF6677; }
+    .dock-pill.hell-mode.active { background: #FF3344; color: #FFF; border-color: #FF3344; box-shadow: 0 0 20px rgba(255, 51, 68, 0.7); }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 6, 10, 0.82); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal-card { background: #0E1520; border: 1px solid rgba(0, 255, 136, 0.3); width: 90%; max-width: 440px; border-radius: 20px; padding: 32px 28px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85); }
+    .apple-input { width: 100%; height: 46px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 0 16px; font-size: 15px; color: #FFF; outline: none; margin-bottom: 18px; }
+    .apple-input:focus { border-color: #00FF88; box-shadow: 0 0 12px rgba(0, 255, 136, 0.3); }
+    .apple-btn-primary { width: 100%; height: 46px; background: #00FF88; color: #040806; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+    .admin-card { max-width: 960px !important; width: 94% !important; max-height: 88vh; overflow: hidden; display: flex; flex-direction: column; padding: 22px 26px !important; text-align: left !important; border-color: #0071E3 !important; }
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+    .kpi-box { background: rgba(255, 255, 255, 0.04); border-radius: 10px; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.08); }
+    .admin-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tab-btn { padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid rgba(255, 255, 255, 0.15); background: transparent; color: #8E9BAE; cursor: pointer; }
+    .tab-btn.active { background: #0071E3; color: #FFF; border-color: #0071E3; }
+    .admin-content { flex: 1; overflow-y: auto; max-height: 44vh; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; background: rgba(0, 0, 0, 0.25); }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .admin-table th { background: rgba(255, 255, 255, 0.06); position: sticky; top: 0; padding: 10px 14px; text-align: left; font-weight: 700; color: #8E9BAE; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+    .admin-table td { padding: 9px 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); color: #F5F7FA; }
   </style>
 </head>
 <body>
-  <div id="app-container">
-
-    <!-- 頂部全域輕量狀態列 -->
-    <header class="top-bar">
-      <div class="user-profile-badge" id="btnProfile">
-        <div class="avatar-circle" id="avatarChar">學</div>
-        <div>
-          <div class="user-name-text" id="userCallsign">澄澈學者</div>
-          <div class="user-title-tag" id="userRankTitle">字理探尋者</div>
-        </div>
-      </div>
-
-      <div class="vitals-group">
-        <div class="vital-item">
-          <span style="color: var(--text-secondary);">生命</span>
-          <div class="hp-dots" id="hpDotsContainer">
-            <div class="hp-dot"></div>
-            <div class="hp-dot"></div>
-            <div class="hp-dot"></div>
-            <div class="hp-dot"></div>
-            <div class="hp-dot"></div>
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div class="hud-layer">
+      <div class="hud-top-bar">
+        <div class="hud-card">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #0071E3; display: flex; align-items: center; justify-content: center; font-weight: 900;" id="avatarChar">學</div>
+          <div>
+            <div style="font-size: 13px; font-weight: 800;" id="userCallsign">特警幹員</div>
+            <div class="hp-bar-outer"><div class="hp-bar-inner" id="hpBarFill"></div></div>
           </div>
         </div>
 
-        <div class="vital-item">
-          <span style="color: var(--text-secondary);">心智 (SAN)</span>
-          <span class="san-badge" id="sanValueBadge">100%</span>
+        <div class="hud-card target-box">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <div id="phaseBadge" style="font-size: 11px; font-weight: 800; background: rgba(0, 255, 136, 0.15); border: 1px solid #00FF88; color: #00FF88; padding: 2px 10px; border-radius: 12px;">階段一：生字辨析特訓</div>
+            <div style="font-size: 11px; font-weight: 700; color: #88C0A0; letter-spacing: 1px;">// 戰術指示</div>
+          </div>
+          <div class="mission-prompt" id="missionPrompt">載入中...</div>
+          <div style="font-size: 12px; color: #A0C0B0;" id="missionSubhint">請鎖定並射擊對應生字浮游靶機，嚴防逼近自爆！</div>
         </div>
 
-        <div class="vital-item">
-          <span style="color: var(--text-secondary);">進度</span>
-          <span style="color: var(--text-primary); font-weight: 700;" id="progressBadge">0 / 10</span>
+        <div class="hud-card">
+          <div>積分<span class="stat-val" id="scoreVal">0</span></div>
+          <div>連擊<span class="stat-val" id="comboVal" style="color: #FFDF5D;">0x</span></div>
+          <div>剩餘<span class="stat-val" id="remainVal" style="color: #58A6FF;">0</span></div>
+          <button class="hud-btn" id="btnToggleMode" style="border-color: #FFDF5D; color: #FFDF5D;">⚡ 循序(字➔詞)</button>
+          <button class="hud-btn admin-btn" id="btnOpenAdmin">🔐 後台</button>
+          <button class="hud-btn" id="btnLeaderboard">🏆 榜單</button>
+          <button class="hud-btn" id="btnSwitchUser">👤 改名</button>
         </div>
-
-        <div class="vital-item">
-          <span style="color: var(--text-secondary);">積分</span>
-          <span class="score-badge" id="scoreValueBadge">0</span>
-        </div>
       </div>
 
-      <div class="top-actions">
-        <button class="icon-btn" id="btnLeaderboard">🏆 排行榜</button>
-        <button class="icon-btn" id="btnSwitchUser">👤 切換名稱</button>
+      <div class="bottom-dock">
+        <div class="dock-strip" id="dockStrip"></div>
       </div>
-    </header>
-
-    <!-- 中央字形聚焦舞台 -->
-    <main class="center-stage">
-      <div class="prompt-container">
-        <div class="prompt-badge" id="currentLessonPillTitle">第 1 課：生化疫區前線</div>
-        <h1 class="prompt-title" id="targetPromptTitle">鎖定正確生字目標</h1>
-        <p class="prompt-hint" id="targetPromptHint">請觀察字形間架結構與注音搭配</p>
-      </div>
-
-      <div class="cards-deck" id="cardsDeck">
-        <!-- 動態渲染三張視網膜級生字卡片 -->
-      </div>
-    </main>
-
-    <!-- 底部水平膠囊導覽列 (Dock-style Strip) -->
-    <footer class="bottom-dock-container">
-      <div class="dock-scroll-strip" id="dockStrip">
-        <!-- 1~13 課 ＋ 全冊地獄模式水平膠囊 -->
-      </div>
-    </footer>
+    </div>
   </div>
 
-  <!-- 登入 / 建立 UserProfile 視窗 -->
   <div class="modal-overlay" id="loginModal" style="display: none;">
     <div class="modal-card">
-      <div class="modal-icon"></div>
-      <h2 class="modal-title">建立學習檔案</h2>
-      <p class="modal-desc">歡迎進入單一畫面的國語生字學習體驗。<br>請輸入您的作戰學習暱稱：</p>
-      <input type="text" class="apple-input" id="inputCallsign" placeholder="例如：澄澈思辨者" maxlength="10" autofocus>
-      <button class="apple-btn-primary" id="btnConfirmLogin">開始學習旅程</button>
+      <div style="font-size: 38px; margin-bottom: 12px;">🎖️</div>
+      <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 8px;">特警作戰登記</h2>
+      <p style="font-size: 13px; color: #8E9BAE; margin-bottom: 22px;">請輸入您的特勤戰鬥代號以記錄戰績與排名：</p>
+      <input type="text" class="apple-input" id="inputCallsign" placeholder="例如：極光狙擊手" maxlength="10">
+      <button class="apple-btn-primary" id="btnConfirmLogin">進入戰術特區出擊</button>
     </div>
   </div>
 
-  <!-- 排行榜視窗 -->
+  <div class="modal-overlay" id="adminAuthModal" style="display: none;">
+    <div class="modal-card">
+      <div style="font-size: 36px; margin-bottom: 10px;">🔐</div>
+      <h2 style="font-size: 20px; font-weight: 900; margin-bottom: 8px;">指揮官安全授權</h2>
+      <p style="font-size: 13px; color: #8E9BAE; margin-bottom: 20px;">請輸入後台管理密碼 (預設: 8888)：</p>
+      <input type="password" class="apple-input" id="inputAdminPass" placeholder="請輸入授權碼">
+      <button class="apple-btn-primary" id="btnConfirmAdminAuth">驗證進入戰情總部</button>
+      <button class="hud-btn" id="btnCancelAdminAuth" style="width: 100%; margin-top: 10px;">取消返回</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="adminDashboardModal" style="display: none;">
+    <div class="modal-card admin-card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
+        <div>
+          <h2 style="font-size: 20px; font-weight: 900; color: #FFF;">🎖️ 特勤教學戰情指揮總部 (Admin Dashboard)</h2>
+          <p style="font-size: 12px; color: #8E9BAE; margin-top: 3px;">全班學員射擊戰績、命中率與常錯字分析</p>
+        </div>
+        <button class="hud-btn" id="btnCloseAdminDashboard">✕ 關閉後台</button>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-box"><div style="font-size: 12px; color: #8E9BAE;">已登記特警學員</div><div style="font-size: 22px; font-weight: 900; color: #0071E3;" id="kpiTotalStudents">0 位</div></div>
+        <div class="kpi-box"><div style="font-size: 12px; color: #8E9BAE;">全體射擊交火次數</div><div style="font-size: 22px; font-weight: 900; color: #0071E3;" id="kpiTotalAttempts">0 次</div></div>
+        <div class="kpi-box"><div style="font-size: 12px; color: #8E9BAE;">全班平均命中精度</div><div style="font-size: 22px; font-weight: 900; color: #00FF88;" id="kpiAvgAccuracy">94%</div></div>
+        <div class="kpi-box"><div style="font-size: 12px; color: #8E9BAE;">全班最易誤擊干擾字</div><div style="font-size: 22px; font-weight: 900; color: #FF3344;" id="kpiHardestWord">瘧 (42%錯)</div></div>
+      </div>
+      <div class="admin-tabs">
+        <button class="tab-btn active" id="tabBtnRanking">🏆 學員戰術總排行</button>
+        <button class="tab-btn" id="tabBtnErrors">📊 易錯生字弱點熱力圖</button>
+        <button class="tab-btn" id="tabBtnCloud">☁️ 跨裝置 Google 試算表同步</button>
+      </div>
+      <div class="admin-content" id="adminContentArea"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div style="display: flex; gap: 8px;">
+          <button class="hud-btn" id="btnExportCSV" style="border-color: #0071E3; color: #64B5F6;">📥 匯出 Excel (CSV)</button>
+          <button class="hud-btn" id="btnSeedMockData">🎲 產生示範學員資料</button>
+          <button class="hud-btn" id="btnClearRecords" style="border-color: #FF3344; color: #FF3344;">🗑️ 清空所有紀錄</button>
+        </div>
+        <div style="font-size: 11px; color: #8E9BAE;">授權碼: 8888</div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="leaderboardModal" style="display: none;">
     <div class="modal-card">
-      <div class="modal-icon">🏆</div>
-      <h2 class="modal-title">特勤學習排行榜</h2>
-      <p class="modal-desc">每日與歷史累積最高得分</p>
-      <div class="leaderboard-list" id="leaderboardList"></div>
-      <button class="apple-btn-primary" id="btnCloseLeaderboard">返回學習舞台</button>
+      <div style="font-size: 36px; margin-bottom: 8px;">🏆</div>
+      <h2 style="font-size: 20px; font-weight: 900; margin-bottom: 4px;">特勤先鋒榮譽榜</h2>
+      <p style="font-size: 12px; color: #8E9BAE; margin-bottom: 18px;">作戰積分先鋒 Top 5</p>
+      <div id="leaderboardList" style="max-height: 260px; overflow-y: auto; text-align: left; margin-bottom: 18px;"></div>
+      <button class="apple-btn-primary" id="btnCloseLeaderboard">重返戰場</button>
     </div>
   </div>
 
-  <!-- 通關大捷卡片 -->
   <div class="modal-overlay" id="victoryModal" style="display: none;">
     <div class="modal-card">
-      <div class="modal-icon" style="background: var(--mint-green-light); color: var(--mint-green);">✓</div>
-      <h2 class="modal-title" id="victoryTitle">🎉 課次圓滿完成！</h2>
-      <p class="modal-desc" id="victoryDesc">本課生字已全數精準辨析完成。</p>
-      <button class="apple-btn-primary" id="btnNextLesson">進入下一課</button>
+      <div style="font-size: 40px; margin-bottom: 8px;">🎖️</div>
+      <h2 style="font-size: 22px; font-weight: 900; color: #00FF88; margin-bottom: 6px;">MISSION ACCOMPLISHED!</h2>
+      <p style="font-size: 14px; color: #A0C0B0; margin-bottom: 22px;">本課所有生字全數精準肅清完畢！</p>
+      <button class="apple-btn-primary" id="btnNextLesson">推進至下一戰役</button>
     </div>
   </div>
 
-  <script>
-    const VOCAB_DATABASE = {"1": {"title": "第 1 課：生化疫區前線", "words": [{"word": "蚊", "prompt": "ㄨㄣˊ (蚊蟲)"}, {"word": "帳", "prompt": "ㄓㄤˋ (營帳/帳篷)"}, {"word": "洲", "prompt": "ㄓㄡ (亞洲/綠洲)"}, {"word": "瘧", "prompt": "ㄋㄩㄝˋ (瘧疾)"}, {"word": "疾", "prompt": "ㄐㄧˊ (疾病/疾馳)"}, {"word": "死", "prompt": "ㄙˇ (死線/起死回生)"}, {"word": "叮", "prompt": "ㄉㄧㄥ (叮咬/叮囑)"}, {"word": "存", "prompt": "ㄘㄨㄣˊ (存活/生存)"}, {"word": "募", "prompt": "ㄇㄨˋ (募集/籌募)"}, {"word": "集", "prompt": "ㄐㄧˊ (聚集/集合)"}]}, "2": {"title": "第 2 課：山巒與防衛", "words": [{"word": "德", "prompt": "ㄉㄜˊ (品德/德行)"}, {"word": "乎", "prompt": "ㄏㄨ (在乎/出乎意料)"}, {"word": "血", "prompt": "ㄒㄧㄝˇ (熱血/血清)"}, {"word": "攝", "prompt": "ㄕㄜˋ (攝影/攝取)"}, {"word": "颱", "prompt": "ㄊㄞˊ (颱風)"}, {"word": "錄", "prompt": "ㄌㄨˋ (紀錄/錄音)"}, {"word": "哀", "prompt": "ㄞ (悲哀/哀傷)"}, {"word": "巒", "prompt": "ㄌㄨㄢˊ (山巒/重巒疊嶂)"}, {"word": "縱", "prompt": "ㄗㄨㄥˋ (縱橫/縱使)"}, {"word": "臍", "prompt": "ㄑㄧˊ (肚臍)"}, {"word": "禍", "prompt": "ㄏㄨㄛˋ (災禍/禍害)"}, {"word": "殘", "prompt": "ㄘㄢˊ (殘破/殘留)"}, {"word": "檳", "prompt": "ㄅㄧㄣ (檳榔)"}, {"word": "榔", "prompt": "ㄌㄤˊ (檳榔樹)"}, {"word": "降", "prompt": "ㄐㄧㄤˋ (下降/降落)"}, {"word": "鏟", "prompt": "ㄔㄢˇ (鐵鏟/鏟除)"}, {"word": "汙", "prompt": "ㄨ (污染/污垢)"}, {"word": "斷", "prompt": "ㄉㄨㄢˋ (折斷/果斷)"}]}, "3": {"title": "第 3 課：千仞絕壁反狙擊", "words": [{"word": "飢", "prompt": "ㄐㄧ (飢餓/如飢似渴)"}, {"word": "峭", "prompt": "ㄑㄧㄠˋ (陡峭/峭壁)"}, {"word": "聳", "prompt": "ㄙㄨㄥˇ (高聳/聳立)"}, {"word": "隱", "prompt": "ㄧㄣˇ (隱蔽/隱藏)"}, {"word": "扯", "prompt": "ㄔㄜˇ (拉扯/牽扯)"}, {"word": "銳", "prompt": "ㄖㄨㄟˋ (銳利/敏銳)"}, {"word": "箭", "prompt": "ㄐㄧㄢˋ (箭在弦上/弓箭)"}, {"word": "韌", "prompt": "ㄖㄣˋ (堅韌/韌性)"}, {"word": "虯", "prompt": "ㄑㄧㄡˊ (虯龍/虯髯)"}, {"word": "鬚", "prompt": "ㄒㄩ (鬍鬚/根鬚)"}, {"word": "茂", "prompt": "ㄇㄠˋ (茂密/繁茂)"}, {"word": "止", "prompt": "ㄓˇ (停止/止步)"}, {"word": "蔓", "prompt": "ㄇㄢˋ (蔓延/藤蔓)"}, {"word": "豐", "prompt": "ㄈㄥ (豐富/豐收)"}, {"word": "藉", "prompt": "ㄐㄧㄝˋ (憑藉/藉口)"}, {"word": "挫", "prompt": "ㄘㄨㄛˋ (挫折/受挫)"}, {"word": "折", "prompt": "ㄓㄜˊ (不折不撓/曲折)"}]}, "4": {"title": "第 4 課：樸實農莊與滋養", "words": [{"word": "恆", "prompt": "ㄏㄥˊ (永恆/恆久)"}, {"word": "澄", "prompt": "ㄔㄥˊ (澄澈/澄清)"}, {"word": "穗", "prompt": "ㄙㄨㄟˋ (稻穗/麥穗)"}, {"word": "養", "prompt": "ㄧㄤˇ (滋養/培養)"}, {"word": "源", "prompt": "ㄩㄢˊ (源頭/資源)"}, {"word": "藝", "prompt": "ㄧˋ (藝術/技藝)"}, {"word": "樸", "prompt": "ㄆㄨˊ (樸素/儉樸)"}, {"word": "堆", "prompt": "ㄉㄨㄟ (土堆/堆疊)"}, {"word": "撿", "prompt": "ㄐㄧㄢˇ (撿拾/撿起)"}, {"word": "巾", "prompt": "ㄐㄧㄣ (毛巾/頭巾)"}, {"word": "痠", "prompt": "ㄙㄨㄢ (痠痛/腰痠)"}, {"word": "素", "prompt": "ㄙㄨˋ (純素/素質)"}, {"word": "尊", "prompt": "ㄗㄨㄣ (尊重/尊嚴)"}, {"word": "嚴", "prompt": "ㄧㄢˊ (嚴肅/莊嚴)"}, {"word": "勞", "prompt": "ㄌㄠˊ (勞動/功勞)"}, {"word": "怨", "prompt": "ㄩㄢˋ (抱怨/怨尤)"}, {"word": "慷", "prompt": "ㄎㄤ (慷慨解囊)"}, {"word": "慨", "prompt": "ㄎㄞˇ (感慨/慷慨)"}, {"word": "滋", "prompt": "ㄗ (滋養/滋味)"}]}, "5": {"title": "第 5 課：榮譽與基業", "words": [{"word": "譽", "prompt": "ㄩˋ (榮譽/名譽)"}, {"word": "務", "prompt": "ㄨˋ (任務/事務)"}, {"word": "聯", "prompt": "ㄌㄧㄢˊ (聯絡/聯盟)"}, {"word": "核", "prompt": "ㄏㄜˊ (核心/考核)"}, {"word": "申", "prompt": "ㄕㄣ (申請/申訴)"}, {"word": "局", "prompt": "ㄐㄩˊ (全局/戰局)"}, {"word": "松", "prompt": "ㄙㄨㄥ (松樹/青松)"}, {"word": "註", "prompt": "ㄓㄨˋ (註冊/附註)"}, {"word": "冊", "prompt": "ㄘㄜˋ (冊子/紀念冊)"}, {"word": "企", "prompt": "ㄑㄧˋ (企圖/企業)"}, {"word": "毅", "prompt": "ㄧˋ (堅毅/剛毅)"}, {"word": "歷", "prompt": "ㄌㄧˋ (歷史/經歷)"}, {"word": "英", "prompt": "ㄧㄥ (精英/英雄)"}, {"word": "銷", "prompt": "ㄒㄧㄠ (銷售/行銷)"}, {"word": "售", "prompt": "ㄕㄡˋ (販售/售出)"}, {"word": "勝", "prompt": "ㄕㄥˋ (勝利/獲勝)"}, {"word": "霸", "prompt": "ㄅㄚˋ (霸氣/爭霸)"}, {"word": "項", "prompt": "ㄒㄧㄤˋ (項目/獎項)"}]}, "6": {"title": "第 6 課：戰術哨戒與隊伍", "words": [{"word": "娛", "prompt": "ㄩˊ (娛樂/文娛)"}, {"word": "汽", "prompt": "ㄑㄧˋ (汽車/汽油)"}, {"word": "哨", "prompt": "ㄕㄠˋ (哨所/前哨)"}, {"word": "典", "prompt": "ㄉㄧㄢˇ (典範/經典)"}, {"word": "框", "prompt": "ㄎㄨㄤ (框架/畫框)"}, {"word": "劇", "prompt": "ㄐㄩˋ (劇烈/戲劇)"}, {"word": "父", "prompt": "ㄈㄨˋ (父親/父兄)"}, {"word": "責", "prompt": "ㄗㄜˊ (責任/職責)"}, {"word": "判", "prompt": "ㄆㄢˋ (判斷/判定)"}, {"word": "鳴", "prompt": "ㄇㄧㄥˊ (鳴笛/轟鳴)"}, {"word": "穎", "prompt": "ㄧㄥˇ (聰穎/新穎)"}, {"word": "獲", "prompt": "ㄏㄨㄛˋ (獲勝/捕獲)"}, {"word": "佳", "prompt": "ㄐㄧㄚ (佳境/最佳)"}, {"word": "膩", "prompt": "ㄋㄧˋ (細膩/油膩)"}, {"word": "效", "prompt": "ㄒㄧㄠˋ (成效/效率)"}, {"word": "隊", "prompt": "ㄉㄨㄟˋ (隊伍/戰隊)"}, {"word": "益", "prompt": "ㄧˋ (利益/精益求精)"}, {"word": "貌", "prompt": "ㄇㄠˋ (相貌/容貌)"}, {"word": "官", "prompt": "ㄍㄨㄢ (軍官/感官)"}, {"word": "增", "prompt": "ㄗㄥ (增加/增強)"}]}, "7": {"title": "第 7 課：逆境突圍與堅韌", "words": [{"word": "逆", "prompt": "ㄋㄧˋ (逆境/逆轉)"}, {"word": "憐", "prompt": "ㄌㄧㄢˊ (可憐/憐愛)"}, {"word": "穩", "prompt": "ㄨㄣˇ (穩健/沉穩)"}, {"word": "競", "prompt": "ㄐㄧㄥˋ (競技/競爭)"}, {"word": "抗", "prompt": "ㄎㄤˋ (抗爭/反抗)"}, {"word": "逸", "prompt": "ㄧˋ (安逸/超逸)"}, {"word": "鄰", "prompt": "ㄌㄧㄣˊ (鄰居/鄰近)"}, {"word": "脈", "prompt": "ㄇㄞˋ (脈搏/山脈)"}, {"word": "絡", "prompt": "ㄌㄨㄛˋ (脈絡/聯絡)"}, {"word": "緻", "prompt": "ㄓˋ (精緻/細緻)"}, {"word": "弱", "prompt": "ㄖㄨㄛˋ (微弱/軟弱)"}, {"word": "噴", "prompt": "ㄆㄣ (噴射/噴發)"}, {"word": "嚏", "prompt": "ㄊㄧˋ (噴嚏)"}, {"word": "織", "prompt": "ㄓ (組織/紡織)"}, {"word": "碌", "prompt": "ㄌㄨˋ (忙碌/庸碌)"}, {"word": "盎", "prompt": "ㄤˋ (盎然/春意盎然)"}, {"word": "膽", "prompt": "ㄉㄢˇ (膽量/大膽)"}, {"word": "圈", "prompt": "ㄑㄩㄢ (包圍圈/圓圈)"}, {"word": "疲", "prompt": "ㄆㄧˊ (疲憊/精疲力竭)"}]}, "8": {"title": "第 8 課：恐懼之城與控制", "words": [{"word": "坦", "prompt": "ㄊㄢˇ (坦率/平坦)"}, {"word": "性", "prompt": "ㄒㄧㄥˋ (性質/性格)"}, {"word": "恐", "prompt": "ㄎㄨㄥˇ (恐懼/恐慌)"}, {"word": "怖", "prompt": "ㄅㄨˋ (恐怖)"}, {"word": "組", "prompt": "ㄗㄨˇ (小組/組織)"}, {"word": "占", "prompt": "ㄓㄢˋ (佔領/攻占)"}, {"word": "播", "prompt": "ㄅㄛ (廣播/傳播)"}, {"word": "控", "prompt": "ㄎㄨㄥˋ (控制/操控)"}, {"word": "制", "prompt": "ㄓˋ (制伏/制度)"}, {"word": "傷", "prompt": "ㄕㄤ (受傷/傷痕)"}, {"word": "攻", "prompt": "ㄍㄨㄥ (攻擊/攻勢)"}, {"word": "擊", "prompt": "ㄐㄧˊ (擊落/打擊)"}, {"word": "權", "prompt": "ㄑㄩㄢˊ (掌控權/權利)"}, {"word": "脅", "prompt": "ㄒㄧㄝˊ (威脅/迫脅)"}, {"word": "復", "prompt": "ㄈㄨˋ (恢復/復原)"}, {"word": "武", "prompt": "ㄨˇ (武裝/武器)"}, {"word": "撼", "prompt": "ㄏㄢˋ (震撼/撼動)"}, {"word": "懼", "prompt": "ㄐㄩˋ (畏懼/無懼)"}]}, "9": {"title": "第 9 課：崎嶇山道與淬鍊", "words": [{"word": "維", "prompt": "ㄨㄟˊ (維護/維持)"}, {"word": "戰", "prompt": "ㄓㄢˋ (戰鬥/戰術)"}, {"word": "崎", "prompt": "ㄑㄧˊ (崎嶇不平)"}, {"word": "嶇", "prompt": "ㄑㄩ (崎嶇)"}, {"word": "拳", "prompt": "ㄑㄩㄢˊ (鐵拳/握拳)"}, {"word": "癌", "prompt": "ㄞˊ (癌症/絕症)"}, {"word": "症", "prompt": "ㄓㄥˋ (病症/症候群)"}, {"word": "銅", "prompt": "ㄊㄨㄥˊ (青銅/銅牌)"}, {"word": "牌", "prompt": "ㄆㄞˊ (盾牌/名牌)"}, {"word": "屢", "prompt": "ㄌㄩˇ (屢次/屢戰屢勝)"}, {"word": "減", "prompt": "ㄐㄧㄢˇ (減少/減速)"}, {"word": "予", "prompt": "ㄩˇ (給予/授予)"}, {"word": "幼", "prompt": "ㄧㄡˋ (幼小/年幼)"}, {"word": "椰", "prompt": "ㄧㄝ (椰子樹)"}, {"word": "即", "prompt": "ㄐㄧˊ (立即/即刻)"}, {"word": "腐", "prompt": "ㄈㄨˇ (腐蝕/腐爛)"}, {"word": "衝", "prompt": "ㄔㄨㄥ (衝擊/突衝)"}, {"word": "鍛", "prompt": "ㄉㄨㄢˋ (鍛鍊/千錘百鍊)"}, {"word": "鍊", "prompt": "ㄌㄧㄢˋ (精鍊/鎖鍊)"}]}, "10": {"title": "第 10 課：幽谷沉思與回歸", "words": [{"word": "唐", "prompt": "ㄊㄤˊ (荒唐/唐代)"}, {"word": "恬", "prompt": "ㄊㄧㄢˊ (恬靜/恬淡)"}, {"word": "罷", "prompt": "ㄅㄚˋ (罷手/罷工)"}, {"word": "暮", "prompt": "ㄇㄨˋ (暮色/日暮)"}, {"word": "掩", "prompt": "ㄧㄢˇ (掩護/掩蓋)"}, {"word": "柴", "prompt": "ㄔㄞˊ (木柴/柴火)"}, {"word": "扉", "prompt": "ㄈㄟ (心扉/門扉)"}, {"word": "歸", "prompt": "ㄍㄨㄟ (歸途/回歸)"}, {"word": "畢", "prompt": "ㄅㄧˋ (畢竟/畢業)"}, {"word": "陋", "prompt": "ㄌㄡˋ (簡陋/破陋)"}, {"word": "傍", "prompt": "ㄅㄤˋ (傍晚/依傍)"}, {"word": "確", "prompt": "ㄑㄩㄝˋ (確認/明確)"}, {"word": "閒", "prompt": "ㄒㄧㄢˊ (閒暇/悠閒)"}, {"word": "詠", "prompt": "ㄩㄥˇ (歌詠/詠唱)"}, {"word": "幽", "prompt": "ㄧㄡ (幽靜/幽暗)"}, {"word": "眠", "prompt": "ㄇㄧㄢˊ (沉眠/睡眠)"}, {"word": "職", "prompt": "ㄓˊ (職責/職位)"}, {"word": "吟", "prompt": "ㄧㄣˊ (沉吟/呻吟)"}, {"word": "曠", "prompt": "ㄎㄨㄤˋ (曠野/心曠神怡)"}]}, "11": {"title": "第 11 課：營地伏擊與祈禱", "words": [{"word": "駭", "prompt": "ㄏㄞˋ (驚駭/駭人聽聞)"}, {"word": "疤", "prompt": "ㄅㄚ (傷疤/疤痕)"}, {"word": "痕", "prompt": "ㄏㄣˊ (痕跡/痕印)"}, {"word": "罐", "prompt": "ㄍㄨㄢˋ (鐵罐/罐裝)"}, {"word": "咚", "prompt": "ㄉㄨㄥ (咚咚響/噗咚)"}, {"word": "碰", "prompt": "ㄆㄥˋ (碰撞/碰面)"}, {"word": "傾", "prompt": "ㄑㄧㄥ (傾斜/傾盆大雨)"}, {"word": "寮", "prompt": "ㄌㄧㄠˊ (工寮/草寮)"}, {"word": "營", "prompt": "ㄧㄥˊ (營帳/軍營)"}, {"word": "殺", "prompt": "ㄕㄚ (擊殺/肅殺)"}, {"word": "崇", "prompt": "ㄔㄨㄥˊ (崇高/崇山峻嶺)"}, {"word": "置", "prompt": "ㄓˋ (安置/佈置)"}, {"word": "奄", "prompt": "ㄧㄢˇ (奄奄一息)"}, {"word": "翼", "prompt": "ㄧˋ (機翼/小心翼翼)"}, {"word": "祈", "prompt": "ㄑㄧˊ (祈求/祈願)"}, {"word": "禱", "prompt": "ㄉㄠˇ (禱告/祈禱)"}, {"word": "吼", "prompt": "ㄏㄡˇ (吼叫/咆哮)"}, {"word": "喉", "prompt": "ㄏㄡˊ (咽喉/喉嚨)"}, {"word": "嚨", "prompt": "ㄌㄨㄥˊ (喉嚨)"}]}, "12": {"title": "第 12 課：荒野探索與開拓", "words": [{"word": "墾", "prompt": "ㄎㄣˇ (開墾/墾荒)"}, {"word": "拓", "prompt": "ㄊㄨㄛˋ (開拓/拓展)"}, {"word": "涉", "prompt": "ㄕㄜˋ (跋山涉水/干涉)"}, {"word": "險", "prompt": "ㄒㄧㄢˇ (探險/危險)"}, {"word": "尋", "prompt": "ㄒㄩㄣˊ (搜尋/尋覓)"}, {"word": "覓", "prompt": "ㄇㄧˋ (尋覓)"}, {"word": "標", "prompt": "ㄅㄧㄠ (目標/標誌)"}, {"word": "航", "prompt": "ㄏㄤˊ (導航/航行)"}, {"word": "遙", "prompt": "ㄧㄠˊ (遙遠/遙望)"}, {"word": "際", "prompt": "ㄐㄧˋ (無邊無際/天際)"}]}, "13": {"title": "第 13 課：怒海暗礁沉船突入", "words": [{"word": "烈", "prompt": "ㄌㄧㄝˋ (烈火/激烈)"}, {"word": "暈", "prompt": "ㄩㄣˋ (眩暈/暈倒)"}, {"word": "昏", "prompt": "ㄏㄨㄣ (昏暗/昏迷)"}, {"word": "艙", "prompt": "ㄘㄤ (水密船艙/機艙)"}, {"word": "途", "prompt": "ㄊㄨˊ (長途/旅途)"}, {"word": "捲", "prompt": "ㄐㄩㄢˇ (席捲/捲土重來)"}, {"word": "喪", "prompt": "ㄙㄤˋ (喪生/垂頭喪氣)"}, {"word": "獸", "prompt": "ㄕㄡˋ (野獸/怪獸)"}, {"word": "渾", "prompt": "ㄏㄨㄣˊ (渾身解數/渾濁)"}, {"word": "擱", "prompt": "ㄍㄜ (擱淺/耽擱)"}, {"word": "礁", "prompt": "ㄐㄧㄠ (暗礁/觸礁)"}, {"word": "筏", "prompt": "ㄈㄚˊ (救生筏/竹筏)"}, {"word": "塌", "prompt": "ㄊㄚ (倒塌/崩塌)"}, {"word": "捏", "prompt": "ㄋㄧㄝ (捏造/拿捏)"}, {"word": "燒", "prompt": "ㄕㄠ (燃燒/發燒)"}, {"word": "白", "prompt": "ㄅㄞˊ (白晝/明白)"}, {"word": "烤", "prompt": "ㄎㄠˇ (烘烤/燒烤)"}, {"word": "爐", "prompt": "ㄌㄨˊ (熔爐/鍋爐室)"}, {"word": "欲", "prompt": "ㄩˋ (欲望/隨心所欲)"}]}};
+  <div class="modal-overlay" id="gameOverModal" style="display: none;">
+    <div class="modal-card" style="border-color: #FF3344;">
+      <div style="font-size: 42px; margin-bottom: 8px;">💀</div>
+      <h2 style="font-size: 22px; font-weight: 900; color: #FF3344; margin-bottom: 6px;">特警作戰失敗 (KIA)</h2>
+      <p style="font-size: 13px; color: #8E9BAE; margin-bottom: 18px;" id="gameOverMsg">生字浮游靶自爆破防！生命值耗盡。</p>
+      <div style="background: rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 14px;">
+        <div>本次得分：<span id="finalScoreVal" style="color: #00FF88; font-weight: 900;">0</span> 分</div>
+        <div style="margin-top: 4px;">最高連擊：<span id="finalComboVal" style="color: #FFDF5D; font-weight: 900;">0</span> 連擊</div>
+      </div>
+      <button class="apple-btn-primary" id="btnRestartMission" style="background: #FF3344; color: #FFF;">重新整備出擊</button>
+    </div>
+  </div>
 
-    // Web Audio 原生柔和音效合成器 (Apple 柔和調音)
-    class AppleSound {
+<script>
+// ==========================================
+// 課本五上全 13 課 225 字詞題庫
+// ==========================================
+const VOCAB_DATABASE = {
+  "1": {
+    "title": "第 1 課：生化疫區前線",
+    "words": [
+      {
+        "word": "蚊",
+        "prompt": "ㄨㄣˊ (蚊蟲)"
+      },
+      {
+        "word": "帳",
+        "prompt": "ㄓㄤˋ (營帳/帳篷)"
+      },
+      {
+        "word": "洲",
+        "prompt": "ㄓㄡ (亞洲/綠洲)"
+      },
+      {
+        "word": "瘧",
+        "prompt": "ㄋㄩㄝˋ (瘧疾)"
+      },
+      {
+        "word": "疾",
+        "prompt": "ㄐㄧˊ (疾病/疾馳)"
+      },
+      {
+        "word": "死",
+        "prompt": "ㄙˇ (死線/起死回生)"
+      },
+      {
+        "word": "叮",
+        "prompt": "ㄉㄧㄥ (叮咬/叮囑)"
+      },
+      {
+        "word": "存",
+        "prompt": "ㄘㄨㄣˊ (存活/生存)"
+      },
+      {
+        "word": "募",
+        "prompt": "ㄇㄨˋ (募集/籌募)"
+      },
+      {
+        "word": "集",
+        "prompt": "ㄐㄧˊ (聚集/集合)"
+      }
+    ]
+  },
+  "2": {
+    "title": "第 2 課：山巒與防衛",
+    "words": [
+      {
+        "word": "德",
+        "prompt": "ㄉㄜˊ (品德/德行)"
+      },
+      {
+        "word": "乎",
+        "prompt": "ㄏㄨ (在乎/出乎意料)"
+      },
+      {
+        "word": "血",
+        "prompt": "ㄒㄧㄝˇ (熱血/血清)"
+      },
+      {
+        "word": "攝",
+        "prompt": "ㄕㄜˋ (攝影/攝取)"
+      },
+      {
+        "word": "颱",
+        "prompt": "ㄊㄞˊ (颱風)"
+      },
+      {
+        "word": "錄",
+        "prompt": "ㄌㄨˋ (紀錄/錄音)"
+      },
+      {
+        "word": "哀",
+        "prompt": "ㄞ (悲哀/哀傷)"
+      },
+      {
+        "word": "巒",
+        "prompt": "ㄌㄨㄢˊ (山巒/重巒疊嶂)"
+      },
+      {
+        "word": "縱",
+        "prompt": "ㄗㄨㄥˋ (縱橫/縱使)"
+      },
+      {
+        "word": "臍",
+        "prompt": "ㄑㄧˊ (肚臍)"
+      },
+      {
+        "word": "禍",
+        "prompt": "ㄏㄨㄛˋ (災禍/禍害)"
+      },
+      {
+        "word": "殘",
+        "prompt": "ㄘㄢˊ (殘破/殘留)"
+      },
+      {
+        "word": "檳",
+        "prompt": "ㄅㄧㄣ (檳榔)"
+      },
+      {
+        "word": "榔",
+        "prompt": "ㄌㄤˊ (檳榔樹)"
+      },
+      {
+        "word": "降",
+        "prompt": "ㄐㄧㄤˋ (下降/降落)"
+      },
+      {
+        "word": "鏟",
+        "prompt": "ㄔㄢˇ (鐵鏟/鏟除)"
+      },
+      {
+        "word": "汙",
+        "prompt": "ㄨ (污染/污垢)"
+      },
+      {
+        "word": "斷",
+        "prompt": "ㄉㄨㄢˋ (折斷/果斷)"
+      }
+    ]
+  },
+  "3": {
+    "title": "第 3 課：千仞絕壁反狙擊",
+    "words": [
+      {
+        "word": "飢",
+        "prompt": "ㄐㄧ (飢餓/如飢似渴)"
+      },
+      {
+        "word": "峭",
+        "prompt": "ㄑㄧㄠˋ (陡峭/峭壁)"
+      },
+      {
+        "word": "聳",
+        "prompt": "ㄙㄨㄥˇ (高聳/聳立)"
+      },
+      {
+        "word": "隱",
+        "prompt": "ㄧㄣˇ (隱蔽/隱藏)"
+      },
+      {
+        "word": "扯",
+        "prompt": "ㄔㄜˇ (拉扯/牽扯)"
+      },
+      {
+        "word": "銳",
+        "prompt": "ㄖㄨㄟˋ (銳利/敏銳)"
+      },
+      {
+        "word": "箭",
+        "prompt": "ㄐㄧㄢˋ (箭在弦上/弓箭)"
+      },
+      {
+        "word": "韌",
+        "prompt": "ㄖㄣˋ (堅韌/韌性)"
+      },
+      {
+        "word": "虯",
+        "prompt": "ㄑㄧㄡˊ (虯龍/虯髯)"
+      },
+      {
+        "word": "鬚",
+        "prompt": "ㄒㄩ (鬍鬚/根鬚)"
+      },
+      {
+        "word": "茂",
+        "prompt": "ㄇㄠˋ (茂密/繁茂)"
+      },
+      {
+        "word": "止",
+        "prompt": "ㄓˇ (停止/止步)"
+      },
+      {
+        "word": "蔓",
+        "prompt": "ㄇㄢˋ (蔓延/藤蔓)"
+      },
+      {
+        "word": "豐",
+        "prompt": "ㄈㄥ (豐富/豐收)"
+      },
+      {
+        "word": "藉",
+        "prompt": "ㄐㄧㄝˋ (憑藉/藉口)"
+      },
+      {
+        "word": "挫",
+        "prompt": "ㄘㄨㄛˋ (挫折/受挫)"
+      },
+      {
+        "word": "折",
+        "prompt": "ㄓㄜˊ (不折不撓/曲折)"
+      }
+    ]
+  },
+  "4": {
+    "title": "第 4 課：樸實農莊與滋養",
+    "words": [
+      {
+        "word": "恆",
+        "prompt": "ㄏㄥˊ (永恆/恆久)"
+      },
+      {
+        "word": "澄",
+        "prompt": "ㄔㄥˊ (澄澈/澄清)"
+      },
+      {
+        "word": "穗",
+        "prompt": "ㄙㄨㄟˋ (稻穗/麥穗)"
+      },
+      {
+        "word": "養",
+        "prompt": "ㄧㄤˇ (滋養/培養)"
+      },
+      {
+        "word": "源",
+        "prompt": "ㄩㄢˊ (源頭/資源)"
+      },
+      {
+        "word": "藝",
+        "prompt": "ㄧˋ (藝術/技藝)"
+      },
+      {
+        "word": "樸",
+        "prompt": "ㄆㄨˊ (樸素/儉樸)"
+      },
+      {
+        "word": "堆",
+        "prompt": "ㄉㄨㄟ (土堆/堆疊)"
+      },
+      {
+        "word": "撿",
+        "prompt": "ㄐㄧㄢˇ (撿拾/撿起)"
+      },
+      {
+        "word": "巾",
+        "prompt": "ㄐㄧㄣ (毛巾/頭巾)"
+      },
+      {
+        "word": "痠",
+        "prompt": "ㄙㄨㄢ (痠痛/腰痠)"
+      },
+      {
+        "word": "素",
+        "prompt": "ㄙㄨˋ (純素/素質)"
+      },
+      {
+        "word": "尊",
+        "prompt": "ㄗㄨㄣ (尊重/尊嚴)"
+      },
+      {
+        "word": "嚴",
+        "prompt": "ㄧㄢˊ (嚴肅/莊嚴)"
+      },
+      {
+        "word": "勞",
+        "prompt": "ㄌㄠˊ (勞動/功勞)"
+      },
+      {
+        "word": "怨",
+        "prompt": "ㄩㄢˋ (抱怨/怨尤)"
+      },
+      {
+        "word": "慷",
+        "prompt": "ㄎㄤ (慷慨解囊)"
+      },
+      {
+        "word": "慨",
+        "prompt": "ㄎㄞˇ (感慨/慷慨)"
+      },
+      {
+        "word": "滋",
+        "prompt": "ㄗ (滋養/滋味)"
+      }
+    ]
+  },
+  "5": {
+    "title": "第 5 課：榮譽與基業",
+    "words": [
+      {
+        "word": "譽",
+        "prompt": "ㄩˋ (榮譽/名譽)"
+      },
+      {
+        "word": "務",
+        "prompt": "ㄨˋ (任務/事務)"
+      },
+      {
+        "word": "聯",
+        "prompt": "ㄌㄧㄢˊ (聯絡/聯盟)"
+      },
+      {
+        "word": "核",
+        "prompt": "ㄏㄜˊ (核心/考核)"
+      },
+      {
+        "word": "申",
+        "prompt": "ㄕㄣ (申請/申訴)"
+      },
+      {
+        "word": "局",
+        "prompt": "ㄐㄩˊ (全局/戰局)"
+      },
+      {
+        "word": "松",
+        "prompt": "ㄙㄨㄥ (松樹/青松)"
+      },
+      {
+        "word": "註",
+        "prompt": "ㄓㄨˋ (註冊/附註)"
+      },
+      {
+        "word": "冊",
+        "prompt": "ㄘㄜˋ (冊子/紀念冊)"
+      },
+      {
+        "word": "企",
+        "prompt": "ㄑㄧˋ (企圖/企業)"
+      },
+      {
+        "word": "毅",
+        "prompt": "ㄧˋ (堅毅/剛毅)"
+      },
+      {
+        "word": "歷",
+        "prompt": "ㄌㄧˋ (歷史/經歷)"
+      },
+      {
+        "word": "英",
+        "prompt": "ㄧㄥ (精英/英雄)"
+      },
+      {
+        "word": "銷",
+        "prompt": "ㄒㄧㄠ (銷售/行銷)"
+      },
+      {
+        "word": "售",
+        "prompt": "ㄕㄡˋ (販售/售出)"
+      },
+      {
+        "word": "勝",
+        "prompt": "ㄕㄥˋ (勝利/獲勝)"
+      },
+      {
+        "word": "霸",
+        "prompt": "ㄅㄚˋ (霸氣/爭霸)"
+      },
+      {
+        "word": "項",
+        "prompt": "ㄒㄧㄤˋ (項目/獎項)"
+      }
+    ]
+  },
+  "6": {
+    "title": "第 6 課：戰術哨戒與隊伍",
+    "words": [
+      {
+        "word": "娛",
+        "prompt": "ㄩˊ (娛樂/文娛)"
+      },
+      {
+        "word": "汽",
+        "prompt": "ㄑㄧˋ (汽車/汽油)"
+      },
+      {
+        "word": "哨",
+        "prompt": "ㄕㄠˋ (哨所/前哨)"
+      },
+      {
+        "word": "典",
+        "prompt": "ㄉㄧㄢˇ (典範/經典)"
+      },
+      {
+        "word": "框",
+        "prompt": "ㄎㄨㄤ (框架/畫框)"
+      },
+      {
+        "word": "劇",
+        "prompt": "ㄐㄩˋ (劇烈/戲劇)"
+      },
+      {
+        "word": "父",
+        "prompt": "ㄈㄨˋ (父親/父兄)"
+      },
+      {
+        "word": "責",
+        "prompt": "ㄗㄜˊ (責任/職責)"
+      },
+      {
+        "word": "判",
+        "prompt": "ㄆㄢˋ (判斷/判定)"
+      },
+      {
+        "word": "鳴",
+        "prompt": "ㄇㄧㄥˊ (鳴笛/轟鳴)"
+      },
+      {
+        "word": "穎",
+        "prompt": "ㄧㄥˇ (聰穎/新穎)"
+      },
+      {
+        "word": "獲",
+        "prompt": "ㄏㄨㄛˋ (獲勝/捕獲)"
+      },
+      {
+        "word": "佳",
+        "prompt": "ㄐㄧㄚ (佳境/最佳)"
+      },
+      {
+        "word": "膩",
+        "prompt": "ㄋㄧˋ (細膩/油膩)"
+      },
+      {
+        "word": "效",
+        "prompt": "ㄒㄧㄠˋ (成效/效率)"
+      },
+      {
+        "word": "隊",
+        "prompt": "ㄉㄨㄟˋ (隊伍/戰隊)"
+      },
+      {
+        "word": "益",
+        "prompt": "ㄧˋ (利益/精益求精)"
+      },
+      {
+        "word": "貌",
+        "prompt": "ㄇㄠˋ (相貌/容貌)"
+      },
+      {
+        "word": "官",
+        "prompt": "ㄍㄨㄢ (軍官/感官)"
+      },
+      {
+        "word": "增",
+        "prompt": "ㄗㄥ (增加/增強)"
+      }
+    ]
+  },
+  "7": {
+    "title": "第 7 課：逆境突圍與堅韌",
+    "words": [
+      {
+        "word": "逆",
+        "prompt": "ㄋㄧˋ (逆境/逆轉)"
+      },
+      {
+        "word": "憐",
+        "prompt": "ㄌㄧㄢˊ (可憐/憐愛)"
+      },
+      {
+        "word": "穩",
+        "prompt": "ㄨㄣˇ (穩健/沉穩)"
+      },
+      {
+        "word": "競",
+        "prompt": "ㄐㄧㄥˋ (競技/競爭)"
+      },
+      {
+        "word": "抗",
+        "prompt": "ㄎㄤˋ (抗爭/反抗)"
+      },
+      {
+        "word": "逸",
+        "prompt": "ㄧˋ (安逸/超逸)"
+      },
+      {
+        "word": "鄰",
+        "prompt": "ㄌㄧㄣˊ (鄰居/鄰近)"
+      },
+      {
+        "word": "脈",
+        "prompt": "ㄇㄞˋ (脈搏/山脈)"
+      },
+      {
+        "word": "絡",
+        "prompt": "ㄌㄨㄛˋ (脈絡/聯絡)"
+      },
+      {
+        "word": "緻",
+        "prompt": "ㄓˋ (精緻/細緻)"
+      },
+      {
+        "word": "弱",
+        "prompt": "ㄖㄨㄛˋ (微弱/軟弱)"
+      },
+      {
+        "word": "噴",
+        "prompt": "ㄆㄣ (噴射/噴發)"
+      },
+      {
+        "word": "嚏",
+        "prompt": "ㄊㄧˋ (噴嚏)"
+      },
+      {
+        "word": "織",
+        "prompt": "ㄓ (組織/紡織)"
+      },
+      {
+        "word": "碌",
+        "prompt": "ㄌㄨˋ (忙碌/庸碌)"
+      },
+      {
+        "word": "盎",
+        "prompt": "ㄤˋ (盎然/春意盎然)"
+      },
+      {
+        "word": "膽",
+        "prompt": "ㄉㄢˇ (膽量/大膽)"
+      },
+      {
+        "word": "圈",
+        "prompt": "ㄑㄩㄢ (包圍圈/圓圈)"
+      },
+      {
+        "word": "疲",
+        "prompt": "ㄆㄧˊ (疲憊/精疲力竭)"
+      }
+    ]
+  },
+  "8": {
+    "title": "第 8 課：恐懼之城與控制",
+    "words": [
+      {
+        "word": "坦",
+        "prompt": "ㄊㄢˇ (坦率/平坦)"
+      },
+      {
+        "word": "性",
+        "prompt": "ㄒㄧㄥˋ (性質/性格)"
+      },
+      {
+        "word": "恐",
+        "prompt": "ㄎㄨㄥˇ (恐懼/恐慌)"
+      },
+      {
+        "word": "怖",
+        "prompt": "ㄅㄨˋ (恐怖)"
+      },
+      {
+        "word": "組",
+        "prompt": "ㄗㄨˇ (小組/組織)"
+      },
+      {
+        "word": "占",
+        "prompt": "ㄓㄢˋ (佔領/攻占)"
+      },
+      {
+        "word": "播",
+        "prompt": "ㄅㄛ (廣播/傳播)"
+      },
+      {
+        "word": "控",
+        "prompt": "ㄎㄨㄥˋ (控制/操控)"
+      },
+      {
+        "word": "制",
+        "prompt": "ㄓˋ (制伏/制度)"
+      },
+      {
+        "word": "傷",
+        "prompt": "ㄕㄤ (受傷/傷痕)"
+      },
+      {
+        "word": "攻",
+        "prompt": "ㄍㄨㄥ (攻擊/攻勢)"
+      },
+      {
+        "word": "擊",
+        "prompt": "ㄐㄧˊ (擊落/打擊)"
+      },
+      {
+        "word": "權",
+        "prompt": "ㄑㄩㄢˊ (掌控權/權利)"
+      },
+      {
+        "word": "脅",
+        "prompt": "ㄒㄧㄝˊ (威脅/迫脅)"
+      },
+      {
+        "word": "復",
+        "prompt": "ㄈㄨˋ (恢復/復原)"
+      },
+      {
+        "word": "武",
+        "prompt": "ㄨˇ (武裝/武器)"
+      },
+      {
+        "word": "撼",
+        "prompt": "ㄏㄢˋ (震撼/撼動)"
+      },
+      {
+        "word": "懼",
+        "prompt": "ㄐㄩˋ (畏懼/無懼)"
+      }
+    ]
+  },
+  "9": {
+    "title": "第 9 課：崎嶇山道與淬鍊",
+    "words": [
+      {
+        "word": "維",
+        "prompt": "ㄨㄟˊ (維護/維持)"
+      },
+      {
+        "word": "戰",
+        "prompt": "ㄓㄢˋ (戰鬥/戰術)"
+      },
+      {
+        "word": "崎",
+        "prompt": "ㄑㄧˊ (崎嶇不平)"
+      },
+      {
+        "word": "嶇",
+        "prompt": "ㄑㄩ (崎嶇)"
+      },
+      {
+        "word": "拳",
+        "prompt": "ㄑㄩㄢˊ (鐵拳/握拳)"
+      },
+      {
+        "word": "癌",
+        "prompt": "ㄞˊ (癌症/絕症)"
+      },
+      {
+        "word": "症",
+        "prompt": "ㄓㄥˋ (病症/症候群)"
+      },
+      {
+        "word": "銅",
+        "prompt": "ㄊㄨㄥˊ (青銅/銅牌)"
+      },
+      {
+        "word": "牌",
+        "prompt": "ㄆㄞˊ (盾牌/名牌)"
+      },
+      {
+        "word": "屢",
+        "prompt": "ㄌㄩˇ (屢次/屢戰屢勝)"
+      },
+      {
+        "word": "減",
+        "prompt": "ㄐㄧㄢˇ (減少/減速)"
+      },
+      {
+        "word": "予",
+        "prompt": "ㄩˇ (給予/授予)"
+      },
+      {
+        "word": "幼",
+        "prompt": "ㄧㄡˋ (幼小/年幼)"
+      },
+      {
+        "word": "椰",
+        "prompt": "ㄧㄝ (椰子樹)"
+      },
+      {
+        "word": "即",
+        "prompt": "ㄐㄧˊ (立即/即刻)"
+      },
+      {
+        "word": "腐",
+        "prompt": "ㄈㄨˇ (腐蝕/腐爛)"
+      },
+      {
+        "word": "衝",
+        "prompt": "ㄔㄨㄥ (衝擊/突衝)"
+      },
+      {
+        "word": "鍛",
+        "prompt": "ㄉㄨㄢˋ (鍛鍊/千錘百鍊)"
+      },
+      {
+        "word": "鍊",
+        "prompt": "ㄌㄧㄢˋ (精鍊/鎖鍊)"
+      }
+    ]
+  },
+  "10": {
+    "title": "第 10 課：幽谷沉思與回歸",
+    "words": [
+      {
+        "word": "唐",
+        "prompt": "ㄊㄤˊ (荒唐/唐代)"
+      },
+      {
+        "word": "恬",
+        "prompt": "ㄊㄧㄢˊ (恬靜/恬淡)"
+      },
+      {
+        "word": "罷",
+        "prompt": "ㄅㄚˋ (罷手/罷工)"
+      },
+      {
+        "word": "暮",
+        "prompt": "ㄇㄨˋ (暮色/日暮)"
+      },
+      {
+        "word": "掩",
+        "prompt": "ㄧㄢˇ (掩護/掩蓋)"
+      },
+      {
+        "word": "柴",
+        "prompt": "ㄔㄞˊ (木柴/柴火)"
+      },
+      {
+        "word": "扉",
+        "prompt": "ㄈㄟ (心扉/門扉)"
+      },
+      {
+        "word": "歸",
+        "prompt": "ㄍㄨㄟ (歸途/回歸)"
+      },
+      {
+        "word": "畢",
+        "prompt": "ㄅㄧˋ (畢竟/畢業)"
+      },
+      {
+        "word": "陋",
+        "prompt": "ㄌㄡˋ (簡陋/破陋)"
+      },
+      {
+        "word": "傍",
+        "prompt": "ㄅㄤˋ (傍晚/依傍)"
+      },
+      {
+        "word": "確",
+        "prompt": "ㄑㄩㄝˋ (確認/明確)"
+      },
+      {
+        "word": "閒",
+        "prompt": "ㄒㄧㄢˊ (閒暇/悠閒)"
+      },
+      {
+        "word": "詠",
+        "prompt": "ㄩㄥˇ (歌詠/詠唱)"
+      },
+      {
+        "word": "幽",
+        "prompt": "ㄧㄡ (幽靜/幽暗)"
+      },
+      {
+        "word": "眠",
+        "prompt": "ㄇㄧㄢˊ (沉眠/睡眠)"
+      },
+      {
+        "word": "職",
+        "prompt": "ㄓˊ (職責/職位)"
+      },
+      {
+        "word": "吟",
+        "prompt": "ㄧㄣˊ (沉吟/呻吟)"
+      },
+      {
+        "word": "曠",
+        "prompt": "ㄎㄨㄤˋ (曠野/心曠神怡)"
+      }
+    ]
+  },
+  "11": {
+    "title": "第 11 課：營地伏擊與祈禱",
+    "words": [
+      {
+        "word": "駭",
+        "prompt": "ㄏㄞˋ (驚駭/駭人聽聞)"
+      },
+      {
+        "word": "疤",
+        "prompt": "ㄅㄚ (傷疤/疤痕)"
+      },
+      {
+        "word": "痕",
+        "prompt": "ㄏㄣˊ (痕跡/痕印)"
+      },
+      {
+        "word": "罐",
+        "prompt": "ㄍㄨㄢˋ (鐵罐/罐裝)"
+      },
+      {
+        "word": "咚",
+        "prompt": "ㄉㄨㄥ (咚咚響/噗咚)"
+      },
+      {
+        "word": "碰",
+        "prompt": "ㄆㄥˋ (碰撞/碰面)"
+      },
+      {
+        "word": "傾",
+        "prompt": "ㄑㄧㄥ (傾斜/傾盆大雨)"
+      },
+      {
+        "word": "寮",
+        "prompt": "ㄌㄧㄠˊ (工寮/草寮)"
+      },
+      {
+        "word": "營",
+        "prompt": "ㄧㄥˊ (營帳/軍營)"
+      },
+      {
+        "word": "殺",
+        "prompt": "ㄕㄚ (擊殺/肅殺)"
+      },
+      {
+        "word": "崇",
+        "prompt": "ㄔㄨㄥˊ (崇高/崇山峻嶺)"
+      },
+      {
+        "word": "置",
+        "prompt": "ㄓˋ (安置/佈置)"
+      },
+      {
+        "word": "奄",
+        "prompt": "ㄧㄢˇ (奄奄一息)"
+      },
+      {
+        "word": "翼",
+        "prompt": "ㄧˋ (機翼/小心翼翼)"
+      },
+      {
+        "word": "祈",
+        "prompt": "ㄑㄧˊ (祈求/祈願)"
+      },
+      {
+        "word": "禱",
+        "prompt": "ㄉㄠˇ (禱告/祈禱)"
+      },
+      {
+        "word": "吼",
+        "prompt": "ㄏㄡˇ (吼叫/咆哮)"
+      },
+      {
+        "word": "喉",
+        "prompt": "ㄏㄡˊ (咽喉/喉嚨)"
+      },
+      {
+        "word": "嚨",
+        "prompt": "ㄌㄨㄥˊ (喉嚨)"
+      }
+    ]
+  },
+  "12": {
+    "title": "第 12 課：荒野探索與開拓",
+    "words": [
+      {
+        "word": "墾",
+        "prompt": "ㄎㄣˇ (開墾/墾荒)"
+      },
+      {
+        "word": "拓",
+        "prompt": "ㄊㄨㄛˋ (開拓/拓展)"
+      },
+      {
+        "word": "涉",
+        "prompt": "ㄕㄜˋ (跋山涉水/干涉)"
+      },
+      {
+        "word": "險",
+        "prompt": "ㄒㄧㄢˇ (探險/危險)"
+      },
+      {
+        "word": "尋",
+        "prompt": "ㄒㄩㄣˊ (搜尋/尋覓)"
+      },
+      {
+        "word": "覓",
+        "prompt": "ㄇㄧˋ (尋覓)"
+      },
+      {
+        "word": "標",
+        "prompt": "ㄅㄧㄠ (目標/標誌)"
+      },
+      {
+        "word": "航",
+        "prompt": "ㄏㄤˊ (導航/航行)"
+      },
+      {
+        "word": "遙",
+        "prompt": "ㄧㄠˊ (遙遠/遙望)"
+      },
+      {
+        "word": "際",
+        "prompt": "ㄐㄧˋ (無邊無際/天際)"
+      }
+    ]
+  },
+  "13": {
+    "title": "第 13 課：怒海暗礁沉船突入",
+    "words": [
+      {
+        "word": "烈",
+        "prompt": "ㄌㄧㄝˋ (烈火/激烈)"
+      },
+      {
+        "word": "暈",
+        "prompt": "ㄩㄣˋ (眩暈/暈倒)"
+      },
+      {
+        "word": "昏",
+        "prompt": "ㄏㄨㄣ (昏暗/昏迷)"
+      },
+      {
+        "word": "艙",
+        "prompt": "ㄘㄤ (水密船艙/機艙)"
+      },
+      {
+        "word": "途",
+        "prompt": "ㄊㄨˊ (長途/旅途)"
+      },
+      {
+        "word": "捲",
+        "prompt": "ㄐㄩㄢˇ (席捲/捲土重來)"
+      },
+      {
+        "word": "喪",
+        "prompt": "ㄙㄤˋ (喪生/垂頭喪氣)"
+      },
+      {
+        "word": "獸",
+        "prompt": "ㄕㄡˋ (野獸/怪獸)"
+      },
+      {
+        "word": "渾",
+        "prompt": "ㄏㄨㄣˊ (渾身解數/渾濁)"
+      },
+      {
+        "word": "擱",
+        "prompt": "ㄍㄜ (擱淺/耽擱)"
+      },
+      {
+        "word": "礁",
+        "prompt": "ㄐㄧㄠ (暗礁/觸礁)"
+      },
+      {
+        "word": "筏",
+        "prompt": "ㄈㄚˊ (救生筏/竹筏)"
+      },
+      {
+        "word": "塌",
+        "prompt": "ㄊㄚ (倒塌/崩塌)"
+      },
+      {
+        "word": "捏",
+        "prompt": "ㄋㄧㄝ (捏造/拿捏)"
+      },
+      {
+        "word": "燒",
+        "prompt": "ㄕㄠ (燃燒/發燒)"
+      },
+      {
+        "word": "白",
+        "prompt": "ㄅㄞˊ (白晝/明白)"
+      },
+      {
+        "word": "烤",
+        "prompt": "ㄎㄠˇ (烘烤/燒烤)"
+      },
+      {
+        "word": "爐",
+        "prompt": "ㄌㄨˊ (熔爐/鍋爐室)"
+      },
+      {
+        "word": "欲",
+        "prompt": "ㄩˋ (欲望/隨心所欲)"
+      }
+    ]
+  }
+};
+
+// ==========================================
+// 特警射擊核心引擎 (part_engine.js)
+// ==========================================
+// Web Audio 原生合成震撼打擊音效
+    class SoundEngine {
       constructor() { this.ctx = null; }
       init() {
         if (!this.ctx) {
@@ -495,279 +1154,1267 @@
         }
         if (this.ctx.state === 'suspended') this.ctx.resume();
       }
-      playCorrect(combo = 1) {
-        if (!this.ctx) return;
-        try {
-          const now = this.ctx.currentTime;
-          const baseFreq = 523.25 * Math.pow(1.059463, Math.min(combo, 12));
-          [baseFreq, baseFreq * 1.25].forEach((f, idx) => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(f, now + idx * 0.04);
-            gain.gain.setValueAtTime(0.2, now + idx * 0.04);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.35);
-            osc.connect(gain); gain.connect(this.ctx.destination);
-            osc.start(now + idx * 0.04); osc.stop(now + idx * 0.04 + 0.35);
-          });
-        } catch(e) {}
-      }
-      playError() {
+      playShoot() {
         if (!this.ctx) return;
         try {
           const now = this.ctx.currentTime;
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
-          osc.type = "triangle";
-          osc.frequency.setValueAtTime(180, now);
-          osc.frequency.exponentialRampToValueAtTime(80, now + 0.2);
-          gain.gain.setValueAtTime(0.25, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(820, now);
+          osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
           osc.connect(gain); gain.connect(this.ctx.destination);
-          osc.start(now); osc.stop(now + 0.2);
+          osc.start(now); osc.stop(now + 0.08);
+        } catch(e) {}
+      }
+      playHitCorrect(combo = 1) {
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const freq = 523.25 * Math.pow(1.059463, Math.min(combo, 14));
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, now);
+          osc.frequency.setValueAtTime(freq * 1.5, now + 0.06);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.start(now); osc.stop(now + 0.28);
+        } catch(e) {}
+      }
+      playHitWrong() {
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = "square";
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.setValueAtTime(80, now + 0.12);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.start(now); osc.stop(now + 0.25);
+        } catch(e) {}
+      }
+      playExplosion() {
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const bufferSize = this.ctx.sampleRate * 0.25;
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(600, now);
+          filter.frequency.linearRampToValueAtTime(80, now + 0.25);
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          noise.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+          noise.start(now);
         } catch(e) {}
       }
     }
-    const sound = new AppleSound();
+    const sound = new SoundEngine();
 
-    // 狀態機與使用者設定
-    let userProfile = null;
-    let currentLessonKey = 1;
-    let currentPool = [];
-    let activeQuestion = null;
-    let hp = 5, maxHp = 5;
-    let san = 100;
-    let score = 0, combo = 0;
-    let lessonTotalCount = 0;
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    let screenW = window.innerWidth, screenH = window.innerHeight;
 
-    function initUser() {
-      const saved = localStorage.getItem('apple_vocab_user');
-      if (saved) {
-        userProfile = JSON.parse(saved);
-        updateUserBadge();
-      } else {
-        document.getElementById('loginModal').style.display = 'flex';
-      }
+    function resize() {
+      screenW = window.innerWidth || 800;
+      screenH = window.innerHeight || 600;
+      canvas.width = screenW; canvas.height = screenH;
     }
+    window.addEventListener("resize", resize);
+    resize();
 
-    document.getElementById('btnConfirmLogin').onclick = () => {
-      sound.init();
-      const val = document.getElementById('inputCallsign').value.trim() || '澄澈學者';
-      userProfile = {
-        user_id: 'usr_' + Date.now().toString(36),
-        nickname: val,
-        title: '字理探尋者',
-        all_time_high_score: 0,
-        daily_high_score: 0
-      };
-      localStorage.setItem('apple_vocab_user', JSON.stringify(userProfile));
-      document.getElementById('loginModal').style.display = 'none';
-      updateUserBadge();
-    };
+    let userProfile = null, currentLessonKey = 1, currentPool = [], activeQuestion = null;
+    let score = 0, combo = 0, maxCombo = 0, playerHp = 100, screenShake = 0;
+    let totalShots = 0, hits = 0, sessionMistakes = [];
 
-    document.getElementById('btnSwitchUser').onclick = () => {
-      document.getElementById('loginModal').style.display = 'flex';
-      document.getElementById('inputCallsign').value = userProfile ? userProfile.nickname : '';
-    };
+    const keys = {};
+    window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
-    function updateUserBadge() {
-      if (!userProfile) return;
-      document.getElementById('avatarChar').innerText = userProfile.nickname.charAt(0);
-      document.getElementById('userCallsign').innerText = userProfile.nickname;
-      document.getElementById('userRankTitle').innerText = userProfile.title;
-    }
+    const mouse = { x: screenW / 2, y: screenH / 2 };
+    window.addEventListener("mousemove", e => { mouse.x = e.clientX; mouse.y = e.clientY; });
 
-    // 渲染底部水平膠囊導覽
-    function renderDock() {
-      const strip = document.getElementById('dockStrip');
-      strip.innerHTML = '';
-
-      for (let i = 1; i <= 13; i++) {
-        const pill = document.createElement('div');
-        pill.className = 'dock-pill' + (currentLessonKey === i ? ' active' : '');
-        pill.innerHTML = `<span>L${i < 10 ? '0'+i : i}</span> ${VOCAB_DATABASE[i].title.split('：')[1] || VOCAB_DATABASE[i].title}`;
-        pill.onclick = () => {
-          sound.init();
-          switchLesson(i);
-        };
-        strip.appendChild(pill);
-      }
-
-      // 地獄模式膠囊
-      const hellPill = document.createElement('div');
-      hellPill.className = 'dock-pill hell-mode' + (currentLessonKey === 'hell' ? ' active' : '');
-      hellPill.innerHTML = `<span>🔥</span> 全冊終極大亂鬥 (225字)`;
-      hellPill.onclick = () => {
-        sound.init();
-        switchLesson('hell');
-      };
-      strip.appendChild(hellPill);
-    }
-
-    function switchLesson(key) {
-      currentLessonKey = key;
-      score = 0; combo = 0; hp = maxHp; san = 100;
-      updateVitals();
-
-      if (key === 'hell') {
-        let all = [];
-        Object.keys(VOCAB_DATABASE).forEach(k => {
-          all = all.concat(VOCAB_DATABASE[k].words);
-        });
-        currentPool = [...all];
-        document.getElementById('currentLessonPillTitle').innerText = '🔥 全冊終極大亂鬥';
-      } else {
-        const lesson = VOCAB_DATABASE[key];
-        currentPool = [...lesson.words];
-        document.getElementById('currentLessonPillTitle').innerText = lesson.title;
-      }
-      lessonTotalCount = currentPool.length;
-      renderDock();
-      spawnNext();
-    }
-
-    function spawnNext() {
-      if (currentPool.length === 0) {
-        showVictory();
-        return;
-      }
-      const randIdx = Math.floor(Math.random() * currentPool.length);
-      activeQuestion = currentPool[randIdx];
-
-      document.getElementById('targetPromptTitle').innerText = `【 鎖定「${activeQuestion.word}」字的正確字形 】`;
-      document.getElementById('targetPromptHint').innerText = `提示：${activeQuestion.prompt}`;
-
-      updateProgress();
-
-      // 抽取 2 個干擾字
-      let allWords = [];
-      Object.keys(VOCAB_DATABASE).forEach(k => {
-        allWords = allWords.concat(VOCAB_DATABASE[k].words.map(w => w.word));
-      });
-      allWords = allWords.filter(w => w !== activeQuestion.word);
-      const distractors = [];
-      while (distractors.length < 2 && allWords.length > 0) {
-        const d = allWords[Math.floor(Math.random() * allWords.length)];
-        if (!distractors.includes(d)) distractors.push(d);
-      }
-
-      const options = [
-        { word: activeQuestion.word, isCorrect: true },
-        { word: distractors[0], isCorrect: false },
-        { word: distractors[1], isCorrect: false }
-      ].sort(() => Math.random() - 0.5);
-
-      const deck = document.getElementById('cardsDeck');
-      deck.innerHTML = '';
-
-      options.forEach((opt, idx) => {
-        const card = document.createElement('div');
-        card.className = 'word-card';
-        card.innerHTML = `
-          <div class="key-hint">鍵 [${idx + 1}]</div>
-          <div class="card-char">${opt.word}</div>
-          <div class="card-zhuyin">${opt.isCorrect ? activeQuestion.prompt.split(' ')[0] : '干擾字辨析'}</div>
-        `;
-        card.onclick = () => checkAnswer(opt.isCorrect, card);
-        deck.appendChild(card);
-      });
-    }
-
-    function checkAnswer(isCorrect, cardEl) {
-      sound.init();
-      if (isCorrect) {
-        sound.playCorrect(combo + 1);
-        combo++;
-        score += 100 + combo * 20;
-        cardEl.classList.add('correct-feedback');
-
-        setTimeout(() => {
-          currentPool = currentPool.filter(w => w.word !== activeQuestion.word);
-          updateVitals();
-          spawnNext();
-        }, 320);
-      } else {
-        sound.playError();
-        combo = 0;
-        hp = Math.max(0, hp - 1);
-        san = Math.max(0, san - 15);
-        cardEl.classList.add('shake-feedback');
-        updateVitals();
-
-        setTimeout(() => {
-          cardEl.classList.remove('shake-feedback');
-        }, 450);
-
-        if (hp <= 0) {
-          alert('生命值歸零！請稍微歇息，重整思緒再出發。');
-          hp = maxHp; san = 100;
-          switchLesson(currentLessonKey);
-        }
-      }
-    }
-
-    function updateVitals() {
-      // 渲染 HP 圓點
-      const container = document.getElementById('hpDotsContainer');
-      container.innerHTML = '';
-      for (let i = 0; i < maxHp; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'hp-dot' + (i >= hp ? ' lost' : '');
-        container.appendChild(dot);
-      }
-      document.getElementById('sanValueBadge').innerText = san + '%';
-      document.getElementById('scoreValueBadge').innerText = score;
-    }
-
-    function updateProgress() {
-      const cleared = lessonTotalCount - currentPool.length;
-      document.getElementById('progressBadge').innerText = `${cleared} / ${lessonTotalCount}`;
-    }
-
-    function showVictory() {
-      document.getElementById('victoryModal').style.display = 'flex';
-      document.getElementById('victoryTitle').innerText = '🎉 課次圓滿完成！';
-      document.getElementById('victoryDesc').innerHTML = `本課生字全數通過檢驗！<br><br><strong>最終得分：${score} ｜ 達到最佳專注心流</strong>`;
-    }
-
-    document.getElementById('btnNextLesson').onclick = () => {
-      document.getElementById('victoryModal').style.display = 'none';
-      if (typeof currentLessonKey === 'number' && currentLessonKey < 13) {
-        switchLesson(currentLessonKey + 1);
-      } else {
-        switchLesson(1);
-      }
-    };
-
-    // 鍵盤 1, 2, 3 快速作答
-    window.addEventListener('keydown', e => {
-      if (['1', '2', '3'].includes(e.key)) {
-        const idx = parseInt(e.key) - 1;
-        const cards = document.querySelectorAll('.word-card');
-        if (cards[idx]) cards[idx].click();
-      }
+    window.addEventListener("mousedown", e => {
+      if (e.target.tagName === 'BUTTON' || e.target.closest('.hud-card') || e.target.closest('.bottom-dock') || e.target.closest('.modal-overlay')) return;
+      if (e.button === 0) { sound.init(); player.shoot(); }
     });
 
-    // 排行榜 Modal
-    document.getElementById('btnLeaderboard').onclick = () => {
-      const list = document.getElementById('leaderboardList');
-      list.innerHTML = `
-        <div class="rank-row"><span class="rank-num">1</span> <span>素樸求真者</span> <strong>5,850 分</strong></div>
-        <div class="rank-row"><span class="rank-num">2</span> <span>${userProfile ? userProfile.nickname : '澄澈思辨者'}</span> <strong>${score > 0 ? score : 5400} 分</strong></div>
-        <div class="rank-row"><span class="rank-num">3</span> <span>微光行者</span> <strong>4,920 分</strong></div>
-        <div class="rank-row"><span class="rank-num">4</span> <span>涵光漫行者</span> <strong>4,310 分</strong></div>
-        <div class="rank-row"><span class="rank-num">5</span> <span>字理新星</span> <strong>3,890 分</strong></div>
+    window.addEventListener("touchstart", e => {
+      if (e.target.tagName === 'BUTTON' || e.target.closest('.hud-card') || e.target.closest('.bottom-dock') || e.target.closest('.modal-overlay')) return;
+      if (e.touches.length > 0) {
+        sound.init(); const t = e.touches[0];
+        mouse.x = t.clientX; mouse.y = t.clientY; player.shoot();
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchmove", e => {
+      if (e.touches.length > 0) {
+        const t = e.touches[0]; mouse.x = t.clientX; mouse.y = t.clientY;
+      }
+    }, { passive: true });
+
+    let bullets = [], targets = [], particles = [], floatingTexts = [];
+
+    const player = {
+      x: screenW / 2, y: screenH / 2, radius: 24, speed: 5.8, angle: 0, runCycle: 0,
+      shoot() {
+        totalShots++; sound.playShoot();
+        screenShake = Math.max(screenShake, 5);
+        const gunLen = 38;
+        const bx = this.x + Math.cos(this.angle) * gunLen;
+        const by = this.y + Math.sin(this.angle) * gunLen;
+        bullets.push({ x: bx, y: by, vx: Math.cos(this.angle) * 19, vy: Math.sin(this.angle) * 19, life: 75 });
+        for (let i = 0; i < 7; i++) {
+          particles.push({
+            x: bx, y: by,
+            vx: Math.cos(this.angle + (Math.random() - 0.5)) * (4 + Math.random() * 5),
+            vy: Math.sin(this.angle + (Math.random() - 0.5)) * (4 + Math.random() * 5),
+            color: "#FFDF5D", radius: 2 + Math.random() * 3, alpha: 1, decay: 0.12
+          });
+        }
+      },
+      update() {
+        let dx = 0, dy = 0;
+        if (keys["w"] || keys["arrowup"]) dy -= 1;
+        if (keys["s"] || keys["arrowdown"]) dy += 1;
+        if (keys["a"] || keys["arrowleft"]) dx -= 1;
+        if (keys["d"] || keys["arrowright"]) dx += 1;
+        if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
+        this.x += dx * this.speed; this.y += dy * this.speed;
+        this.x = Math.max(50, Math.min(screenW - 50, this.x));
+        this.y = Math.max(120, Math.min(screenH - 85, this.y));
+        if (dx !== 0 || dy !== 0) this.runCycle += 0.25;
+        const diffX = mouse.x - this.x, diffY = mouse.y - this.y;
+        if (Math.abs(diffX) > 1 || Math.abs(diffY) > 1) { this.angle = Math.atan2(diffY, diffX); }
+      },
+      draw() {
+        ctx.save(); ctx.translate(this.x, this.y);
+        ctx.strokeStyle = "rgba(0, 255, 136, 0.4)"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, 0, 32 + Math.sin(Date.now() * 0.005) * 4, 0, Math.PI * 2); ctx.stroke();
+        ctx.save(); ctx.rotate(this.angle);
+        ctx.strokeStyle = "rgba(255, 60, 60, 0.4)"; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(35, 6); ctx.lineTo(260, 6); ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle = "#5A6872"; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(8, 6); ctx.lineTo(36, 6); ctx.stroke();
+        ctx.fillStyle = "#00FF88"; ctx.fillRect(20, 2, 8, 3);
+        ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(16, 6); ctx.moveTo(0, 8); ctx.lineTo(26, 6); ctx.stroke();
+        ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#00FF88"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(5, 0, 10, -0.6, 0.6); ctx.stroke();
+        ctx.restore();
+        ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 3.5; const leg = Math.sin(this.runCycle) * 14;
+        ctx.beginPath(); ctx.moveTo(-5, 12); ctx.lineTo(-5 - leg, 28); ctx.moveTo(5, 12); ctx.lineTo(5 + leg, 28); ctx.stroke();
+        ctx.font = "bold 11px sans-serif"; ctx.fillStyle = "#00FF88"; ctx.textAlign = "center"; ctx.fillText("特警 PLAYER", 0, -22);
+        ctx.restore();
+      }
+    };
+
+    class WordTarget {
+      constructor(word, isCorrect, angleSlot, speedMult = 1.0, isPhrase = false) {
+        this.word = word;
+        this.isCorrect = isCorrect;
+        this.isPhrase = isPhrase || (word && word.length > 1);
+        this.width = this.isPhrase ? Math.max(104, word.length * 36 + 28) : 72;
+        this.height = 54;
+        this.radius = this.isPhrase ? (this.width / 2) : 36;
+        const dist = Math.min(screenW, screenH) * 0.38 + (this.isPhrase ? 75 : 60);
+        this.x = player.x + Math.cos(angleSlot) * dist;
+        this.y = player.y + Math.sin(angleSlot) * dist;
+        this.x = Math.max(60, Math.min(screenW - 60, this.x));
+        this.y = Math.max(130, Math.min(screenH - 70, this.y));
+        this.speed = (1.15 + Math.random() * 0.45) * speedMult;
+        this.hp = 1;
+        this.wobble = Math.random() * 10;
+      }
+      update() {
+        this.wobble += 0.05;
+        const a = Math.atan2(player.y - this.y, player.x - this.x);
+        this.x += Math.cos(a) * this.speed;
+        this.y += Math.sin(a) * this.speed;
+        const hitDist = this.isPhrase ? 36 : this.radius;
+        const dist = Math.hypot(player.x - this.x, player.y - this.y);
+        if (dist < player.radius + hitDist) {
+          const dmg = this.isPhrase ? 18 : 15;
+          playerHp = Math.max(0, playerHp - dmg);
+          sound.playHitWrong();
+          screenShake = 18;
+          combo = 0;
+          updateHUD();
+          createExplosion(this.x, this.y, "#FF3344", 28);
+          this.hp = 0;
+          if (playerHp <= 0) handleGameOver();
+        }
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y + Math.sin(this.wobble) * 4);
+        ctx.fillStyle = "rgba(18, 28, 38, 0.95)";
+        ctx.strokeStyle = this.isCorrect ? "rgba(0, 255, 136, 0.85)" : "rgba(255, 170, 0, 0.7)";
+        ctx.lineWidth = 3;
+
+        if (!this.isPhrase) {
+          ctx.beginPath();
+          for (let i = 0; i < 6; i++) {
+            const ang = (i * Math.PI) / 3;
+            const px = Math.cos(ang) * this.radius;
+            const py = Math.sin(ang) * this.radius;
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#FFDF5D";
+          ctx.beginPath();
+          ctx.arc(0, -this.radius, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.font = "900 30px 'PingFang TC', 'Noto Sans TC', sans-serif";
+          ctx.fillStyle = "#FFFFFF";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(this.word, 0, 2);
+        } else {
+          const w = this.width, h = this.height, r = 22;
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(-w/2, -h/2, w, h, r);
+          } else {
+            ctx.arc(-w/2 + r, 0, r, Math.PI/2, Math.PI*1.5);
+            ctx.arc(w/2 - r, 0, r, -Math.PI/2, Math.PI/2);
+            ctx.closePath();
+          }
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = this.isCorrect ? "#00FF88" : "#FFAA00";
+          ctx.fillRect(-w/2 - 4, -8, 4, 16);
+          ctx.fillRect(w/2, -8, 4, 16);
+
+          ctx.fillStyle = "#FFDF5D";
+          ctx.beginPath();
+          ctx.arc(0, -h/2, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          const fontSize = this.word.length >= 4 ? 18 : this.word.length === 3 ? 20 : 23;
+          ctx.font = `900 ${fontSize}px 'PingFang TC', 'Noto Sans TC', sans-serif`;
+          ctx.fillStyle = "#FFFFFF";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(this.word, 0, 2);
+        }
+        ctx.restore();
+      }
+    }
+
+    function createExplosion(x, y, color, count = 22) {
+      for (let i = 0; i < count; i++) {
+        const speed = 2 + Math.random() * 8, a = Math.random() * Math.PI * 2;
+        particles.push({
+          x, y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed,
+          color, radius: 2.5 + Math.random() * 3.5, alpha: 1, decay: 0.03 + Math.random() * 0.03
+        });
+      }
+    }
+
+    function addFloatingText(x, y, text, color) {
+      floatingTexts.push({ x, y, text, color, alpha: 1, vy: -2.2 });
+    }
+
+// ==========================================
+// 戰術邏輯、防作弊遮蔽、戰情總部 (part_admin.js)
+// ==========================================
+// ==========================================
+// 三角洲字點：循序漸進特警射擊引擎 (part_admin.js)
+// 難度進階：階段一(生字辨析) ➔ 階段二(生詞語境獵殺)
+// ==========================================
+
+// 1. 五年級國語全冊形似字/同音字/易混淆字字典 (Confusables Map)
+const CONFUSABLES = {
+  "蚊": ["紋", "雯", "玟"], "帳": ["張", "脹", "漲", "棚"], "洲": ["州", "舟", "周"],
+  "瘧": ["虐", "瘋", "痕"], "疾": ["嫉", "級", "及", "急"], "死": ["歹", "殘", "列"],
+  "叮": ["盯", "釘", "訂"], "存": ["在", "薦", "孝"], "募": ["幕", "慕", "墓"],
+  "集": ["焦", "雀", "隻"], "德": ["得", "惪", "聽"], "乎": ["呼", "平", "干"],
+  "血": ["皿", "盃", "盆"], "攝": ["聶", "躡", "懾"], "颱": ["台", "苔", "抬"],
+  "錄": ["綠", "祿", "碌"], "哀": ["衷", "衰", "衷"], "巒": ["戀", "變", "蠻"],
+  "縱": ["從", "粽", "總"], "臍": ["齊", "劑", "濟"], "禍": ["鍋", "渦", "媧"],
+  "殘": ["錢", "賤", "踐"], "降": ["陣", "隊", "墜"], "鏟": ["產", "產", "產"],
+  "汙": ["汗", "污", "江"], "斷": ["繼", "段", "短"], "飢": ["肌", "幾", "飢"],
+  "峭": ["肖", "梢", "悄"], "聳": ["茸", "聾", "耳"], "隱": ["穩", "癮", "急"],
+  "扯": ["址", "址", "趾"], "銳": ["悅", "說", "脫"], "箭": ["前", "剪", "煎"],
+  "韌": ["刃", "忍", "韌"], "茂": ["戊", "戌", "成"], "藉": ["籍", "藉", "及"],
+  "挫": ["座", "坐", "搓"], "折": ["拆", "析", "折"], "恆": ["桓", "垣", "萱"],
+  "澄": ["橙", "登", "凳"], "穗": ["惠", "聰", "穗"], "樸": ["朴", "撲", "僕"],
+  "撿": ["檢", "儉", "臉"], "痠": ["酸", "酸", "梭"], "慷": ["康", "糠", "慷"],
+  "慨": ["概", "溉", "概"], "滋": ["慈", "磁", "滋"], "譽": ["與", "舉", "興"],
+  "務": ["霧", "騖", "鶩"], "聯": ["連", "關", "廉"], "冊": ["柵", "珊", "冊"],
+  "毅": ["役", "投", "段"], "銷": ["消", "宵", "削"], "霸": ["革", "霸", "壩"],
+  "娛": ["誤", "吳", "娛"], "哨": ["稍", "梢", "俏"], "框": ["匡", "眶", "筐"],
+  "劇": ["據", "據", "居"], "穎": ["潁", "頃", "顆"], "膩": ["貳", "膩", "膩"],
+  "貌": ["貓", "邈", "貌"], "逆": ["朔", "溯", "塑"], "憐": ["鄰", "零", "令"],
+  "穩": ["隱", "穩", "急"], "競": ["竟", "境", "鏡"], "緻": ["致", "至", "製"],
+  "嚏": ["啼", "蹄", "帝"], "盎": ["央", "映", "英"], "懼": ["具", "俱", "巨"],
+  "崎": ["奇", "琦", "騎"], "嶇": ["區", "歐", "軀"], "屢": ["縷", "履", "簍"],
+  "鍛": ["段", "段", "斷"], "鍊": ["練", "煉", "鏈"], "恬": ["甜", "括", "舌"],
+  "罷": ["擺", "擺", "罷"], "暮": ["幕", "慕", "募"], "扉": ["非", "匪", "翡"],
+  "畢": ["華", "畢", "十"], "陋": ["陋", "陋", "陸"], "傍": ["旁", "磅", "謗"],
+  "駭": ["該", "孩", "刻"], "疤": ["把", "笆", "芭"], "痕": ["狠", "恨", "很"],
+  "寮": ["療", "繚", "僚"], "崇": ["宗", "崇", "崇"], "禱": ["壽", "疇", "濤"],
+  "墾": ["懇", "懇", "肯"], "拓": ["石", "托", "拖"], "涉": ["步", "涉", "涉"],
+  "覓": ["見", "覓", "免"], "礁": ["焦", "瞧", "礁"], "筏": ["伐", "閥", "筏"]
+};
+
+// 2. 自動提取各課生字與生詞庫
+const allGradeWords = [];
+const LESSON_PHRASES = {};
+const ALL_PHRASES = [];
+
+for (const lKey in VOCAB_DATABASE) {
+  LESSON_PHRASES[lKey] = [];
+  if (VOCAB_DATABASE[lKey].words) {
+    VOCAB_DATABASE[lKey].words.forEach(item => {
+      const w = item.word;
+      if (!allGradeWords.includes(w)) allGradeWords.push(w);
+      const p = item.prompt || "";
+      const zhuyin = p.split("(")[0].trim();
+      const match = p.match(/\((.*?)\)/);
+      if (match) {
+        const phrases = match[1].split("/").map(s => s.trim()).filter(Boolean);
+        phrases.forEach(ph => {
+          const masked = ph.replaceAll(w, " ＿ ");
+          const entry = {
+            phrase: ph,
+            word: w,
+            zhuyin: zhuyin,
+            masked: masked,
+            prompt: `造詞填空：【 ${masked} 】 ( ${zhuyin} )`
+          };
+          LESSON_PHRASES[lKey].push(entry);
+          ALL_PHRASES.push(entry);
+        });
+      }
+    });
+  }
+}
+
+// 模式與階段狀態
+// mode: "progressive" (循序漸進: 生字➔生詞), "char_only" (僅生字), "phrase_only" (僅生詞)
+let currentMode = "progressive";
+let currentPhase = 1; // 1: 生字特訓, 2: 生詞獵殺
+let isWaveTransition = false;
+
+// 取得生字干擾字（3個）
+function getCharDistractors(targetWord, count = 3) {
+  const result = [];
+  if (CONFUSABLES[targetWord]) {
+    for (const cw of CONFUSABLES[targetWord]) {
+      if (cw !== targetWord && !result.includes(cw)) {
+        result.push(cw);
+      }
+    }
+  }
+  const shuffled = [...allGradeWords].sort(() => Math.random() - 0.5);
+  for (const sw of shuffled) {
+    if (result.length >= count) break;
+    if (sw !== targetWord && !result.includes(sw)) {
+      result.push(sw);
+    }
+  }
+  return result.slice(0, count);
+}
+
+// 取得生詞干擾詞（3個：包含高擬真錯別字詞陷阱 + 同課生詞）
+function getPhraseDistractors(targetPhrase, targetWord, count = 3) {
+  const result = [];
+
+  // 1. 錯別字詞陷阱（例如：瘧疾 ➔ 虐疾 / 帳篷 ➔ 帳棚）
+  if (CONFUSABLES[targetWord]) {
+    for (const cw of CONFUSABLES[targetWord]) {
+      const typo = targetPhrase.replaceAll(targetWord, cw);
+      if (typo !== targetPhrase && !result.includes(typo)) {
+        result.push(typo);
+        if (result.length >= 2) break;
+      }
+    }
+  }
+
+  // 2. 當前課堂的其他生詞
+  const curLessonPhrases = (LESSON_PHRASES[currentLessonKey] || []).map(x => x.phrase).filter(p => p !== targetPhrase);
+  curLessonPhrases.sort(() => Math.random() - 0.5);
+  for (const p of curLessonPhrases) {
+    if (result.length >= count) break;
+    if (!result.includes(p)) result.push(p);
+  }
+
+  // 3. 全年級生詞補足
+  const shuffled = [...ALL_PHRASES].map(x => x.phrase).filter(p => p !== targetPhrase);
+  shuffled.sort(() => Math.random() - 0.5);
+  for (const p of shuffled) {
+    if (result.length >= count) break;
+    if (!result.includes(p)) result.push(p);
+  }
+
+  return result.slice(0, count);
+}
+
+// 題目語意格式化：防作弊遮蔽
+function formatDirective(word, rawPrompt) {
+  if (!rawPrompt) return "語境提示載入中...";
+  return rawPrompt.replaceAll(word, " ＿ ");
+}
+
+// 階段切換指示特效
+function triggerPhaseUpgrade() {
+  sound.playHitCorrect(12);
+  screenShake = 16;
+  createExplosion(player.x, player.y, "#FFDF5D", 45);
+  createExplosion(screenW / 2, screenH / 2, "#00FF88", 35);
+  addFloatingText(player.x, player.y - 40, "⚡ 階段一生字肅清完成！", "#00FF88");
+  addFloatingText(player.x, player.y - 10, "🚀 進入【階段二：生詞語境獵殺】！", "#FFDF5D");
+
+  currentPhase = 2;
+  updatePhaseUI();
+
+  // 載入第二階段生詞題庫
+  if (currentLessonKey === "hell") {
+    currentPool = [...ALL_PHRASES].sort(() => Math.random() - 0.5);
+  } else {
+    currentPool = [...(LESSON_PHRASES[currentLessonKey] || [])].sort(() => Math.random() - 0.5);
+  }
+
+  setTimeout(() => {
+    if (playerHp > 0) spawnWave();
+  }, 900);
+}
+
+function updatePhaseUI() {
+  const badge = document.getElementById("phaseBadge");
+  const subhint = document.getElementById("missionSubhint");
+  if (!badge) return;
+
+  if (currentPhase === 1) {
+    badge.innerText = "階段一：生字辨析特訓";
+    badge.style.color = "#00FF88";
+    badge.style.borderColor = "#00FF88";
+    badge.style.background = "rgba(0, 255, 136, 0.15)";
+    if (subhint) subhint.innerText = "請鎖定正確生字浮游靶機，嚴防逼近自爆！";
+  } else {
+    badge.innerText = "階段二：生詞語境獵殺 (難度升級)";
+    badge.style.color = "#FF9500";
+    badge.style.borderColor = "#FF9500";
+    badge.style.background = "rgba(255, 149, 0, 0.18)";
+    if (subhint) subhint.innerText = "鎖定正確生詞裝甲艦，識破錯別詞偽裝！(航速提升135%)";
+  }
+}
+
+// 生成新一波次靶機
+function spawnWave() {
+  if (playerHp <= 0) return;
+  isWaveTransition = false;
+  targets = [];
+
+  // 若當前池已清空
+  if (!currentPool || currentPool.length === 0) {
+    if (currentPhase === 1 && currentMode === "progressive") {
+      // 循序漸進：階段一生字完成，自動升級至階段二生詞！
+      triggerPhaseUpgrade();
+      return;
+    } else {
+      // 全數通關！
+      handleVictory();
+      return;
+    }
+  }
+
+  activeQuestion = currentPool.shift();
+  document.getElementById("remainVal").innerText = currentPool.length + 1;
+
+  let waveItems = [];
+  let speedMult = 1.0;
+
+  if (currentPhase === 1) {
+    // 【階段一：生字】
+    const maskedPrompt = formatDirective(activeQuestion.word, activeQuestion.prompt);
+    document.getElementById("missionPrompt").innerText = maskedPrompt;
+
+    const distractors = getCharDistractors(activeQuestion.word, 3);
+    waveItems = [
+      { word: activeQuestion.word, isCorrect: true, isPhrase: false },
+      ...distractors.map(w => ({ word: w, isCorrect: false, isPhrase: false }))
+    ];
+    speedMult = (currentLessonKey === "hell" ? 1.5 : 1.0) + Math.min(combo * 0.03, 0.4);
+  } else {
+    // 【階段二：生詞】
+    document.getElementById("missionPrompt").innerText = activeQuestion.prompt;
+
+    const distractors = getPhraseDistractors(activeQuestion.phrase, activeQuestion.word, 3);
+    waveItems = [
+      { word: activeQuestion.phrase, isCorrect: true, isPhrase: true },
+      ...distractors.map(w => ({ word: w, isCorrect: false, isPhrase: true }))
+    ];
+    // 生詞階段巡航速度提升 135%
+    speedMult = (currentLessonKey === "hell" ? 1.75 : 1.35) + Math.min(combo * 0.04, 0.45);
+  }
+
+  // 隨機打散方位
+  waveItems.sort(() => Math.random() - 0.5);
+
+  const baseAngle = Math.random() * Math.PI * 2;
+  targets = waveItems.map((item, idx) => {
+    const slotAngle = baseAngle + (idx * (Math.PI * 2 / waveItems.length));
+    return new WordTarget(item.word, item.isCorrect, slotAngle, speedMult, item.isPhrase);
+  });
+}
+
+// 更新子彈與碰撞檢測
+function updateBulletsAndCollisions() {
+  for (let bi = bullets.length - 1; bi >= 0; bi--) {
+    const b = bullets[bi];
+    b.x += b.vx;
+    b.y += b.vy;
+    b.life--;
+
+    if (b.life <= 0 || b.x < 0 || b.x > screenW || b.y < 0 || b.y > screenH) {
+      bullets.splice(bi, 1);
+      continue;
+    }
+
+    let bulletConsumed = false;
+    for (let ti = targets.length - 1; ti >= 0; ti--) {
+      const t = targets[ti];
+      const hitRadius = t.isPhrase ? (t.width / 2) : (t.radius + 8);
+      const dist = Math.hypot(b.x - t.x, b.y - t.y);
+
+      if (dist < hitRadius) {
+        bulletConsumed = true;
+        hits++;
+
+        if (t.isCorrect) {
+          combo++;
+          if (combo > maxCombo) maxCombo = combo;
+          const basePts = t.isPhrase ? 200 : 100;
+          const comboPts = combo * (t.isPhrase ? 35 : 25);
+          const points = basePts + comboPts;
+          score += points;
+          sound.playHitCorrect(combo);
+          screenShake = t.isPhrase ? 12 : 9;
+
+          createExplosion(t.x, t.y, "#00FF88", t.isPhrase ? 36 : 28);
+          addFloatingText(t.x, t.y, `+${points} ${t.isPhrase ? '生詞獵殺!' : '精準命中!'}`, "#00FF88");
+          recordAnswer(t.word, true, currentPhase === 1 ? "生字辨析" : "生詞填空");
+          updateHUD();
+
+          // 其餘靶機散退消散
+          targets.forEach(ot => {
+            if (ot !== t) createExplosion(ot.x, ot.y, "rgba(255, 223, 93, 0.4)", 8);
+          });
+          targets = [];
+
+          isWaveTransition = true;
+          setTimeout(() => {
+            if (playerHp > 0) spawnWave();
+          }, 420);
+        } else {
+          combo = 0;
+          const dmg = t.isPhrase ? 14 : 12;
+          playerHp = Math.max(0, playerHp - dmg);
+          sound.playHitWrong();
+          screenShake = 16;
+
+          createExplosion(t.x, t.y, "#FF3344", 26);
+          addFloatingText(t.x, t.y, `誤擊「${t.word}」 -${dmg}HP!`, "#FF3344");
+          const correctTarget = currentPhase === 1 ? activeQuestion.word : activeQuestion.phrase;
+          recordAnswer(t.word, false, `誤將「${t.word}」當作「${correctTarget}」`);
+          updateHUD();
+
+          targets.splice(ti, 1);
+          if (playerHp <= 0) {
+            handleGameOver();
+          }
+        }
+        break;
+      }
+    }
+
+    if (bulletConsumed) {
+      bullets.splice(bi, 1);
+    }
+  }
+}
+
+// 檢查浮游靶自爆破防
+function checkDeadTargets() {
+  if (isWaveTransition) return;
+  let correctDestroyed = false;
+  for (let ti = targets.length - 1; ti >= 0; ti--) {
+    if (targets[ti].hp <= 0) {
+      if (targets[ti].isCorrect) {
+        correctDestroyed = true;
+        const correctTarget = currentPhase === 1 ? activeQuestion.word : activeQuestion.phrase;
+        recordAnswer(correctTarget, false, "浮游靶逼近自爆破防");
+      }
+      targets.splice(ti, 1);
+    }
+  }
+  if (correctDestroyed && playerHp > 0 && !isWaveTransition) {
+    isWaveTransition = true;
+    setTimeout(() => {
+      if (playerHp > 0) spawnWave();
+    }, 500);
+  }
+}
+
+// 支援空白鍵射擊
+window.addEventListener("keydown", e => {
+  if (e.code === "Space") {
+    e.preventDefault();
+    sound.init();
+    player.shoot();
+  }
+});
+
+// 繪製戰術雷達格線
+function drawTacticalGrid() {
+  ctx.strokeStyle = "rgba(0, 255, 136, 0.04)";
+  ctx.lineWidth = 1;
+  const gridSize = 64;
+  for (let x = 0; x < screenW; x += gridSize) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, screenH); ctx.stroke();
+  }
+  for (let y = 0; y < screenH; y += gridSize) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(screenW, y); ctx.stroke();
+  }
+  ctx.strokeStyle = currentPhase === 1 ? "rgba(0, 255, 136, 0.07)" : "rgba(255, 149, 0, 0.09)";
+  ctx.beginPath();
+  ctx.arc(screenW / 2, screenH / 2, Math.min(screenW, screenH) * 0.38, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+// 繪製特警子彈與曳光軌跡
+function drawBullets() {
+  ctx.save();
+  for (const b of bullets) {
+    ctx.strokeStyle = "#FFDF5D";
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.moveTo(b.x, b.y);
+    ctx.lineTo(b.x - b.vx * 0.7, b.y - b.vy * 0.7);
+    ctx.stroke();
+
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, 2.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// 更新與繪製粒子
+function updateAndDrawParticles() {
+  ctx.save();
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.alpha -= p.decay;
+    if (p.alpha <= 0) {
+      particles.splice(i, 1);
+      continue;
+    }
+    ctx.globalAlpha = Math.max(0, p.alpha);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// 更新與繪製打擊浮動提示
+function updateAndDrawFloatingTexts() {
+  ctx.save();
+  for (let i = floatingTexts.length - 1; i >= 0; i--) {
+    const ft = floatingTexts[i];
+    ft.y += ft.vy;
+    ft.alpha -= 0.025;
+    if (ft.alpha <= 0) {
+      floatingTexts.splice(i, 1);
+      continue;
+    }
+    ctx.globalAlpha = Math.max(0, ft.alpha);
+    ctx.font = "bold 16px 'PingFang TC', sans-serif";
+    ctx.fillStyle = ft.color;
+    ctx.textAlign = "center";
+    ctx.fillText(ft.text, ft.x, ft.y);
+  }
+  ctx.restore();
+}
+
+// 遊戲渲染主迴圈
+function gameLoop() {
+  let sx = 0, sy = 0;
+  if (screenShake > 0) {
+    sx = (Math.random() - 0.5) * screenShake;
+    sy = (Math.random() - 0.5) * screenShake;
+    screenShake *= 0.88;
+    if (screenShake < 0.2) screenShake = 0;
+  }
+
+  ctx.save();
+  ctx.translate(sx, sy);
+
+  ctx.fillStyle = "#070B10";
+  ctx.fillRect(0, 0, screenW, screenH);
+
+  drawTacticalGrid();
+
+  player.update();
+  player.draw();
+
+  updateBulletsAndCollisions();
+  drawBullets();
+
+  for (let i = 0; i < targets.length; i++) {
+    targets[i].update();
+    targets[i].draw();
+  }
+  checkDeadTargets();
+
+  updateAndDrawParticles();
+  updateAndDrawFloatingTexts();
+
+  ctx.restore();
+
+  requestAnimationFrame(gameLoop);
+}
+
+// ==========================================
+// 課次切換、模式選擇與底部導覽列 (Dock)
+// ==========================================
+function initDock() {
+  const dockStrip = document.getElementById("dockStrip");
+  dockStrip.innerHTML = "";
+
+  for (let i = 1; i <= 13; i++) {
+    const btn = document.createElement("button");
+    btn.className = `dock-pill ${i === currentLessonKey ? "active" : ""}`;
+    btn.innerText = `第 ${i} 課`;
+    btn.dataset.lesson = i;
+    btn.onclick = () => switchLesson(i);
+    dockStrip.appendChild(btn);
+  }
+
+  const hellBtn = document.createElement("button");
+  hellBtn.className = `dock-pill hell-mode ${currentLessonKey === "hell" ? "active" : ""}`;
+  hellBtn.innerText = "🔥 全冊地獄生存戰";
+  hellBtn.dataset.lesson = "hell";
+  hellBtn.onclick = () => switchLesson("hell");
+  dockStrip.appendChild(hellBtn);
+}
+
+// 切換模式：循序漸進 (生字➔生詞) / 僅生字 / 僅生詞
+const btnToggleMode = document.getElementById("btnToggleMode");
+if (btnToggleMode) {
+  btnToggleMode.onclick = () => {
+    if (currentMode === "progressive") {
+      currentMode = "char_only";
+      btnToggleMode.innerText = "🎯 僅生字特訓";
+      btnToggleMode.style.borderColor = "#00FF88";
+      btnToggleMode.style.color = "#00FF88";
+    } else if (currentMode === "char_only") {
+      currentMode = "phrase_only";
+      btnToggleMode.innerText = "🚀 僅生詞獵殺";
+      btnToggleMode.style.borderColor = "#FF9500";
+      btnToggleMode.style.color = "#FF9500";
+    } else {
+      currentMode = "progressive";
+      btnToggleMode.innerText = "⚡ 循序(字➔詞)";
+      btnToggleMode.style.borderColor = "#FFDF5D";
+      btnToggleMode.style.color = "#FFDF5D";
+    }
+    switchLesson(currentLessonKey);
+  };
+}
+
+function switchLesson(lessonKey) {
+  currentLessonKey = lessonKey;
+
+  document.querySelectorAll(".dock-pill").forEach(p => {
+    p.classList.toggle("active", p.dataset.lesson == lessonKey);
+  });
+
+  // 依當前模式設定起始階段
+  if (currentMode === "phrase_only") {
+    currentPhase = 2;
+  } else {
+    currentPhase = 1;
+  }
+  updatePhaseUI();
+
+  // 載入對應池
+  if (currentPhase === 1) {
+    if (lessonKey === "hell") {
+      currentPool = [...allGradeWords.map(w => {
+        for (const l in VOCAB_DATABASE) {
+          const found = VOCAB_DATABASE[l].words.find(item => item.word === w);
+          if (found) return found;
+        }
+        return { word: w, prompt: w };
+      })].sort(() => Math.random() - 0.5);
+    } else {
+      const lessonData = VOCAB_DATABASE[lessonKey];
+      currentPool = (lessonData && lessonData.words) ? JSON.parse(JSON.stringify(lessonData.words)).sort(() => Math.random() - 0.5) : [];
+    }
+  } else {
+    if (lessonKey === "hell") {
+      currentPool = [...ALL_PHRASES].sort(() => Math.random() - 0.5);
+    } else {
+      currentPool = [...(LESSON_PHRASES[lessonKey] || [])].sort(() => Math.random() - 0.5);
+    }
+  }
+
+  playerHp = 100;
+  combo = 0;
+  score = 0;
+  totalShots = 0;
+  hits = 0;
+  bullets = [];
+  targets = [];
+  particles = [];
+  floatingTexts = [];
+  player.x = screenW / 2;
+  player.y = screenH / 2;
+
+  updateHUD();
+  spawnWave();
+}
+
+// ==========================================
+// 學員檔案與 HUD 狀態更新
+// ==========================================
+const KEY_USER = "delta_shooter_user";
+const KEY_RECORDS = "delta_shooter_records";
+const KEY_ERRORS = "delta_shooter_errors";
+
+function updateHUD() {
+  document.getElementById("scoreVal").innerText = score;
+  document.getElementById("comboVal").innerText = combo + "x";
+  const hpFill = document.getElementById("hpBarFill");
+  const hp = Math.max(0, Math.min(100, playerHp));
+  hpFill.style.width = hp + "%";
+  if (hp > 55) {
+    hpFill.style.background = "linear-gradient(90deg, #00FF88, #34C759)";
+  } else if (hp > 25) {
+    hpFill.style.background = "linear-gradient(90deg, #FFDF5D, #FFA500)";
+  } else {
+    hpFill.style.background = "linear-gradient(90deg, #FF3344, #FF0055)";
+  }
+}
+
+function loadUserProfile() {
+  const saved = localStorage.getItem(KEY_USER);
+  if (saved) {
+    try {
+      userProfile = JSON.parse(saved);
+      document.getElementById("userCallsign").innerText = userProfile.callsign;
+      document.getElementById("avatarChar").innerText = userProfile.callsign.charAt(0) || "特";
+    } catch(e) {
+      showLoginModal();
+    }
+  } else {
+    showLoginModal();
+  }
+}
+
+function showLoginModal() {
+  document.getElementById("loginModal").style.display = "flex";
+  document.getElementById("inputCallsign").value = userProfile ? userProfile.callsign : "";
+}
+
+document.getElementById("btnConfirmLogin").onclick = () => {
+  const name = document.getElementById("inputCallsign").value.trim();
+  if (!name) return alert("請輸入特警呼號代號！");
+  userProfile = { callsign: name, updatedAt: new Date().toISOString() };
+  localStorage.setItem(KEY_USER, JSON.stringify(userProfile));
+  document.getElementById("userCallsign").innerText = name;
+  document.getElementById("avatarChar").innerText = name.charAt(0);
+  document.getElementById("loginModal").style.display = "none";
+  sound.init();
+};
+
+document.getElementById("btnSwitchUser").onclick = () => showLoginModal();
+
+// ==========================================
+// 數據分析、歷史存檔與勝負結算
+// ==========================================
+function recordAnswer(word, isCorrect, detail = "") {
+  try {
+    const errorMap = JSON.parse(localStorage.getItem(KEY_ERRORS) || "{}");
+    if (!isCorrect) {
+      if (!errorMap[word]) errorMap[word] = { word, count: 0, confused: {} };
+      errorMap[word].count++;
+      if (detail) {
+        errorMap[word].confused[detail] = (errorMap[word].confused[detail] || 0) + 1;
+      }
+      localStorage.setItem(KEY_ERRORS, JSON.stringify(errorMap));
+    }
+  } catch(e) {}
+}
+
+function saveRoundRecord(completed = false) {
+  try {
+    const records = JSON.parse(localStorage.getItem(KEY_RECORDS) || "[]");
+    const acc = totalShots > 0 ? Math.round((hits / totalShots) * 100) : 100;
+    const modeLabel = currentMode === "progressive" ? "循序(字+詞)" : (currentMode === "char_only" ? "僅生字" : "僅生詞");
+    records.push({
+      id: Date.now(),
+      callsign: userProfile ? userProfile.callsign : "匿名特警",
+      lesson: (currentLessonKey === "hell" ? "全冊地獄" : `第 ${currentLessonKey} 課`) + ` [${modeLabel}]`,
+      score: score,
+      maxCombo: maxCombo,
+      accuracy: acc,
+      completed: completed,
+      date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString().slice(0, 5)
+    });
+    records.sort((a, b) => b.score - a.score);
+    localStorage.setItem(KEY_RECORDS, JSON.stringify(records.slice(0, 100)));
+  } catch(e) {}
+}
+
+function handleGameOver() {
+  saveRoundRecord(false);
+  document.getElementById("finalScoreVal").innerText = score;
+  document.getElementById("finalComboVal").innerText = maxCombo;
+  document.getElementById("gameOverModal").style.display = "flex";
+}
+
+document.getElementById("btnRestartMission").onclick = () => {
+  document.getElementById("gameOverModal").style.display = "none";
+  switchLesson(currentLessonKey);
+};
+
+function handleVictory() {
+  saveRoundRecord(true);
+  const vModal = document.getElementById("victoryModal");
+  if (vModal) {
+    const titleP = vModal.querySelector("p");
+    if (titleP) {
+      titleP.innerText = currentMode === "progressive"
+        ? `第 ${currentLessonKey} 課【生字＋生詞】循序特訓全數精準肅清制霸！`
+        : `第 ${currentLessonKey} 課所有目標全數肅清！`;
+    }
+    vModal.style.display = "flex";
+  }
+}
+
+document.getElementById("btnNextLesson").onclick = () => {
+  document.getElementById("victoryModal").style.display = "none";
+  let next = currentLessonKey === "hell" ? 1 : Number(currentLessonKey) + 1;
+  if (next > 13) next = "hell";
+  switchLesson(next);
+};
+
+// ==========================================
+// 榮譽榜單與指揮官戰情總部 (Admin 8888)
+// ==========================================
+document.getElementById("btnLeaderboard").onclick = () => {
+  renderPublicLeaderboard();
+  document.getElementById("leaderboardModal").style.display = "flex";
+};
+
+document.getElementById("btnCloseLeaderboard").onclick = () => {
+  document.getElementById("leaderboardModal").style.display = "none";
+};
+
+function renderPublicLeaderboard() {
+  const records = JSON.parse(localStorage.getItem(KEY_RECORDS) || "[]");
+  const listEl = document.getElementById("leaderboardList");
+  if (records.length === 0) {
+    listEl.innerHTML = "<div style='color: #8E9BAE; text-align: center; padding: 20px;'>暫無作戰紀錄，快展開首輪射擊！</div>";
+    return;
+  }
+  listEl.innerHTML = records.slice(0, 7).map((r, i) => `
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; margin-bottom: 6px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-weight: 900; color: ${i === 0 ? '#FFDF5D' : i === 1 ? '#E0E0E0' : i === 2 ? '#CD7F32' : '#8E9BAE'};">#${i + 1}</span>
+        <span style="font-weight: 700; color: #FFF;">${r.callsign}</span>
+        <span style="font-size: 11px; color: #64B5F6; background: rgba(0,113,227,0.2); padding: 2px 6px; border-radius: 4px;">${r.lesson}</span>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-weight: 900; color: #00FF88;">${r.score} 分</div>
+        <div style="font-size: 11px; color: #8E9BAE;">${r.maxCombo} 連擊 | 命中 ${r.accuracy}%</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+document.getElementById("btnOpenAdmin").onclick = () => {
+  document.getElementById("inputAdminPass").value = "";
+  document.getElementById("adminAuthModal").style.display = "flex";
+};
+
+document.getElementById("btnCancelAdminAuth").onclick = () => {
+  document.getElementById("adminAuthModal").style.display = "none";
+};
+
+document.getElementById("btnConfirmAdminAuth").onclick = () => {
+  const pwd = document.getElementById("inputAdminPass").value.trim();
+  if (pwd === "8888") {
+    document.getElementById("adminAuthModal").style.display = "none";
+    openAdminDashboard();
+  } else {
+    alert("授權失敗！密碼不正確 (預設: 8888)");
+  }
+};
+
+document.getElementById("btnCloseAdminDashboard").onclick = () => {
+  document.getElementById("adminDashboardModal").style.display = "none";
+};
+
+let currentAdminTab = "ranking";
+
+function openAdminDashboard() {
+  document.getElementById("adminDashboardModal").style.display = "flex";
+  refreshAdminKPIs();
+  renderAdminTab(currentAdminTab);
+}
+
+function refreshAdminKPIs() {
+  const records = JSON.parse(localStorage.getItem(KEY_RECORDS) || "[]");
+  const errors = JSON.parse(localStorage.getItem(KEY_ERRORS) || "{}");
+
+  const uniqueUsers = new Set(records.map(r => r.callsign));
+  document.getElementById("kpiTotalStudents").innerText = `${uniqueUsers.size} 位`;
+  document.getElementById("kpiTotalAttempts").innerText = `${records.length} 次`;
+
+  if (records.length > 0) {
+    const avgAcc = Math.round(records.reduce((sum, r) => sum + (r.accuracy || 0), 0) / records.length);
+    document.getElementById("kpiAvgAccuracy").innerText = `${avgAcc}%`;
+  } else {
+    document.getElementById("kpiAvgAccuracy").innerText = "100%";
+  }
+
+  let hardestWord = "無";
+  let maxErr = 0;
+  for (const w in errors) {
+    if (errors[w].count > maxErr) {
+      maxErr = errors[w].count;
+      hardestWord = `${w} (${maxErr}次)`;
+    }
+  }
+  document.getElementById("kpiHardestWord").innerText = hardestWord;
+}
+
+document.getElementById("tabBtnRanking").onclick = () => {
+  currentAdminTab = "ranking";
+  setAdminTabActive("tabBtnRanking");
+  renderAdminTab("ranking");
+};
+
+document.getElementById("tabBtnErrors").onclick = () => {
+  currentAdminTab = "errors";
+  setAdminTabActive("tabBtnErrors");
+  renderAdminTab("errors");
+};
+
+document.getElementById("tabBtnCloud").onclick = () => {
+  currentAdminTab = "cloud";
+  setAdminTabActive("tabBtnCloud");
+  renderAdminTab("cloud");
+};
+
+function setAdminTabActive(activeId) {
+  ["tabBtnRanking", "tabBtnErrors", "tabBtnCloud"].forEach(id => {
+    document.getElementById(id).classList.toggle("active", id === activeId);
+  });
+}
+
+function renderAdminTab(tab) {
+  const container = document.getElementById("adminContentArea");
+  if (tab === "ranking") {
+    const records = JSON.parse(localStorage.getItem(KEY_RECORDS) || "[]");
+    if (records.length === 0) {
+      container.innerHTML = "<div style='padding: 30px; text-align: center; color: #8E9BAE;'>目前尚無學員成績紀錄，可點擊下方「🎲 產生示範學員資料」預覽！</div>";
+      return;
+    }
+    let html = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>名次</th><th>特警呼號</th><th>出擊關卡與模式</th><th>作戰積分</th><th>最高連擊</th><th>命中率</th><th>狀態</th><th>作戰時間</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    records.forEach((r, idx) => {
+      html += `
+        <tr>
+          <td><span style="font-weight: 800; color: ${idx === 0 ? '#FFDF5D' : idx === 1 ? '#E0E0E0' : '#8E9BAE'};">#${idx + 1}</span></td>
+          <td style="font-weight: 700; color: #FFF;">${r.callsign}</td>
+          <td><span style="color: #64B5F6;">${r.lesson}</span></td>
+          <td style="font-weight: 900; color: #00FF88;">${r.score}</td>
+          <td><span style="color: #FFDF5D;">${r.maxCombo}x</span></td>
+          <td>${r.accuracy}%</td>
+          <td>${r.completed ? '<span style="color: #00FF88;">完全制霸</span>' : '<span style="color: #FF3344;">陣亡</span>'}</td>
+          <td style="color: #8E9BAE; font-size: 11px;">${r.date}</td>
+        </tr>
       `;
-      document.getElementById('leaderboardModal').style.display = 'flex';
-    };
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } else if (tab === "errors") {
+    const errors = JSON.parse(localStorage.getItem(KEY_ERRORS) || "{}");
+    const errList = Object.values(errors).sort((a, b) => b.count - a.count);
+    if (errList.length === 0) {
+      container.innerHTML = "<div style='padding: 30px; text-align: center; color: #8E9BAE;'>目前無誤擊紀錄，全班準度極高！</div>";
+      return;
+    }
+    let html = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>易錯生字/生詞</th><th>錯誤次數</th><th>常見誤擊對象 / 破防原因</th><th>教學弱點診斷建議</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    errList.forEach(e => {
+      const confKeys = Object.keys(e.confused || {}).join(", ") || "無特別偏好";
+      html += `
+        <tr>
+          <td style="font-size: 18px; font-weight: 900; color: #FF3344;">${e.word}</td>
+          <td style="font-weight: 700; color: #FFDF5D;">${e.count} 次</td>
+          <td style="color: #A0C0B0;">${confKeys}</td>
+          <td style="color: #8E9BAE; font-size: 12px;">加強形似字與詞語搭配辨析</td>
+        </tr>
+      `;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } else if (tab === "cloud") {
+    container.innerHTML = `
+      <div style="padding: 24px; color: #C0D0E0; font-size: 13px; line-height: 1.7;">
+        <h3 style="color: #FFF; font-size: 16px; margin-bottom: 10px;">☁️ 跨裝置全班即時戰情同步設定 (Google Apps Script)</h3>
+        <p>若需在全班多台平板/電腦上作戰並自動彙整至同一張 Google 試算表：</p>
+        <ol style="margin-left: 20px; margin-top: 8px; margin-bottom: 14px;">
+          <li>建立 Google 試算表，進入「擴充功能」>「Apps Script」。</li>
+          <li>部署為網頁應用程式 (Web App)，並將存取權設為「任何人」。</li>
+          <li>將取得的 Webhook 網址填入下方，作戰結束後成績將自動上傳同步！</li>
+        </ol>
+        <div style="display: flex; gap: 8px; max-width: 600px;">
+          <input type="text" class="apple-input" id="inputWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" style="margin-bottom: 0;">
+          <button class="apple-btn-primary" style="width: 140px;" onclick="saveWebhookUrl()">保存設定</button>
+        </div>
+      </div>
+    `;
+  }
+}
 
-    document.getElementById('btnCloseLeaderboard').onclick = () => {
-      document.getElementById('leaderboardModal').style.display = 'none';
-    };
+document.getElementById("btnExportCSV").onclick = () => {
+  const records = JSON.parse(localStorage.getItem(KEY_RECORDS) || "[]");
+  if (records.length === 0) return alert("目前尚無成績紀錄可供匯出！");
 
-    // 初始化
-    initUser();
-    switchLesson(1);
-  </script>
+  let csvContent = "\uFEFF";
+  csvContent += "名次,學員呼號,出擊關卡與模式,作戰積分,最高連擊,命中率,狀態,作戰時間\n";
+
+  records.forEach((r, idx) => {
+    csvContent += `"${idx + 1}","${r.callsign}","${r.lesson}","${r.score}","${r.maxCombo}","${r.accuracy}%","${r.completed ? '完全制霸' : '陣亡'}","${r.date}"\n`;
+  });
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `三角洲字點_循序射擊戰績_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById("btnSeedMockData").onclick = () => {
+  const mockStudents = [
+    { callsign: "極光狙擊手", lesson: "第 1 課 [循序(字+詞)]", score: 6280, maxCombo: 18, accuracy: 96, completed: true },
+    { callsign: "獵隼特警", lesson: "第 1 課 [循序(字+詞)]", score: 5840, maxCombo: 15, accuracy: 94, completed: true },
+    { callsign: "幽靈影刃", lesson: "第 2 課 [僅生詞]", score: 4420, maxCombo: 11, accuracy: 89, completed: false },
+    { callsign: "雷霆先鋒", lesson: "全冊地獄 [循序(字+詞)]", score: 8150, maxCombo: 24, accuracy: 95, completed: false },
+    { callsign: "蒼狼隊員", lesson: "第 3 課 [僅生字]", score: 2960, maxCombo: 8, accuracy: 88, completed: true }
+  ];
+  const now = new Date();
+  const records = mockStudents.map((s, idx) => ({
+    id: Date.now() - idx * 100000,
+    ...s,
+    date: now.toLocaleDateString() + " " + now.toLocaleTimeString().slice(0, 5)
+  }));
+  records.sort((a, b) => b.score - a.score);
+  localStorage.setItem(KEY_RECORDS, JSON.stringify(records));
+
+  const mockErrors = {
+    "虐疾": { word: "虐疾", count: 8, confused: { "誤當作正解「瘧疾」": 8 } },
+    "瘧": { word: "瘧", count: 6, confused: { "誤擊干擾字「虐」": 4, "自爆破防": 2 } },
+    "帳棚": { word: "帳棚", count: 5, confused: { "誤當作正解「帳篷」": 5 } },
+    "出呼意料": { word: "出呼意料", count: 4, confused: { "誤當作正解「出乎意料」": 4 } }
+  };
+  localStorage.setItem(KEY_ERRORS, JSON.stringify(mockErrors));
+
+  refreshAdminKPIs();
+  renderAdminTab(currentAdminTab);
+  alert("示範學員作戰紀錄已成功注入！包含生字與生詞錯題分析。");
+};
+
+document.getElementById("btnClearRecords").onclick = () => {
+  if (confirm("確定要清空全體學員的戰績紀錄與易錯生字統計嗎？此動作無法復原！")) {
+    localStorage.removeItem(KEY_RECORDS);
+    localStorage.removeItem(KEY_ERRORS);
+    refreshAdminKPIs();
+    renderAdminTab(currentAdminTab);
+    alert("戰情數據已全數重置！");
+  }
+};
+
+window.saveWebhookUrl = function() {
+  const url = document.getElementById("inputWebhookUrl").value.trim();
+  if (url) {
+    localStorage.setItem("delta_shooter_webhook", url);
+    alert("Webhook 同步網址已成功保存！");
+  }
+};
+
+// 特警射擊與移動保護：開啟彈窗或陣亡時禁止操作
+const origShoot = player.shoot.bind(player);
+player.shoot = function() {
+  if (playerHp <= 0) return;
+  const openModal = document.querySelector(".modal-overlay[style*='display: flex']");
+  if (openModal) return;
+  origShoot();
+};
+
+const origPlayerUpdate = player.update.bind(player);
+player.update = function() {
+  if (playerHp <= 0) return;
+  const openModal = document.querySelector(".modal-overlay[style*='display: flex']");
+  if (openModal) return;
+  origPlayerUpdate();
+};
+
+// ==========================================
+// 啟動主迴圈與初始化遊戲
+// ==========================================
+initDock();
+loadUserProfile();
+switchLesson(1);
+requestAnimationFrame(gameLoop);
+</script>
 </body>
 </html>
