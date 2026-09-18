@@ -3,21 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>三角洲字點：記憶階梯融合特勤系統 (Memory Staircase)</title>
-  <link rel="manifest" href="manifest.json">
+  <title>國語生字特訓：視網膜級極簡學堂 (Apple Style Unified Canvas)</title>
   <style>
-    :root {
-      --bg-color: #060a08;
-      --hud-green: #00ff77;
-      --hud-amber: #ffaa00;
-      --hud-red: #ff3344;
-      --hud-blue: #00ddff;
-      --hud-purple: #c77dff;
-      --panel-bg: rgba(9, 18, 14, 0.94);
-      --border-color: rgba(0, 255, 119, 0.35);
-    }
     * {
       box-sizing: border-box;
       margin: 0; padding: 0;
@@ -25,581 +12,762 @@
       -webkit-user-select: none;
       -webkit-touch-callout: none;
       touch-action: manipulation;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
     }
-    body {
-      background-color: var(--bg-color);
-      color: #e0f0e8;
+    :root {
+      --bg-global: #F5F5F7;
+      --card-bg: #FFFFFF;
+      --card-border: rgba(0, 0, 0, 0.06);
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+      --card-shadow-hover: 0 14px 32px rgba(0, 0, 0, 0.08);
+      --text-primary: #1D1D1F;
+      --text-secondary: #6E6E73;
+      --text-tertiary: #86868B;
+      --apple-blue: #0071E3;
+      --apple-blue-light: rgba(0, 113, 227, 0.08);
+      --mint-green: #34C759;
+      --mint-green-light: rgba(52, 199, 89, 0.12);
+      --coral-red: #FF3B30;
+      --coral-red-light: rgba(255, 59, 48, 0.12);
+      --radius-sm: 10px;
+      --radius-md: 18px;
+      --radius-lg: 24px;
+      --spring-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    html, body {
+      background: var(--bg-global);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro TC", "SF Pro Display", "PingFang TC", "Noto Sans TC", sans-serif;
       overflow: hidden;
       width: 100vw; height: 100vh;
-      display: flex; flex-direction: column;
+      -webkit-font-smoothing: antialiased;
     }
-    .scanlines {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-      background-size: 100% 3px, 4px 100%;
-      pointer-events: none; z-index: 999;
-    }
-    .nvg-mode {
-      filter: contrast(1.15) brightness(1.1) sepia(100%) hue-rotate(85deg) saturate(220%);
-    }
-
-    /* 頂部 HUD */
-    header.hud-header {
-      height: 48px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 16px;
-      border-bottom: 1px solid var(--border-color);
-      background: rgba(4, 9, 6, 0.98);
-      font-size: 13px; letter-spacing: 1px; z-index: 100;
-    }
-    .tag-badge {
-      display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold;
-      background: rgba(0, 255, 119, 0.15); border: 1px solid var(--hud-green); color: var(--hud-green);
-    }
-    .hud-controls button {
-      background: transparent; border: 1px solid var(--border-color);
-      color: var(--hud-green); padding: 5px 10px; border-radius: 4px;
-      cursor: pointer; font-size: 12px; margin-left: 6px;
-    }
-    .hud-controls button:active { background: var(--hud-green); color: #000; }
-
-    /* 主舞台 */
-    main#tactical-stage {
-      flex: 1; position: relative; display: flex; align-items: center; justify-content: center;
-      overflow: hidden; background: radial-gradient(circle at center, #0e1a14 0%, #040605 85%);
-      padding: 10px;
-    }
-
-    /* 戰術視窗 */
-    .tactical-window {
-      width: 100%; max-width: 1060px; height: 96%;
-      background: var(--panel-bg); border: 1px solid var(--border-color);
-      border-radius: 8px; box-shadow: 0 0 35px rgba(0, 255, 119, 0.08);
-      position: relative; display: flex; flex-direction: column; overflow: hidden;
-    }
-    .window-header {
-      padding: 10px 16px; background: rgba(0, 255, 119, 0.08);
-      border-bottom: 1px solid var(--border-color);
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 14px; font-weight: bold; color: var(--hud-green);
-    }
-    .window-body {
-      flex: 1; padding: 16px; position: relative; overflow-y: auto;
-      display: flex; flex-direction: column;
-    }
-
-    /* 記憶階梯進度階梯圖 */
-    .staircase-visual {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .staircase-step {
-      background: rgba(16, 28, 22, 0.7);
-      border: 1px solid rgba(0, 255, 119, 0.25);
-      border-radius: 6px;
-      padding: 12px;
+    #app-container {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      width: 100vw; height: 100vh;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 24px 20px 24px;
       position: relative;
-      transition: all 0.2s;
-    }
-    .staircase-step.active {
-      border-color: var(--hud-green);
-      background: rgba(0, 255, 119, 0.12);
-      box-shadow: 0 0 15px rgba(0, 255, 119, 0.2);
-    }
-    .staircase-step.locked {
-      opacity: 0.55;
-      border-style: dashed;
-    }
-    .step-num {
-      font-size: 11px;
-      font-weight: bold;
-      color: var(--hud-amber);
-      letter-spacing: 1px;
-    }
-    .step-title {
-      font-size: 15px;
-      font-weight: 900;
-      color: #fff;
-      margin: 4px 0;
-    }
-    .step-desc {
-      font-size: 11px;
-      color: #88c0a0;
-      line-height: 1.4;
-    }
-    .step-status {
-      margin-top: 8px;
-      font-size: 11px;
-      font-weight: bold;
-      color: var(--hud-green);
     }
 
-    /* 階梯演練交互區 */
-    .exercise-panel {
-      flex: 1;
-      background: rgba(12, 22, 17, 0.95);
-      border: 1px solid rgba(0, 255, 119, 0.3);
-      border-radius: 8px;
-      padding: 20px;
+    /* 頂部全域輕量狀態列 (Top Status Bar) */
+    .top-bar {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
       align-items: center;
-      position: relative;
+      justify-content: space-between;
+      height: 58px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 0 20px;
+      box-shadow: var(--card-shadow);
+      z-index: 10;
     }
-    .evolution-chain {
+    .user-profile-badge {
       display: flex;
       align-items: center;
       gap: 10px;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.35);
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 13px;
-      color: #a0d8b4;
-    }
-    .chain-node {
-      padding: 3px 8px;
-      border-radius: 3px;
-      background: rgba(255, 255, 255, 0.08);
-      font-weight: bold;
-    }
-    .chain-node.current {
-      background: var(--hud-green);
-      color: #000;
-    }
-    .prompt-text {
-      font-size: 18px;
-      font-weight: bold;
-      color: #fff;
-      text-align: center;
-      margin: 14px 0 8px 0;
-      line-height: 1.5;
-    }
-    .prompt-sub {
-      font-size: 13px;
-      color: var(--hud-amber);
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    .interactive-options {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      justify-content: center;
-      width: 100%;
-      margin-bottom: 12px;
-    }
-    .tactical-choice-btn {
-      min-width: 120px;
-      padding: 14px 24px;
-      font-size: 26px;
-      font-weight: bold;
-      border: 1px solid var(--border-color);
-      background: rgba(20, 36, 28, 0.9);
-      color: #fff;
-      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.15s;
+    }
+    .avatar-circle {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0071E3, #42a5f5);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
+    }
+    .user-name-text {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+    }
+    .user-title-tag {
+      font-size: 11px; font-weight: 500; color: var(--text-secondary);
+      background: var(--bg-global);
+      padding: 2px 8px; border-radius: 6px;
+    }
+
+    .vitals-group {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .vital-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hp-dots {
+      display: flex; gap: 4px;
+    }
+    .hp-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--mint-green);
+      transition: all 0.25s;
+    }
+    .hp-dot.lost {
+      background: rgba(0, 0, 0, 0.12);
+    }
+    .san-badge {
+      color: var(--apple-blue);
+      background: var(--apple-blue-light);
+      padding: 3px 10px; border-radius: 12px;
+      font-weight: 700;
+    }
+    .score-badge {
+      font-size: 15px; font-weight: 800; color: var(--apple-blue);
+    }
+
+    .top-actions {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .icon-btn {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px; font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s var(--spring-ease);
+    }
+    .icon-btn:hover, .icon-btn:active {
+      background: var(--card-bg);
+      color: var(--apple-blue);
+      border-color: var(--apple-blue);
+      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.12);
+    }
+
+    /* 中央字形聚焦舞台 (Center Stage) */
+    .center-stage {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 10px 0;
     }
-    .tactical-choice-btn:active {
-      transform: scale(0.95);
-      background: var(--hud-green);
-      color: #000;
+    .prompt-container {
+      text-align: center;
+      margin-bottom: 28px;
     }
-    .tactical-choice-btn .sub-label {
-      font-size: 11px;
-      color: #88c0a0;
-      margin-top: 4px;
+    .prompt-badge {
+      display: inline-block;
+      font-size: 12px; font-weight: 600;
+      color: var(--apple-blue);
+      background: var(--apple-blue-light);
+      padding: 4px 14px; border-radius: 20px;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    .prompt-title {
+      font-size: 26px; font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+    .prompt-hint {
+      font-size: 15px; font-weight: 500;
+      color: var(--text-secondary);
     }
 
-    /* 快速切換模式按鈕 */
-    .switch-nav {
+    /* 視網膜級生字卡片展示區 */
+    .cards-deck {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      width: 100%;
+      max-width: 860px;
+    }
+    .word-card {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 38px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s var(--spring-ease);
+      position: relative;
+    }
+    .word-card:hover {
+      transform: scale(1.03);
+      box-shadow: var(--card-shadow-hover);
+      border-color: rgba(0, 113, 227, 0.25);
+    }
+    .word-card:active {
+      transform: scale(0.98);
+    }
+    .card-char {
+      font-size: 68px;
+      font-weight: 900;
+      color: var(--text-primary);
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .card-zhuyin {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-global);
+      padding: 4px 14px;
+      border-radius: 12px;
+    }
+    .key-hint {
+      position: absolute; top: 12px; left: 16px;
+      font-size: 11px; font-weight: 700; color: var(--text-tertiary);
+    }
+
+    /* 狀態回饋動態 */
+    .word-card.correct-feedback {
+      border-color: var(--mint-green) !important;
+      background: var(--mint-green-light) !important;
+      box-shadow: 0 0 24px rgba(52, 199, 89, 0.35) !important;
+      transform: scale(1.04) !important;
+    }
+    .word-card.shake-feedback {
+      border-color: var(--coral-red) !important;
+      background: var(--coral-red-light) !important;
+      animation: appleShake 0.4s var(--spring-ease);
+    }
+    @keyframes appleShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    /* 底部水平膠囊導覽列 (Dock-style Pill Navigation) */
+    .bottom-dock-container {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 8px 12px;
+      box-shadow: var(--card-shadow);
+      z-index: 10;
+    }
+    .dock-scroll-strip {
       display: flex;
       gap: 8px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 4px 0;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
-    .switch-btn {
-      background: rgba(0, 255, 119, 0.1);
-      border: 1px solid var(--border-color);
-      color: var(--hud-green);
-      padding: 5px 12px;
-      border-radius: 4px;
+    .dock-scroll-strip::-webkit-scrollbar { display: none; }
+    .dock-pill {
+      flex-shrink: 0;
+      background: #FFFFFF;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 30px;
+      padding: 8px 18px;
+      font-size: 13px; font-weight: 600;
+      color: var(--text-secondary);
       cursor: pointer;
-      font-size: 12px;
-      font-weight: bold;
+      display: flex; align-items: center; gap: 6px;
+      transition: all 0.25s var(--spring-ease);
     }
-    .switch-btn.active {
-      background: var(--hud-green);
-      color: #000;
+    .dock-pill:hover {
+      border-color: var(--apple-blue);
+      color: var(--apple-blue);
+      transform: translateY(-1px);
+    }
+    .dock-pill.active {
+      background: var(--apple-blue);
+      color: #FFFFFF;
+      border-color: var(--apple-blue);
+      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+    }
+    .dock-pill.hell-mode {
+      border-color: rgba(255, 59, 48, 0.3);
+      color: var(--coral-red);
+    }
+    .dock-pill.hell-mode.active {
+      background: var(--coral-red);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(255, 59, 48, 0.35);
     }
 
-    /* iPad 旋轉橫向提示 */
-    @media (orientation: portrait) { #portrait-warning { display: flex !important; } }
-    #portrait-warning {
-      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: #060a08; z-index: 10000; flex-direction: column;
-      align-items: center; justify-content: center; padding: 24px; text-align: center; color: var(--hud-amber);
+    /* 登入建立檔案 Modal Sheet */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+      opacity: 1; transition: opacity 0.3s var(--spring-ease);
     }
+    .modal-card {
+      background: #FFFFFF;
+      width: 90%; max-width: 440px;
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--card-border);
+      text-align: center;
+      animation: modalSlideUp 0.35s var(--spring-ease);
+    }
+    @keyframes modalSlideUp {
+      from { transform: translateY(24px) scale(0.96); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .modal-icon {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--apple-blue-light); color: var(--apple-blue);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin: 0 auto 16px auto;
+    }
+    .modal-title {
+      font-size: 22px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;
+    }
+    .modal-desc {
+      font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5;
+    }
+    .apple-input {
+      width: 100%; height: 48px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: var(--radius-sm);
+      padding: 0 16px;
+      font-size: 16px; color: var(--text-primary);
+      outline: none; margin-bottom: 20px;
+      transition: all 0.2s;
+    }
+    .apple-input:focus {
+      border-color: var(--apple-blue);
+      box-shadow: 0 0 0 3px var(--apple-blue-light);
+    }
+    .apple-btn-primary {
+      width: 100%; height: 48px;
+      background: var(--apple-blue);
+      color: #FFFFFF; border: none;
+      border-radius: var(--radius-sm);
+      font-size: 16px; font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 113, 227, 0.3);
+      transition: all 0.2s;
+    }
+    .apple-btn-primary:hover {
+      background: #0077ED;
+      transform: translateY(-1px);
+    }
+    .apple-btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    /* 排行榜 Sheet */
+    .leaderboard-list {
+      max-height: 280px; overflow-y: auto; text-align: left; margin-bottom: 20px;
+    }
+    .rank-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,0.05);
+      font-size: 14px;
+    }
+    .rank-num { font-weight: 800; color: var(--apple-blue); width: 24px; }
   </style>
 </head>
 <body>
-  <div class="scanlines"></div>
-  <div id="portrait-warning">
-    <div style="font-size: 48px; margin-bottom: 12px;">🔄</div>
-    <h2>請將 iPad 旋轉至「橫向模式」</h2>
-    <p style="margin-top: 8px; font-size: 14px; color: #88c0a0;">記憶階梯戰術指揮面板需要橫向完整視野</p>
+  <div id="app-container">
+
+    <!-- 頂部全域輕量狀態列 -->
+    <header class="top-bar">
+      <div class="user-profile-badge" id="btnProfile">
+        <div class="avatar-circle" id="avatarChar">學</div>
+        <div>
+          <div class="user-name-text" id="userCallsign">澄澈學者</div>
+          <div class="user-title-tag" id="userRankTitle">字理探尋者</div>
+        </div>
+      </div>
+
+      <div class="vitals-group">
+        <div class="vital-item">
+          <span style="color: var(--text-secondary);">生命</span>
+          <div class="hp-dots" id="hpDotsContainer">
+            <div class="hp-dot"></div>
+            <div class="hp-dot"></div>
+            <div class="hp-dot"></div>
+            <div class="hp-dot"></div>
+            <div class="hp-dot"></div>
+          </div>
+        </div>
+
+        <div class="vital-item">
+          <span style="color: var(--text-secondary);">心智 (SAN)</span>
+          <span class="san-badge" id="sanValueBadge">100%</span>
+        </div>
+
+        <div class="vital-item">
+          <span style="color: var(--text-secondary);">進度</span>
+          <span style="color: var(--text-primary); font-weight: 700;" id="progressBadge">0 / 10</span>
+        </div>
+
+        <div class="vital-item">
+          <span style="color: var(--text-secondary);">積分</span>
+          <span class="score-badge" id="scoreValueBadge">0</span>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-btn" id="btnLeaderboard">🏆 排行榜</button>
+        <button class="icon-btn" id="btnSwitchUser">👤 切換名稱</button>
+      </div>
+    </header>
+
+    <!-- 中央字形聚焦舞台 -->
+    <main class="center-stage">
+      <div class="prompt-container">
+        <div class="prompt-badge" id="currentLessonPillTitle">第 1 課：生化疫區前線</div>
+        <h1 class="prompt-title" id="targetPromptTitle">鎖定正確生字目標</h1>
+        <p class="prompt-hint" id="targetPromptHint">請觀察字形間架結構與注音搭配</p>
+      </div>
+
+      <div class="cards-deck" id="cardsDeck">
+        <!-- 動態渲染三張視網膜級生字卡片 -->
+      </div>
+    </main>
+
+    <!-- 底部水平膠囊導覽列 (Dock-style Strip) -->
+    <footer class="bottom-dock-container">
+      <div class="dock-scroll-strip" id="dockStrip">
+        <!-- 1~13 課 ＋ 全冊地獄模式水平膠囊 -->
+      </div>
+    </footer>
   </div>
 
-  <header class="hud-header">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <span class="tag-badge">AUTO-AUTHORIZED</span>
-      <span id="callsign-tag" style="color: #88c0a0;">特遣隊: DELTA-07</span>
-      <span class="tag-badge" style="border-color: var(--hud-purple); color: var(--hud-purple);">記憶階梯持續融合系統</span>
+  <!-- 登入 / 建立 UserProfile 視窗 -->
+  <div class="modal-overlay" id="loginModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-icon"></div>
+      <h2 class="modal-title">建立學習檔案</h2>
+      <p class="modal-desc">歡迎進入單一畫面的國語生字學習體驗。<br>請輸入您的作戰學習暱稱：</p>
+      <input type="text" class="apple-input" id="inputCallsign" placeholder="例如：澄澈思辨者" maxlength="10" autofocus>
+      <button class="apple-btn-primary" id="btnConfirmLogin">開始學習旅程</button>
     </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <div class="switch-nav">
-        <button class="switch-btn active" id="btn-tab-staircase" onclick="switchTab('staircase')">🪜 階梯融合演練</button>
-        <button class="switch-btn" id="btn-tab-missions" onclick="switchTab('missions')">🎯 實戰特戰任務</button>
-        <button class="switch-btn" id="btn-tab-analytics" onclick="switchTab('analytics')">📊 記憶掌握分析</button>
-      </div>
-      <div class="hud-controls">
-        <button id="btn-nvg">NVG 夜視</button>
-        <a href="stickman_shooter.html" style="text-decoration:none;"><button style="border-color:#ffdf5d; color:#ffdf5d;">💥 火柴人射擊</button></a><button id="btn-fullscreen">⛶ 全螢幕</button>
-      </div>
+  </div>
+
+  <!-- 排行榜視窗 -->
+  <div class="modal-overlay" id="leaderboardModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-icon">🏆</div>
+      <h2 class="modal-title">特勤學習排行榜</h2>
+      <p class="modal-desc">每日與歷史累積最高得分</p>
+      <div class="leaderboard-list" id="leaderboardList"></div>
+      <button class="apple-btn-primary" id="btnCloseLeaderboard">返回學習舞台</button>
     </div>
-  </header>
+  </div>
 
-  <main id="tactical-stage">
-    
-    <!-- 記憶階梯核心視窗 (預設直接自動進入，免重複點擊允許) -->
-    <div class="tactical-window" id="main-window">
-      <div class="window-header">
-        <span id="window-title-text">特種識字記憶階梯 // 螺旋擴充與跨課融合中樞</span>
-        <span id="mastery-indicator" style="color: var(--hud-amber);">綜合掌握度: 82% ｜ 階梯等級: 3</span>
-      </div>
-      
-      <div class="window-body" id="tab-content-staircase">
-        
-        <!-- 四階記憶階梯可視化卡片 -->
-        <div class="staircase-visual">
-          <div class="staircase-step" id="step-card-1">
-            <div>
-              <div class="step-num">STAGE 01 // 感知</div>
-              <div class="step-title">形音知覺標定</div>
-              <div class="step-desc">辨析形近字、注音讀音與視覺特徵，瞬間破防。</div>
-            </div>
-            <div class="step-status" id="step1-status">✔ 已就緒 (100%)</div>
-          </div>
-
-          <div class="staircase-step" id="step-card-2">
-            <div>
-              <div class="step-num">STAGE 02 // 解構</div>
-              <div class="step-title">部首部件拆解</div>
-              <div class="step-desc">雷射切割部首，左右、上下結構重組解密。</div>
-            </div>
-            <div class="step-status" id="step2-status">✔ 已解鎖 (85%)</div>
-          </div>
-
-          <div class="staircase-step active" id="step-card-3">
-            <div>
-              <div class="step-num">STAGE 03 // 串接</div>
-              <div class="step-title">脈絡語義射控</div>
-              <div class="step-desc">詞語搭配精準校準，狙擊測風與協同支援。</div>
-            </div>
-            <div class="step-status" id="step3-status">⚡ 融合中 (60%)</div>
-          </div>
-
-          <div class="staircase-step" id="step-card-4">
-            <div>
-              <div class="step-num">STAGE 04 // 語用</div>
-              <div class="step-title">跨課情境長句融合</div>
-              <div class="step-desc">跨越第 1、3、13 課生字，重組特種作戰情境長句。</div>
-            </div>
-            <div class="step-status" id="step4-status">🔒 蓄力推進</div>
-          </div>
-        </div>
-
-        <!-- 階梯持續擴充演練交互主體 -->
-        <div class="exercise-panel">
-          
-          <div class="evolution-chain">
-            <span style="font-weight: bold; color: #fff;">記憶進化鏈：</span>
-            <span class="chain-node" id="chain-1">① 字形辨析</span> ➔ 
-            <span class="chain-node" id="chain-2">② 部首解構</span> ➔ 
-            <span class="chain-node current" id="chain-3">③ 詞語射控</span> ➔ 
-            <span class="chain-node" id="chain-4">④ 跨課情境融合</span>
-          </div>
-
-          <div style="width: 100%; text-align: center;">
-            <div class="prompt-text" id="exercise-prompt">
-              正在解鎖長程狙擊射控：特務匿蹤於高聳之【？】壁，風偏修正左 2 密位！
-            </div>
-            <div class="prompt-sub" id="exercise-sub">
-              [階梯任務]：請選出匹配語義的正確生字，完成狙擊測風！
-            </div>
-          </div>
-
-          <!-- 動態選項區 -->
-          <div class="interactive-options" id="exercise-options">
-            <!-- 動態生成選項 -->
-          </div>
-
-          <!-- 底部狀態 -->
-          <div style="display: flex; justify-content: space-between; width: 100%; font-size: 12px; color: #88c0a0;">
-            <span id="combo-text">🔥 連擊次數: 5 ｜ 反應時間: 0.8s</span>
-            <span>💡 答對自動演進至下一階梯，錯誤即時重組加固</span>
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- 分頁 2：實戰任務大廳 -->
-      <div class="window-body" id="tab-content-missions" style="display: none;">
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; height: 100%;">
-          
-          <div style="background: rgba(14,28,20,0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <div style="font-size: 11px; color: var(--hud-amber);">第一課 ｜ 生化疫區防線</div>
-              <h3 style="color: var(--hud-green); margin: 6px 0;">任務一：血清前線</h3>
-              <p style="font-size: 12px; color: #88c0a0; line-height: 1.5;">夜視營帳突入，辨析『瘧、疾、蚊』生字弱點，20秒拆除 C4 語意引線。</p>
-            </div>
-            <button onclick="startMissionMode(1)" style="width: 100%; padding: 10px; background: rgba(0,255,119,0.15); border: 1px solid var(--hud-green); color: var(--hud-green); border-radius: 4px; font-weight: bold; cursor: pointer;">啟動任務</button>
-          </div>
-
-          <div style="background: rgba(14,28,20,0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <div style="font-size: 11px; color: var(--hud-amber);">第三課 ｜ 千仞絕壁防線</div>
-              <h3 style="color: var(--hud-green); margin: 6px 0;">任務二：峭壁鷹眼</h3>
-              <p style="font-size: 12px; color: #88c0a0; line-height: 1.5;">高寒山巔長距狙擊。觀測手解碼回報，狙擊鏡中辨明『峭』vs『俏』與風偏。</p>
-            </div>
-            <button onclick="startMissionMode(2)" style="width: 100%; padding: 10px; background: rgba(0,255,119,0.15); border: 1px solid var(--hud-green); color: var(--hud-green); border-radius: 4px; font-weight: bold; cursor: pointer;">啟動任務</button>
-          </div>
-
-          <div style="background: rgba(14,28,20,0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <div style="font-size: 11px; color: var(--hud-amber);">第十三課 ｜ 沉船暴風雨</div>
-              <h3 style="color: var(--hud-green); margin: 6px 0;">任務三：怒海暗礁</h3>
-              <p style="font-size: 12px; color: #88c0a0; line-height: 1.5;">浸水隔艙倒塌前，以雷射部首『舟+倉=艙』破門營救，避開暗礁突圍。</p>
-            </div>
-            <button onclick="startMissionMode(3)" style="width: 100%; padding: 10px; background: rgba(0,255,119,0.15); border: 1px solid var(--hud-green); color: var(--hud-green); border-radius: 4px; font-weight: bold; cursor: pointer;">啟動任務</button>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- 分頁 3：學習分析後台 -->
-      <div class="window-body" id="tab-content-analytics" style="display: none;">
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;">
-          <div style="background: rgba(0,255,119,0.08); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; text-align: center;">
-            <div style="font-size: 11px; color: #88c0a0;">全冊綜合掌握度</div>
-            <div style="font-size: 26px; font-weight: bold; color: var(--hud-green); margin-top: 4px;">88%</div>
-          </div>
-          <div style="background: rgba(255,170,0,0.08); border: 1px solid rgba(255,170,0,0.3); padding: 12px; border-radius: 6px; text-align: center;">
-            <div style="font-size: 11px; color: var(--hud-amber);">平均作答反應秒數</div>
-            <div style="font-size: 26px; font-weight: bold; color: var(--hud-amber); margin-top: 4px;">1.1 秒</div>
-          </div>
-          <div style="background: rgba(199,125,255,0.08); border: 1px solid rgba(199,125,255,0.3); padding: 12px; border-radius: 6px; text-align: center;">
-            <div style="font-size: 11px; color: var(--hud-purple);">跨課融合情境完成率</div>
-            <div style="font-size: 26px; font-weight: bold; color: var(--hud-purple); margin-top: 4px;">92%</div>
-          </div>
-        </div>
-        <div style="font-size: 13px; color: #88c0a0; margin-bottom: 6px;">五上生字艾賓浩斯間隔重複螺旋歷程：</div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-          <thead>
-            <tr style="background: rgba(0,255,119,0.1); color: var(--hud-green);">
-              <th style="padding: 6px; border: 1px solid var(--border-color);">生字</th>
-              <th style="padding: 6px; border: 1px solid var(--border-color);">當前階梯</th>
-              <th style="padding: 6px; border: 1px solid var(--border-color);">部首/注音</th>
-              <th style="padding: 6px; border: 1px solid var(--border-color);">已融合情境詞彙</th>
-              <th style="padding: 6px; border: 1px solid var(--border-color);">掌握狀態</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td style="padding: 6px; border: 1px solid var(--border-color); font-weight: bold; text-align: center;">峭</td><td style="text-align: center;">第 3 階 (詞語)</td><td style="text-align: center;">山 (ㄑㄧㄠˋ)</td><td>懸崖峭壁、險峭</td><td style="color: var(--hud-green); text-align: center;">已鞏固</td></tr>
-            <tr><td style="padding: 6px; border: 1px solid var(--border-color); font-weight: bold; text-align: center;">瘧</td><td style="text-align: center;">第 2 階 (部件)</td><td style="text-align: center;">疒 (ㄋㄩㄝˋ)</td><td>瘧疾、抗瘧血清</td><td style="color: var(--hud-amber); text-align: center;">加固中</td></tr>
-            <tr><td style="padding: 6px; border: 1px solid var(--border-color); font-weight: bold; text-align: center;">艙</td><td style="text-align: center;">第 4 階 (融合)</td><td style="text-align: center;">舟 (ㄘㄤ)</td><td>水密船艙、機艙</td><td style="color: var(--hud-green); text-align: center;">已精通</td></tr>
-            <tr><td style="padding: 6px; border: 1px solid var(--border-color); font-weight: bold; text-align: center;">礁</td><td style="text-align: center;">第 3 階 (詞語)</td><td style="text-align: center;">石 (ㄐㄧㄠ)</td><td>觸礁、暗礁突圍</td><td style="color: var(--hud-green); text-align: center;">已鞏固</td></tr>
-          </tbody>
-        </table>
-      </div>
-
+  <!-- 通關大捷卡片 -->
+  <div class="modal-overlay" id="victoryModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-icon" style="background: var(--mint-green-light); color: var(--mint-green);">✓</div>
+      <h2 class="modal-title" id="victoryTitle">🎉 課次圓滿完成！</h2>
+      <p class="modal-desc" id="victoryDesc">本課生字已全數精準辨析完成。</p>
+      <button class="apple-btn-primary" id="btnNextLesson">進入下一課</button>
     </div>
-  </main>
+  </div>
 
-  <script src="assets/audio.js"></script>
   <script>
-    // 自動允許機制 (Auto-Authorized on launch)
-    window.addEventListener('load', () => {
-      console.log('系統已全自動通過身份驗證，直通記憶階梯中樞。');
-      // 任意首次觸控自動解鎖 Web Audio
-      const unlockAudio = () => {
-        tacticalAudio.init();
-        window.removeEventListener('touchstart', unlockAudio);
-        window.removeEventListener('click', unlockAudio);
-      };
-      window.addEventListener('touchstart', unlockAudio, { once: true });
-      window.addEventListener('click', unlockAudio, { once: true });
-      
-      initStaircaseEngine();
-    });
+    const VOCAB_DATABASE = {"1": {"title": "第 1 課：生化疫區前線", "words": [{"word": "蚊", "prompt": "ㄨㄣˊ (蚊蟲)"}, {"word": "帳", "prompt": "ㄓㄤˋ (營帳/帳篷)"}, {"word": "洲", "prompt": "ㄓㄡ (亞洲/綠洲)"}, {"word": "瘧", "prompt": "ㄋㄩㄝˋ (瘧疾)"}, {"word": "疾", "prompt": "ㄐㄧˊ (疾病/疾馳)"}, {"word": "死", "prompt": "ㄙˇ (死線/起死回生)"}, {"word": "叮", "prompt": "ㄉㄧㄥ (叮咬/叮囑)"}, {"word": "存", "prompt": "ㄘㄨㄣˊ (存活/生存)"}, {"word": "募", "prompt": "ㄇㄨˋ (募集/籌募)"}, {"word": "集", "prompt": "ㄐㄧˊ (聚集/集合)"}]}, "2": {"title": "第 2 課：山巒與防衛", "words": [{"word": "德", "prompt": "ㄉㄜˊ (品德/德行)"}, {"word": "乎", "prompt": "ㄏㄨ (在乎/出乎意料)"}, {"word": "血", "prompt": "ㄒㄧㄝˇ (熱血/血清)"}, {"word": "攝", "prompt": "ㄕㄜˋ (攝影/攝取)"}, {"word": "颱", "prompt": "ㄊㄞˊ (颱風)"}, {"word": "錄", "prompt": "ㄌㄨˋ (紀錄/錄音)"}, {"word": "哀", "prompt": "ㄞ (悲哀/哀傷)"}, {"word": "巒", "prompt": "ㄌㄨㄢˊ (山巒/重巒疊嶂)"}, {"word": "縱", "prompt": "ㄗㄨㄥˋ (縱橫/縱使)"}, {"word": "臍", "prompt": "ㄑㄧˊ (肚臍)"}, {"word": "禍", "prompt": "ㄏㄨㄛˋ (災禍/禍害)"}, {"word": "殘", "prompt": "ㄘㄢˊ (殘破/殘留)"}, {"word": "檳", "prompt": "ㄅㄧㄣ (檳榔)"}, {"word": "榔", "prompt": "ㄌㄤˊ (檳榔樹)"}, {"word": "降", "prompt": "ㄐㄧㄤˋ (下降/降落)"}, {"word": "鏟", "prompt": "ㄔㄢˇ (鐵鏟/鏟除)"}, {"word": "汙", "prompt": "ㄨ (污染/污垢)"}, {"word": "斷", "prompt": "ㄉㄨㄢˋ (折斷/果斷)"}]}, "3": {"title": "第 3 課：千仞絕壁反狙擊", "words": [{"word": "飢", "prompt": "ㄐㄧ (飢餓/如飢似渴)"}, {"word": "峭", "prompt": "ㄑㄧㄠˋ (陡峭/峭壁)"}, {"word": "聳", "prompt": "ㄙㄨㄥˇ (高聳/聳立)"}, {"word": "隱", "prompt": "ㄧㄣˇ (隱蔽/隱藏)"}, {"word": "扯", "prompt": "ㄔㄜˇ (拉扯/牽扯)"}, {"word": "銳", "prompt": "ㄖㄨㄟˋ (銳利/敏銳)"}, {"word": "箭", "prompt": "ㄐㄧㄢˋ (箭在弦上/弓箭)"}, {"word": "韌", "prompt": "ㄖㄣˋ (堅韌/韌性)"}, {"word": "虯", "prompt": "ㄑㄧㄡˊ (虯龍/虯髯)"}, {"word": "鬚", "prompt": "ㄒㄩ (鬍鬚/根鬚)"}, {"word": "茂", "prompt": "ㄇㄠˋ (茂密/繁茂)"}, {"word": "止", "prompt": "ㄓˇ (停止/止步)"}, {"word": "蔓", "prompt": "ㄇㄢˋ (蔓延/藤蔓)"}, {"word": "豐", "prompt": "ㄈㄥ (豐富/豐收)"}, {"word": "藉", "prompt": "ㄐㄧㄝˋ (憑藉/藉口)"}, {"word": "挫", "prompt": "ㄘㄨㄛˋ (挫折/受挫)"}, {"word": "折", "prompt": "ㄓㄜˊ (不折不撓/曲折)"}]}, "4": {"title": "第 4 課：樸實農莊與滋養", "words": [{"word": "恆", "prompt": "ㄏㄥˊ (永恆/恆久)"}, {"word": "澄", "prompt": "ㄔㄥˊ (澄澈/澄清)"}, {"word": "穗", "prompt": "ㄙㄨㄟˋ (稻穗/麥穗)"}, {"word": "養", "prompt": "ㄧㄤˇ (滋養/培養)"}, {"word": "源", "prompt": "ㄩㄢˊ (源頭/資源)"}, {"word": "藝", "prompt": "ㄧˋ (藝術/技藝)"}, {"word": "樸", "prompt": "ㄆㄨˊ (樸素/儉樸)"}, {"word": "堆", "prompt": "ㄉㄨㄟ (土堆/堆疊)"}, {"word": "撿", "prompt": "ㄐㄧㄢˇ (撿拾/撿起)"}, {"word": "巾", "prompt": "ㄐㄧㄣ (毛巾/頭巾)"}, {"word": "痠", "prompt": "ㄙㄨㄢ (痠痛/腰痠)"}, {"word": "素", "prompt": "ㄙㄨˋ (純素/素質)"}, {"word": "尊", "prompt": "ㄗㄨㄣ (尊重/尊嚴)"}, {"word": "嚴", "prompt": "ㄧㄢˊ (嚴肅/莊嚴)"}, {"word": "勞", "prompt": "ㄌㄠˊ (勞動/功勞)"}, {"word": "怨", "prompt": "ㄩㄢˋ (抱怨/怨尤)"}, {"word": "慷", "prompt": "ㄎㄤ (慷慨解囊)"}, {"word": "慨", "prompt": "ㄎㄞˇ (感慨/慷慨)"}, {"word": "滋", "prompt": "ㄗ (滋養/滋味)"}]}, "5": {"title": "第 5 課：榮譽與基業", "words": [{"word": "譽", "prompt": "ㄩˋ (榮譽/名譽)"}, {"word": "務", "prompt": "ㄨˋ (任務/事務)"}, {"word": "聯", "prompt": "ㄌㄧㄢˊ (聯絡/聯盟)"}, {"word": "核", "prompt": "ㄏㄜˊ (核心/考核)"}, {"word": "申", "prompt": "ㄕㄣ (申請/申訴)"}, {"word": "局", "prompt": "ㄐㄩˊ (全局/戰局)"}, {"word": "松", "prompt": "ㄙㄨㄥ (松樹/青松)"}, {"word": "註", "prompt": "ㄓㄨˋ (註冊/附註)"}, {"word": "冊", "prompt": "ㄘㄜˋ (冊子/紀念冊)"}, {"word": "企", "prompt": "ㄑㄧˋ (企圖/企業)"}, {"word": "毅", "prompt": "ㄧˋ (堅毅/剛毅)"}, {"word": "歷", "prompt": "ㄌㄧˋ (歷史/經歷)"}, {"word": "英", "prompt": "ㄧㄥ (精英/英雄)"}, {"word": "銷", "prompt": "ㄒㄧㄠ (銷售/行銷)"}, {"word": "售", "prompt": "ㄕㄡˋ (販售/售出)"}, {"word": "勝", "prompt": "ㄕㄥˋ (勝利/獲勝)"}, {"word": "霸", "prompt": "ㄅㄚˋ (霸氣/爭霸)"}, {"word": "項", "prompt": "ㄒㄧㄤˋ (項目/獎項)"}]}, "6": {"title": "第 6 課：戰術哨戒與隊伍", "words": [{"word": "娛", "prompt": "ㄩˊ (娛樂/文娛)"}, {"word": "汽", "prompt": "ㄑㄧˋ (汽車/汽油)"}, {"word": "哨", "prompt": "ㄕㄠˋ (哨所/前哨)"}, {"word": "典", "prompt": "ㄉㄧㄢˇ (典範/經典)"}, {"word": "框", "prompt": "ㄎㄨㄤ (框架/畫框)"}, {"word": "劇", "prompt": "ㄐㄩˋ (劇烈/戲劇)"}, {"word": "父", "prompt": "ㄈㄨˋ (父親/父兄)"}, {"word": "責", "prompt": "ㄗㄜˊ (責任/職責)"}, {"word": "判", "prompt": "ㄆㄢˋ (判斷/判定)"}, {"word": "鳴", "prompt": "ㄇㄧㄥˊ (鳴笛/轟鳴)"}, {"word": "穎", "prompt": "ㄧㄥˇ (聰穎/新穎)"}, {"word": "獲", "prompt": "ㄏㄨㄛˋ (獲勝/捕獲)"}, {"word": "佳", "prompt": "ㄐㄧㄚ (佳境/最佳)"}, {"word": "膩", "prompt": "ㄋㄧˋ (細膩/油膩)"}, {"word": "效", "prompt": "ㄒㄧㄠˋ (成效/效率)"}, {"word": "隊", "prompt": "ㄉㄨㄟˋ (隊伍/戰隊)"}, {"word": "益", "prompt": "ㄧˋ (利益/精益求精)"}, {"word": "貌", "prompt": "ㄇㄠˋ (相貌/容貌)"}, {"word": "官", "prompt": "ㄍㄨㄢ (軍官/感官)"}, {"word": "增", "prompt": "ㄗㄥ (增加/增強)"}]}, "7": {"title": "第 7 課：逆境突圍與堅韌", "words": [{"word": "逆", "prompt": "ㄋㄧˋ (逆境/逆轉)"}, {"word": "憐", "prompt": "ㄌㄧㄢˊ (可憐/憐愛)"}, {"word": "穩", "prompt": "ㄨㄣˇ (穩健/沉穩)"}, {"word": "競", "prompt": "ㄐㄧㄥˋ (競技/競爭)"}, {"word": "抗", "prompt": "ㄎㄤˋ (抗爭/反抗)"}, {"word": "逸", "prompt": "ㄧˋ (安逸/超逸)"}, {"word": "鄰", "prompt": "ㄌㄧㄣˊ (鄰居/鄰近)"}, {"word": "脈", "prompt": "ㄇㄞˋ (脈搏/山脈)"}, {"word": "絡", "prompt": "ㄌㄨㄛˋ (脈絡/聯絡)"}, {"word": "緻", "prompt": "ㄓˋ (精緻/細緻)"}, {"word": "弱", "prompt": "ㄖㄨㄛˋ (微弱/軟弱)"}, {"word": "噴", "prompt": "ㄆㄣ (噴射/噴發)"}, {"word": "嚏", "prompt": "ㄊㄧˋ (噴嚏)"}, {"word": "織", "prompt": "ㄓ (組織/紡織)"}, {"word": "碌", "prompt": "ㄌㄨˋ (忙碌/庸碌)"}, {"word": "盎", "prompt": "ㄤˋ (盎然/春意盎然)"}, {"word": "膽", "prompt": "ㄉㄢˇ (膽量/大膽)"}, {"word": "圈", "prompt": "ㄑㄩㄢ (包圍圈/圓圈)"}, {"word": "疲", "prompt": "ㄆㄧˊ (疲憊/精疲力竭)"}]}, "8": {"title": "第 8 課：恐懼之城與控制", "words": [{"word": "坦", "prompt": "ㄊㄢˇ (坦率/平坦)"}, {"word": "性", "prompt": "ㄒㄧㄥˋ (性質/性格)"}, {"word": "恐", "prompt": "ㄎㄨㄥˇ (恐懼/恐慌)"}, {"word": "怖", "prompt": "ㄅㄨˋ (恐怖)"}, {"word": "組", "prompt": "ㄗㄨˇ (小組/組織)"}, {"word": "占", "prompt": "ㄓㄢˋ (佔領/攻占)"}, {"word": "播", "prompt": "ㄅㄛ (廣播/傳播)"}, {"word": "控", "prompt": "ㄎㄨㄥˋ (控制/操控)"}, {"word": "制", "prompt": "ㄓˋ (制伏/制度)"}, {"word": "傷", "prompt": "ㄕㄤ (受傷/傷痕)"}, {"word": "攻", "prompt": "ㄍㄨㄥ (攻擊/攻勢)"}, {"word": "擊", "prompt": "ㄐㄧˊ (擊落/打擊)"}, {"word": "權", "prompt": "ㄑㄩㄢˊ (掌控權/權利)"}, {"word": "脅", "prompt": "ㄒㄧㄝˊ (威脅/迫脅)"}, {"word": "復", "prompt": "ㄈㄨˋ (恢復/復原)"}, {"word": "武", "prompt": "ㄨˇ (武裝/武器)"}, {"word": "撼", "prompt": "ㄏㄢˋ (震撼/撼動)"}, {"word": "懼", "prompt": "ㄐㄩˋ (畏懼/無懼)"}]}, "9": {"title": "第 9 課：崎嶇山道與淬鍊", "words": [{"word": "維", "prompt": "ㄨㄟˊ (維護/維持)"}, {"word": "戰", "prompt": "ㄓㄢˋ (戰鬥/戰術)"}, {"word": "崎", "prompt": "ㄑㄧˊ (崎嶇不平)"}, {"word": "嶇", "prompt": "ㄑㄩ (崎嶇)"}, {"word": "拳", "prompt": "ㄑㄩㄢˊ (鐵拳/握拳)"}, {"word": "癌", "prompt": "ㄞˊ (癌症/絕症)"}, {"word": "症", "prompt": "ㄓㄥˋ (病症/症候群)"}, {"word": "銅", "prompt": "ㄊㄨㄥˊ (青銅/銅牌)"}, {"word": "牌", "prompt": "ㄆㄞˊ (盾牌/名牌)"}, {"word": "屢", "prompt": "ㄌㄩˇ (屢次/屢戰屢勝)"}, {"word": "減", "prompt": "ㄐㄧㄢˇ (減少/減速)"}, {"word": "予", "prompt": "ㄩˇ (給予/授予)"}, {"word": "幼", "prompt": "ㄧㄡˋ (幼小/年幼)"}, {"word": "椰", "prompt": "ㄧㄝ (椰子樹)"}, {"word": "即", "prompt": "ㄐㄧˊ (立即/即刻)"}, {"word": "腐", "prompt": "ㄈㄨˇ (腐蝕/腐爛)"}, {"word": "衝", "prompt": "ㄔㄨㄥ (衝擊/突衝)"}, {"word": "鍛", "prompt": "ㄉㄨㄢˋ (鍛鍊/千錘百鍊)"}, {"word": "鍊", "prompt": "ㄌㄧㄢˋ (精鍊/鎖鍊)"}]}, "10": {"title": "第 10 課：幽谷沉思與回歸", "words": [{"word": "唐", "prompt": "ㄊㄤˊ (荒唐/唐代)"}, {"word": "恬", "prompt": "ㄊㄧㄢˊ (恬靜/恬淡)"}, {"word": "罷", "prompt": "ㄅㄚˋ (罷手/罷工)"}, {"word": "暮", "prompt": "ㄇㄨˋ (暮色/日暮)"}, {"word": "掩", "prompt": "ㄧㄢˇ (掩護/掩蓋)"}, {"word": "柴", "prompt": "ㄔㄞˊ (木柴/柴火)"}, {"word": "扉", "prompt": "ㄈㄟ (心扉/門扉)"}, {"word": "歸", "prompt": "ㄍㄨㄟ (歸途/回歸)"}, {"word": "畢", "prompt": "ㄅㄧˋ (畢竟/畢業)"}, {"word": "陋", "prompt": "ㄌㄡˋ (簡陋/破陋)"}, {"word": "傍", "prompt": "ㄅㄤˋ (傍晚/依傍)"}, {"word": "確", "prompt": "ㄑㄩㄝˋ (確認/明確)"}, {"word": "閒", "prompt": "ㄒㄧㄢˊ (閒暇/悠閒)"}, {"word": "詠", "prompt": "ㄩㄥˇ (歌詠/詠唱)"}, {"word": "幽", "prompt": "ㄧㄡ (幽靜/幽暗)"}, {"word": "眠", "prompt": "ㄇㄧㄢˊ (沉眠/睡眠)"}, {"word": "職", "prompt": "ㄓˊ (職責/職位)"}, {"word": "吟", "prompt": "ㄧㄣˊ (沉吟/呻吟)"}, {"word": "曠", "prompt": "ㄎㄨㄤˋ (曠野/心曠神怡)"}]}, "11": {"title": "第 11 課：營地伏擊與祈禱", "words": [{"word": "駭", "prompt": "ㄏㄞˋ (驚駭/駭人聽聞)"}, {"word": "疤", "prompt": "ㄅㄚ (傷疤/疤痕)"}, {"word": "痕", "prompt": "ㄏㄣˊ (痕跡/痕印)"}, {"word": "罐", "prompt": "ㄍㄨㄢˋ (鐵罐/罐裝)"}, {"word": "咚", "prompt": "ㄉㄨㄥ (咚咚響/噗咚)"}, {"word": "碰", "prompt": "ㄆㄥˋ (碰撞/碰面)"}, {"word": "傾", "prompt": "ㄑㄧㄥ (傾斜/傾盆大雨)"}, {"word": "寮", "prompt": "ㄌㄧㄠˊ (工寮/草寮)"}, {"word": "營", "prompt": "ㄧㄥˊ (營帳/軍營)"}, {"word": "殺", "prompt": "ㄕㄚ (擊殺/肅殺)"}, {"word": "崇", "prompt": "ㄔㄨㄥˊ (崇高/崇山峻嶺)"}, {"word": "置", "prompt": "ㄓˋ (安置/佈置)"}, {"word": "奄", "prompt": "ㄧㄢˇ (奄奄一息)"}, {"word": "翼", "prompt": "ㄧˋ (機翼/小心翼翼)"}, {"word": "祈", "prompt": "ㄑㄧˊ (祈求/祈願)"}, {"word": "禱", "prompt": "ㄉㄠˇ (禱告/祈禱)"}, {"word": "吼", "prompt": "ㄏㄡˇ (吼叫/咆哮)"}, {"word": "喉", "prompt": "ㄏㄡˊ (咽喉/喉嚨)"}, {"word": "嚨", "prompt": "ㄌㄨㄥˊ (喉嚨)"}]}, "12": {"title": "第 12 課：荒野探索與開拓", "words": [{"word": "墾", "prompt": "ㄎㄣˇ (開墾/墾荒)"}, {"word": "拓", "prompt": "ㄊㄨㄛˋ (開拓/拓展)"}, {"word": "涉", "prompt": "ㄕㄜˋ (跋山涉水/干涉)"}, {"word": "險", "prompt": "ㄒㄧㄢˇ (探險/危險)"}, {"word": "尋", "prompt": "ㄒㄩㄣˊ (搜尋/尋覓)"}, {"word": "覓", "prompt": "ㄇㄧˋ (尋覓)"}, {"word": "標", "prompt": "ㄅㄧㄠ (目標/標誌)"}, {"word": "航", "prompt": "ㄏㄤˊ (導航/航行)"}, {"word": "遙", "prompt": "ㄧㄠˊ (遙遠/遙望)"}, {"word": "際", "prompt": "ㄐㄧˋ (無邊無際/天際)"}]}, "13": {"title": "第 13 課：怒海暗礁沉船突入", "words": [{"word": "烈", "prompt": "ㄌㄧㄝˋ (烈火/激烈)"}, {"word": "暈", "prompt": "ㄩㄣˋ (眩暈/暈倒)"}, {"word": "昏", "prompt": "ㄏㄨㄣ (昏暗/昏迷)"}, {"word": "艙", "prompt": "ㄘㄤ (水密船艙/機艙)"}, {"word": "途", "prompt": "ㄊㄨˊ (長途/旅途)"}, {"word": "捲", "prompt": "ㄐㄩㄢˇ (席捲/捲土重來)"}, {"word": "喪", "prompt": "ㄙㄤˋ (喪生/垂頭喪氣)"}, {"word": "獸", "prompt": "ㄕㄡˋ (野獸/怪獸)"}, {"word": "渾", "prompt": "ㄏㄨㄣˊ (渾身解數/渾濁)"}, {"word": "擱", "prompt": "ㄍㄜ (擱淺/耽擱)"}, {"word": "礁", "prompt": "ㄐㄧㄠ (暗礁/觸礁)"}, {"word": "筏", "prompt": "ㄈㄚˊ (救生筏/竹筏)"}, {"word": "塌", "prompt": "ㄊㄚ (倒塌/崩塌)"}, {"word": "捏", "prompt": "ㄋㄧㄝ (捏造/拿捏)"}, {"word": "燒", "prompt": "ㄕㄠ (燃燒/發燒)"}, {"word": "白", "prompt": "ㄅㄞˊ (白晝/明白)"}, {"word": "烤", "prompt": "ㄎㄠˇ (烘烤/燒烤)"}, {"word": "爐", "prompt": "ㄌㄨˊ (熔爐/鍋爐室)"}, {"word": "欲", "prompt": "ㄩˋ (欲望/隨心所欲)"}]}};
 
-    // 分頁切換
-    function switchTab(tabId) {
-      tacticalAudio.playRadioSquelch(0.1);
-      document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('btn-tab-' + tabId).classList.add('active');
-
-      document.getElementById('tab-content-staircase').style.display = tabId === 'staircase' ? 'flex' : 'none';
-      document.getElementById('tab-content-missions').style.display = tabId === 'missions' ? 'flex' : 'none';
-      document.getElementById('tab-content-analytics').style.display = tabId === 'analytics' ? 'flex' : 'none';
-    }
-
-    // 全螢幕切換
-    document.getElementById('btn-fullscreen').onclick = () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    };
-
-    // NVG 夜視開關
-    document.getElementById('btn-nvg').onclick = () => {
-      document.body.classList.toggle('nvg-mode');
-      tacticalAudio.playRadioSquelch(0.12);
-    };
-
-    // ========================================================
-    // 記憶階梯持續擴充與融合引擎 (Staircase Evolution Engine)
-    // ========================================================
-    const stairSteps = [
-      {
-        stage: 1,
-        title: "STAGE 01 // 形音知覺標定",
-        prompt: "【第一階：知覺突破】巡邏機攜帶干擾信號，請標定「瘧」字的正確字形弱點：",
-        sub: "辨析形近字：小心『虐』與『瘋』的混淆干擾！",
-        correct: "瘧",
-        options: [
-          { label: "瘧", sub: "部首: 疒 (ㄋㄩㄝˋ)" },
-          { label: "虐", sub: "部首: 虍 (ㄋㄩㄝˋ)" },
-          { label: "瘋", sub: "部首: 疒 (ㄈㄥ)" }
-        ],
-        nextPrompt: "✔ 第一階達成！正在將「瘧」字解構擴充至第二階部首拆解..."
-      },
-      {
-        stage: 2,
-        title: "STAGE 02 // 部首部件拆解",
-        prompt: "【第二階：部件破拆】野戰營帳水密門鎖死，請選出合成生字「艙」的關鍵部首：",
-        sub: "雷射切割線需吻合部首：水密結構以『舟』為基底！",
-        correct: "舟",
-        options: [
-          { label: "舟", sub: "舟字旁 (水上隔艙)" },
-          { label: "木", sub: "木字旁" },
-          { label: "石", sub: "石字旁" }
-        ],
-        nextPrompt: "✔ 第二階達成！正在將「艙」與「舟」融入第三階詞語搭配射控..."
-      },
-      {
-        stage: 3,
-        title: "STAGE 03 // 脈絡語義射控",
-        prompt: "【第三階：詞語射控】高寒山巔長程狙擊：特務匿蹤於高聳之【？】壁，風偏修正左 2 密位！",
-        sub: "成語射控系統：請選出填入『高聳入雲、山勢險【？】』的正確字形！",
-        correct: "峭",
-        options: [
-          { label: "峭", sub: "險峭 (山部)" },
-          { label: "俏", sub: "俏麗 (亻部)" },
-          { label: "梢", sub: "樹梢 (木部)" }
-        ],
-        nextPrompt: "✔ 第三階達成！終極融合：正在將第一、三、十三課生字融合成跨課情境長句！"
-      },
-      {
-        stage: 4,
-        title: "STAGE 04 // 跨課情境長句融合",
-        prompt: "【第四階：跨課語義融合】特遣隊急電：「快艇在暴風雨中觸【？】導致船【？】浸水，隊員在千仞【？】壁建立野戰營【？】以防惡【？】傳播！」",
-        sub: "跨越第 1、3、13 課：請依序補全『觸【礁】、船【艙】、千仞【峭】壁、營【帳】、惡【疾】』之關鍵首字！",
-        correct: "礁",
-        options: [
-          { label: "礁", sub: "第13課 (石部)" },
-          { label: "焦", sub: "非石質障礙" },
-          { label: "樵", sub: "木柴" }
-        ],
-        nextPrompt: "🎉 恭喜完成全套記憶階梯！四大階梯全數貫通並融會貫通！"
-      }
-    ];
-
-    let currentStepIndex = 0;
-    let comboCount = 5;
-
-    function initStaircaseEngine() {
-      renderCurrentStair();
-    }
-
-    function renderCurrentStair() {
-      const step = stairSteps[currentStepIndex];
-      
-      // 更新鏈條視覺
-      for (let i = 1; i <= 4; i++) {
-        const node = document.getElementById('chain-' + i);
-        const card = document.getElementById('step-card-' + i);
-        if (i === step.stage) {
-          node.className = 'chain-node current';
-          card.className = 'staircase-step active';
-        } else if (i < step.stage) {
-          node.className = 'chain-node';
-          card.className = 'staircase-step';
-        } else {
-          node.className = 'chain-node';
-          card.className = 'staircase-step locked';
+    // Web Audio 原生柔和音效合成器 (Apple 柔和調音)
+    class AppleSound {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
         }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      playCorrect(combo = 1) {
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const baseFreq = 523.25 * Math.pow(1.059463, Math.min(combo, 12));
+          [baseFreq, baseFreq * 1.25].forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(f, now + idx * 0.04);
+            gain.gain.setValueAtTime(0.2, now + idx * 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.35);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.04); osc.stop(now + idx * 0.04 + 0.35);
+          });
+        } catch(e) {}
+      }
+      playError() {
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.2);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.start(now); osc.stop(now + 0.2);
+        } catch(e) {}
+      }
+    }
+    const sound = new AppleSound();
+
+    // 狀態機與使用者設定
+    let userProfile = null;
+    let currentLessonKey = 1;
+    let currentPool = [];
+    let activeQuestion = null;
+    let hp = 5, maxHp = 5;
+    let san = 100;
+    let score = 0, combo = 0;
+    let lessonTotalCount = 0;
+
+    function initUser() {
+      const saved = localStorage.getItem('apple_vocab_user');
+      if (saved) {
+        userProfile = JSON.parse(saved);
+        updateUserBadge();
+      } else {
+        document.getElementById('loginModal').style.display = 'flex';
+      }
+    }
+
+    document.getElementById('btnConfirmLogin').onclick = () => {
+      sound.init();
+      const val = document.getElementById('inputCallsign').value.trim() || '澄澈學者';
+      userProfile = {
+        user_id: 'usr_' + Date.now().toString(36),
+        nickname: val,
+        title: '字理探尋者',
+        all_time_high_score: 0,
+        daily_high_score: 0
+      };
+      localStorage.setItem('apple_vocab_user', JSON.stringify(userProfile));
+      document.getElementById('loginModal').style.display = 'none';
+      updateUserBadge();
+    };
+
+    document.getElementById('btnSwitchUser').onclick = () => {
+      document.getElementById('loginModal').style.display = 'flex';
+      document.getElementById('inputCallsign').value = userProfile ? userProfile.nickname : '';
+    };
+
+    function updateUserBadge() {
+      if (!userProfile) return;
+      document.getElementById('avatarChar').innerText = userProfile.nickname.charAt(0);
+      document.getElementById('userCallsign').innerText = userProfile.nickname;
+      document.getElementById('userRankTitle').innerText = userProfile.title;
+    }
+
+    // 渲染底部水平膠囊導覽
+    function renderDock() {
+      const strip = document.getElementById('dockStrip');
+      strip.innerHTML = '';
+
+      for (let i = 1; i <= 13; i++) {
+        const pill = document.createElement('div');
+        pill.className = 'dock-pill' + (currentLessonKey === i ? ' active' : '');
+        pill.innerHTML = `<span>L${i < 10 ? '0'+i : i}</span> ${VOCAB_DATABASE[i].title.split('：')[1] || VOCAB_DATABASE[i].title}`;
+        pill.onclick = () => {
+          sound.init();
+          switchLesson(i);
+        };
+        strip.appendChild(pill);
       }
 
-      document.getElementById('exercise-prompt').innerText = step.prompt;
-      document.getElementById('exercise-sub').innerText = step.sub;
+      // 地獄模式膠囊
+      const hellPill = document.createElement('div');
+      hellPill.className = 'dock-pill hell-mode' + (currentLessonKey === 'hell' ? ' active' : '');
+      hellPill.innerHTML = `<span>🔥</span> 全冊終極大亂鬥 (225字)`;
+      hellPill.onclick = () => {
+        sound.init();
+        switchLesson('hell');
+      };
+      strip.appendChild(hellPill);
+    }
 
-      const optBox = document.getElementById('exercise-options');
-      optBox.innerHTML = '';
+    function switchLesson(key) {
+      currentLessonKey = key;
+      score = 0; combo = 0; hp = maxHp; san = 100;
+      updateVitals();
 
-      step.options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'tactical-choice-btn';
-        btn.innerHTML = `<div>${opt.label}</div><div class="sub-label">${opt.sub}</div>`;
-        btn.onclick = () => handleChoice(opt.label, step);
-        optBox.appendChild(btn);
+      if (key === 'hell') {
+        let all = [];
+        Object.keys(VOCAB_DATABASE).forEach(k => {
+          all = all.concat(VOCAB_DATABASE[k].words);
+        });
+        currentPool = [...all];
+        document.getElementById('currentLessonPillTitle').innerText = '🔥 全冊終極大亂鬥';
+      } else {
+        const lesson = VOCAB_DATABASE[key];
+        currentPool = [...lesson.words];
+        document.getElementById('currentLessonPillTitle').innerText = lesson.title;
+      }
+      lessonTotalCount = currentPool.length;
+      renderDock();
+      spawnNext();
+    }
+
+    function spawnNext() {
+      if (currentPool.length === 0) {
+        showVictory();
+        return;
+      }
+      const randIdx = Math.floor(Math.random() * currentPool.length);
+      activeQuestion = currentPool[randIdx];
+
+      document.getElementById('targetPromptTitle').innerText = `【 鎖定「${activeQuestion.word}」字的正確字形 】`;
+      document.getElementById('targetPromptHint').innerText = `提示：${activeQuestion.prompt}`;
+
+      updateProgress();
+
+      // 抽取 2 個干擾字
+      let allWords = [];
+      Object.keys(VOCAB_DATABASE).forEach(k => {
+        allWords = allWords.concat(VOCAB_DATABASE[k].words.map(w => w.word));
+      });
+      allWords = allWords.filter(w => w !== activeQuestion.word);
+      const distractors = [];
+      while (distractors.length < 2 && allWords.length > 0) {
+        const d = allWords[Math.floor(Math.random() * allWords.length)];
+        if (!distractors.includes(d)) distractors.push(d);
+      }
+
+      const options = [
+        { word: activeQuestion.word, isCorrect: true },
+        { word: distractors[0], isCorrect: false },
+        { word: distractors[1], isCorrect: false }
+      ].sort(() => Math.random() - 0.5);
+
+      const deck = document.getElementById('cardsDeck');
+      deck.innerHTML = '';
+
+      options.forEach((opt, idx) => {
+        const card = document.createElement('div');
+        card.className = 'word-card';
+        card.innerHTML = `
+          <div class="key-hint">鍵 [${idx + 1}]</div>
+          <div class="card-char">${opt.word}</div>
+          <div class="card-zhuyin">${opt.isCorrect ? activeQuestion.prompt.split(' ')[0] : '干擾字辨析'}</div>
+        `;
+        card.onclick = () => checkAnswer(opt.isCorrect, card);
+        deck.appendChild(card);
       });
     }
 
-    function handleChoice(chosen, step) {
-      if (chosen === step.correct) {
-        tacticalAudio.playHit();
-        comboCount++;
-        document.getElementById('combo-text').innerText = `🔥 連擊次數: ${comboCount} ｜ 反應時間: 0.7s (精確突破)`;
-        
-        tacticalAudio.playSuccess();
-        alert(step.nextPrompt);
+    function checkAnswer(isCorrect, cardEl) {
+      sound.init();
+      if (isCorrect) {
+        sound.playCorrect(combo + 1);
+        combo++;
+        score += 100 + combo * 20;
+        cardEl.classList.add('correct-feedback');
 
-        currentStepIndex = (currentStepIndex + 1) % stairSteps.length;
-        renderCurrentStair();
+        setTimeout(() => {
+          currentPool = currentPool.filter(w => w.word !== activeQuestion.word);
+          updateVitals();
+          spawnNext();
+        }, 320);
       } else {
-        tacticalAudio.playError();
-        comboCount = Math.max(0, comboCount - 1);
-        document.getElementById('combo-text').innerText = `⚠ 混淆警報！部首辨析失誤 ｜ 請再次觀察字根部件！`;
+        sound.playError();
+        combo = 0;
+        hp = Math.max(0, hp - 1);
+        san = Math.max(0, san - 15);
+        cardEl.classList.add('shake-feedback');
+        updateVitals();
+
+        setTimeout(() => {
+          cardEl.classList.remove('shake-feedback');
+        }, 450);
+
+        if (hp <= 0) {
+          alert('生命值歸零！請稍微歇息，重整思緒再出發。');
+          hp = maxHp; san = 100;
+          switchLesson(currentLessonKey);
+        }
       }
     }
 
-    function startMissionMode(mId) {
-      switchTab('staircase');
-      alert(`已載入任務 ${mId} 之專屬記憶階梯數據！`);
+    function updateVitals() {
+      // 渲染 HP 圓點
+      const container = document.getElementById('hpDotsContainer');
+      container.innerHTML = '';
+      for (let i = 0; i < maxHp; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'hp-dot' + (i >= hp ? ' lost' : '');
+        container.appendChild(dot);
+      }
+      document.getElementById('sanValueBadge').innerText = san + '%';
+      document.getElementById('scoreValueBadge').innerText = score;
     }
+
+    function updateProgress() {
+      const cleared = lessonTotalCount - currentPool.length;
+      document.getElementById('progressBadge').innerText = `${cleared} / ${lessonTotalCount}`;
+    }
+
+    function showVictory() {
+      document.getElementById('victoryModal').style.display = 'flex';
+      document.getElementById('victoryTitle').innerText = '🎉 課次圓滿完成！';
+      document.getElementById('victoryDesc').innerHTML = `本課生字全數通過檢驗！<br><br><strong>最終得分：${score} ｜ 達到最佳專注心流</strong>`;
+    }
+
+    document.getElementById('btnNextLesson').onclick = () => {
+      document.getElementById('victoryModal').style.display = 'none';
+      if (typeof currentLessonKey === 'number' && currentLessonKey < 13) {
+        switchLesson(currentLessonKey + 1);
+      } else {
+        switchLesson(1);
+      }
+    };
+
+    // 鍵盤 1, 2, 3 快速作答
+    window.addEventListener('keydown', e => {
+      if (['1', '2', '3'].includes(e.key)) {
+        const idx = parseInt(e.key) - 1;
+        const cards = document.querySelectorAll('.word-card');
+        if (cards[idx]) cards[idx].click();
+      }
+    });
+
+    // 排行榜 Modal
+    document.getElementById('btnLeaderboard').onclick = () => {
+      const list = document.getElementById('leaderboardList');
+      list.innerHTML = `
+        <div class="rank-row"><span class="rank-num">1</span> <span>素樸求真者</span> <strong>5,850 分</strong></div>
+        <div class="rank-row"><span class="rank-num">2</span> <span>${userProfile ? userProfile.nickname : '澄澈思辨者'}</span> <strong>${score > 0 ? score : 5400} 分</strong></div>
+        <div class="rank-row"><span class="rank-num">3</span> <span>微光行者</span> <strong>4,920 分</strong></div>
+        <div class="rank-row"><span class="rank-num">4</span> <span>涵光漫行者</span> <strong>4,310 分</strong></div>
+        <div class="rank-row"><span class="rank-num">5</span> <span>字理新星</span> <strong>3,890 分</strong></div>
+      `;
+      document.getElementById('leaderboardModal').style.display = 'flex';
+    };
+
+    document.getElementById('btnCloseLeaderboard').onclick = () => {
+      document.getElementById('leaderboardModal').style.display = 'none';
+    };
+
+    // 初始化
+    initUser();
+    switchLesson(1);
   </script>
 </body>
 </html>
