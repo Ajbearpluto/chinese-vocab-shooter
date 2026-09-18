@@ -234,7 +234,7 @@
         <button class="hud-btn admin-btn" id="btnLoginOpenAdmin" style="flex: 1; padding: 11px 12px; font-size: 13px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800;">🔐 指揮官後台</button>
         <button class="hud-btn" id="btnLoginOpenLeaderboard" style="flex: 1; padding: 11px 12px; font-size: 13px; border-radius: 12px; border-color: #FFDF5D; color: #FFDF5D; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800;">🏆 榮譽榜單</button>
       </div>
-      <div style="font-size: 11px; color: #6A7888; margin-top: 8px;">老師免登記學員代號，點選「🔐 指揮官後台」即可直達戰情總部 (密碼: 8888)</div>
+      <div style="font-size: 11px; color: #6A7888; margin-top: 8px;">老師免登記學員代號，點選「🔐 指揮官後台」並輸入授權密碼即可直達戰情總部</div>
     </div>
   </div>
 
@@ -281,7 +281,7 @@
     <div class="modal-card">
       <div style="font-size: 36px; margin-bottom: 10px;">🔐</div>
       <h2 style="font-size: 20px; font-weight: 900; margin-bottom: 8px;">指揮官安全授權</h2>
-      <p style="font-size: 13px; color: #8E9BAE; margin-bottom: 20px;">請輸入後台管理密碼 (預設: 8888)：</p>
+      <p style="font-size: 13px; color: #8E9BAE; margin-bottom: 20px;">請輸入後台管理授權密碼：</p>
       <input type="password" class="apple-input" id="inputAdminPass" placeholder="請輸入授權碼">
       <button class="apple-btn-primary" id="btnConfirmAdminAuth">驗證進入戰情總部</button>
       <button class="hud-btn" id="btnCancelAdminAuth" style="width: 100%; margin-top: 10px;">取消返回</button>
@@ -325,7 +325,10 @@
           <button class="hud-btn" id="btnSeedMockData">🎲 產生示範學員資料</button>
           <button class="hud-btn" id="btnClearRecords" style="border-color: #FF3344; color: #FF3344;">🗑️ 清空所有紀錄</button>
         </div>
-        <div style="font-size: 11px; color: #8E9BAE;">授權碼: 8888</div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="hud-btn" id="btnChangeAdminPass" style="font-size: 11px; padding: 4px 10px;">🔑 修改後台密碼</button>
+          <span style="font-size: 11px; color: #8E9BAE;">🔐 安全管理模式</span>
+        </div>
       </div>
     </div>
   </div>
@@ -2715,8 +2718,10 @@ function renderPublicLeaderboard() {
 }
 
 // ==========================================
-// 指揮官戰情總部 (Admin 8888)：分課名冊與生字診斷
+// 指揮官戰情總部：分課名冊與生字診斷安全管理
 // ==========================================
+const KEY_ADMIN_PASS = "delta_shooter_admin_pass";
+
 function promptAdminAuth(fromModal = null) {
   isGameActive = false;
   if (fromModal) fromModal.style.display = "none";
@@ -2751,13 +2756,36 @@ document.getElementById("btnCancelAdminAuth").onclick = () => {
 
 document.getElementById("btnConfirmAdminAuth").onclick = () => {
   const pwd = document.getElementById("inputAdminPass").value.trim();
-  if (pwd === "8888") {
+  const currentPass = localStorage.getItem(KEY_ADMIN_PASS) || "8888";
+  if (pwd === currentPass) {
     document.getElementById("adminAuthModal").style.display = "none";
     openAdminDashboard();
   } else {
-    alert("授權失敗！密碼不正確 (預設: 8888)");
+    alert("授權失敗！密碼不正確，請重新輸入。");
   }
 };
+
+// 老師自訂與修改後台密碼
+const btnChangePass = document.getElementById("btnChangeAdminPass");
+if (btnChangePass) {
+  btnChangePass.onclick = () => {
+    const currentPass = localStorage.getItem(KEY_ADMIN_PASS) || "8888";
+    const oldPass = prompt("請輸入目前管理密碼進行身分驗證：");
+    if (oldPass === null) return;
+    if (oldPass.trim() !== currentPass) {
+      alert("密碼驗證失敗，無法修改！");
+      return;
+    }
+    const newPass = prompt("請輸入新的後台管理密碼（建議 4~12 位英數字）：");
+    if (newPass === null) return;
+    if (!newPass.trim()) {
+      alert("新密碼不能為空白！");
+      return;
+    }
+    localStorage.setItem(KEY_ADMIN_PASS, newPass.trim());
+    alert("後台管理密碼已成功更新！請妥善保管。");
+  };
+}
 
 const passInput = document.getElementById("inputAdminPass");
 if (passInput) {
