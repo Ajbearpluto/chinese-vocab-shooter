@@ -12,30 +12,101 @@
     body { background: #070B10; color: #F5F7FA; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang TC', sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
     #game-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
     canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
-    .hud-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 14px 20px; z-index: 10; }
-    .hud-top-bar { display: flex; justify-content: space-between; align-items: flex-start; pointer-events: auto; }
-    .hud-card { background: rgba(18, 26, 38, 0.94); backdrop-filter: blur(16px); border: 1px solid rgba(0, 255, 136, 0.35); border-radius: 14px; padding: 10px 18px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75); display: flex; align-items: center; gap: 14px; }
-    .target-box { text-align: center; min-width: 440px; border-color: #00FF88; box-shadow: 0 0 28px rgba(0, 255, 136, 0.25); flex-direction: column; gap: 4px; }
-    .mission-prompt { font-size: 28px; font-weight: 900; color: #FFDF5D; text-shadow: 0 0 16px rgba(255, 223, 93, 0.6); }
-    .hp-bar-outer { width: 130px; height: 8px; background: #16221D; border-radius: 4px; overflow: hidden; border: 1px solid #23382F; margin-top: 4px; }
-    .hp-bar-inner { width: 100%; height: 100%; background: linear-gradient(90deg, #FF3344, #00FF88); transition: width 0.2s; }
-    .stat-val { font-size: 18px; font-weight: 900; color: #00FF88; margin-left: 4px; }
-    .hud-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 700; color: #FFF; cursor: pointer; transition: all 0.2s; }
+    .hud-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 12px 18px; z-index: 10; }
+    .hud-top-bar { display: flex; justify-content: space-between; align-items: flex-start; pointer-events: auto; gap: 12px; }
+    
+    /* 頂部 HUD 卡片基礎樣式 */
+    .hud-card { background: rgba(14, 22, 34, 0.96); backdrop-filter: blur(18px); border: 1.5px solid rgba(0, 210, 220, 0.35); border-radius: 16px; padding: 10px 18px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.85); display: flex; align-items: center; gap: 14px; }
+    
+    /* 特警學員與生命值專屬卡片 (大幅增強可視度) */
+    .hp-card { min-width: 320px; border-color: rgba(0, 255, 136, 0.45); }
+    .avatar-box { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #0071E3, #00D2DC); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: #FFF; box-shadow: 0 0 14px rgba(0, 210, 220, 0.5); flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.5); }
+    
+    /* 大型高可視度生命值計量槽 */
+    .hp-bar-outer {
+      width: 230px;
+      height: 24px;
+      background: rgba(6, 10, 16, 0.95);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      position: relative;
+      margin-top: 5px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.9) inset, 0 3px 8px rgba(0, 0, 0, 0.6);
+    }
+    .hp-bar-inner {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #00D2DC, #00FF88);
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 16px rgba(0, 255, 136, 0.65);
+    }
+    .hp-bar-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 900;
+      color: #FFFFFF;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.9);
+      letter-spacing: 0.8px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .hp-badge {
+      font-size: 12px;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+    }
+    .hp-danger-pulse {
+      animation: hpCriticalPulse 0.7s infinite alternate;
+    }
+    @keyframes hpCriticalPulse {
+      0% { box-shadow: 0 0 10px rgba(255, 51, 68, 0.6); border-color: rgba(255, 51, 68, 0.6); }
+      100% { box-shadow: 0 0 28px rgba(255, 0, 50, 1); border-color: rgba(255, 255, 255, 0.95); }
+    }
+
+    /* 戰術指示與當前目標 (超大超清晰) */
+    .target-box { text-align: center; min-width: 480px; border-color: #00D2DC; box-shadow: 0 0 32px rgba(0, 210, 220, 0.28); flex-direction: column; gap: 5px; padding: 10px 22px; }
+    .mission-prompt { font-size: 32px; font-weight: 900; color: #FFDF5D; text-shadow: 0 0 20px rgba(255, 223, 93, 0.7), 0 2px 4px rgba(0,0,0,0.85); letter-spacing: 1.5px; }
+    
+    /* 數據狀態獨立膠囊 */
+    .stat-pill { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 62px; padding: 4px 8px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .stat-label { font-size: 11px; font-weight: 800; color: #8E9BAE; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .stat-val { font-size: 20px; font-weight: 900; line-height: 1.1; }
+
+    /* 按鈕樣式 */
+    .hud-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 7px 14px; font-size: 12px; font-weight: 800; color: #FFF; cursor: pointer; transition: all 0.2s; }
     .hud-btn:hover { background: #FFF; color: #000; box-shadow: 0 0 14px rgba(255, 255, 255, 0.4); }
     .admin-btn { border-color: #0071E3 !important; color: #64B5F6 !important; background: rgba(0, 113, 227, 0.15) !important; }
     .admin-btn:hover { background: #0071E3 !important; color: #FFF !important; }
-    .bottom-dock { pointer-events: auto; background: rgba(14, 20, 28, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 22px; padding: 8px 14px; margin: 0 auto; max-width: 960px; width: 95%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); }
+    
+    /* 底部導覽列 */
+    .bottom-dock { pointer-events: auto; background: rgba(14, 20, 28, 0.92); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 22px; padding: 8px 14px; margin: 0 auto; max-width: 960px; width: 95%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); }
     .dock-strip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
     .dock-strip::-webkit-scrollbar { display: none; }
     .dock-pill { flex-shrink: 0; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 30px; padding: 7px 16px; font-size: 12px; font-weight: 700; color: #A0B0C0; cursor: pointer; transition: all 0.2s; }
     .dock-pill.active { background: #00FF88; color: #040806; border-color: #00FF88; box-shadow: 0 0 16px rgba(0, 255, 136, 0.4); }
     .dock-pill.hell-mode { border-color: rgba(255, 51, 68, 0.4); color: #FF6677; }
     .dock-pill.hell-mode.active { background: #FF3344; color: #FFF; border-color: #FF3344; box-shadow: 0 0 20px rgba(255, 51, 68, 0.7); }
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 6, 10, 0.82); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .modal-card { background: #0E1520; border: 1px solid rgba(0, 255, 136, 0.3); width: 90%; max-width: 440px; border-radius: 20px; padding: 32px 28px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85); }
-    .apple-input { width: 100%; height: 46px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 0 16px; font-size: 15px; color: #FFF; outline: none; margin-bottom: 18px; }
-    .apple-input:focus { border-color: #00FF88; box-shadow: 0 0 12px rgba(0, 255, 136, 0.3); }
-    .apple-btn-primary { width: 100%; height: 46px; background: #00FF88; color: #040806; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+
+    /* 彈窗樣式 */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 6, 10, 0.86); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal-card { background: #0E1520; border: 1px solid rgba(0, 255, 136, 0.3); width: 90%; max-width: 450px; border-radius: 20px; padding: 32px 28px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85); }
+    .apple-input { width: 100%; height: 48px; background: rgba(255, 255, 255, 0.06); border: 1.5px solid rgba(255, 255, 255, 0.25); border-radius: 12px; padding: 0 16px; font-size: 16px; font-weight: 700; color: #FFF; outline: none; margin-bottom: 18px; }
+    .apple-input:focus { border-color: #00D2DC; box-shadow: 0 0 14px rgba(0, 210, 220, 0.4); }
+    .apple-btn-primary { width: 100%; height: 48px; background: #00FF88; color: #040806; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+    .apple-btn-primary:hover { filter: brightness(1.15); box-shadow: 0 0 18px rgba(0, 255, 136, 0.5); }
+
+    /* 後台戰情室 */
     .admin-card { max-width: 960px !important; width: 94% !important; max-height: 88vh; overflow: hidden; display: flex; flex-direction: column; padding: 22px 26px !important; text-align: left !important; border-color: #0071E3 !important; }
     .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
     .kpi-box { background: rgba(255, 255, 255, 0.04); border-radius: 10px; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.08); }
@@ -46,12 +117,16 @@
     .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .admin-table th { background: rgba(255, 255, 255, 0.06); position: sticky; top: 0; padding: 10px 14px; text-align: left; font-weight: 700; color: #8E9BAE; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
     .admin-table td { padding: 9px 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); color: #F5F7FA; }
+    
+    /* 戰術出擊大廳 */
     .lobby-card { max-width: 880px !important; width: 95% !important; max-height: 90vh; overflow-y: auto; text-align: left !important; padding: 24px 28px !important; border-color: rgba(0, 210, 220, 0.4) !important; }
-    .ultimate-card { background: linear-gradient(135deg, rgba(255, 69, 58, 0.15), rgba(255, 179, 0, 0.1)); border: 1px solid rgba(255, 69, 58, 0.45); border-radius: 16px; padding: 16px 20px; margin-bottom: 18px; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
-    .ultimate-card:hover { border-color: #FF3344; box-shadow: 0 8px 30px rgba(255, 51, 68, 0.35); transform: translateY(-2px); }
+    .ultimate-card { background: linear-gradient(135deg, rgba(255, 69, 58, 0.18), rgba(255, 179, 0, 0.12)); border: 1.5px solid rgba(255, 69, 58, 0.5); border-radius: 16px; padding: 16px 20px; margin-bottom: 18px; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
+    .ultimate-card:hover { border-color: #FF3344; box-shadow: 0 8px 30px rgba(255, 51, 68, 0.4); transform: translateY(-2px); }
     .mission-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); gap: 12px; }
     .lesson-card { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; }
     .lesson-card:hover { background: rgba(0, 210, 220, 0.08); border-color: #00D2DC; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 210, 220, 0.2); }
+    
+    /* 篩選標籤 */
     .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
     .filter-bar::-webkit-scrollbar { display: none; }
     .filter-pill { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid rgba(255, 255, 255, 0.15); background: transparent; color: #8E9BAE; cursor: pointer; transition: all 0.2s; }
@@ -67,29 +142,47 @@
     <canvas id="gameCanvas"></canvas>
     <div class="hud-layer">
       <div class="hud-top-bar">
-        <div class="hud-card">
-          <div style="width: 32px; height: 32px; border-radius: 50%; background: #0071E3; display: flex; align-items: center; justify-content: center; font-weight: 900;" id="avatarChar">學</div>
+        <!-- 特警學員資訊與大幅強化生命條 -->
+        <div class="hud-card hp-card" id="hudHpCard">
+          <div class="avatar-box" id="avatarChar">警</div>
           <div>
-            <div style="font-size: 13px; font-weight: 800;" id="userCallsign">特警幹員</div>
-            <div class="hp-bar-outer"><div class="hp-bar-inner" id="hpBarFill"></div></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 2px;">
+              <span style="font-size: 14px; font-weight: 900; color: #FFF;" id="userCallsign">等待登記...</span>
+              <span class="hp-badge" id="hpBadge" style="color: #00FF88; background: rgba(0,255,136,0.18);">❤️ 100%</span>
+            </div>
+            <div class="hp-bar-outer" id="hpBarOuter">
+              <div class="hp-bar-inner" id="hpBarFill"></div>
+              <div class="hp-bar-text" id="hpText">100 / 100 HP</div>
+            </div>
           </div>
         </div>
 
+        <!-- 戰術指示與目標 (特大高可視字體) -->
         <div class="hud-card target-box">
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <div id="phaseBadge" style="font-size: 11px; font-weight: 800; background: rgba(0, 255, 136, 0.15); border: 1px solid #00FF88; color: #00FF88; padding: 2px 10px; border-radius: 12px;">階段一：生字辨析特訓</div>
-            <div style="font-size: 11px; font-weight: 700; color: #88C0A0; letter-spacing: 1px;">// 戰術指示</div>
+            <div id="phaseBadge" style="font-size: 11px; font-weight: 900; background: rgba(0, 210, 220, 0.18); border: 1.5px solid #00D2DC; color: #00D2DC; padding: 3px 12px; border-radius: 12px;">階段一：生字辨析特訓</div>
+            <div style="font-size: 11px; font-weight: 800; color: #88C0A0; letter-spacing: 1px;">// 戰術指示</div>
           </div>
           <div class="mission-prompt" id="missionPrompt">載入中...</div>
-          <div style="font-size: 12px; color: #A0C0B0;" id="missionSubhint">請鎖定並射擊對應生字浮游靶機，嚴防逼近自爆！</div>
+          <div style="font-size: 13px; font-weight: 700; color: #A0C0B0;" id="missionSubhint">請鎖定並射擊對應生字浮游靶機，嚴防逼近自爆！</div>
         </div>
 
-        <div class="hud-card">
-          <div>積分<span class="stat-val" id="scoreVal">0</span></div>
-          <div>連擊<span class="stat-val" id="comboVal" style="color: #FFDF5D;">0x</span></div>
-          <div>剩餘<span class="stat-val" id="remainVal" style="color: #58A6FF;">0</span></div>
+        <!-- 作戰數據膠囊與控制按鈕 -->
+        <div class="hud-card" style="gap: 8px;">
+          <div class="stat-pill">
+            <span class="stat-label">🏆 積分</span>
+            <span class="stat-val" id="scoreVal" style="color: #00D2DC;">0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">🔥 連擊</span>
+            <span class="stat-val" id="comboVal" style="color: #FFDF5D;">0x</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">🎯 剩餘</span>
+            <span class="stat-val" id="remainVal" style="color: #FF6677;">0</span>
+          </div>
           <button class="hud-btn" id="btnOpenLobby" style="border-color: #00D2DC; color: #00D2DC;">🗺️ 選關</button>
-          <button class="hud-btn" id="btnToggleMode" style="border-color: #FFDF5D; color: #FFDF5D;">⚡ 循序(字➔詞)</button>
+          <button class="hud-btn" id="btnToggleMode" style="border-color: #FFDF5D; color: #FFDF5D;">⚡ 循序</button>
           <button class="hud-btn admin-btn" id="btnOpenAdmin">🔐 後台</button>
           <button class="hud-btn" id="btnLeaderboard">🏆 榜單</button>
           <button class="hud-btn" id="btnSwitchUser">👤 改名</button>
@@ -102,13 +195,16 @@
     </div>
   </div>
 
+  <!-- 特警登記彈窗：每次進入或陣亡後強制要求輸入名字 -->
   <div class="modal-overlay" id="loginModal" style="display: none;">
     <div class="modal-card">
-      <div style="font-size: 38px; margin-bottom: 12px;">🎖️</div>
+      <div style="font-size: 44px; margin-bottom: 10px;">🎖️</div>
       <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 8px;">特警作戰登記</h2>
-      <p style="font-size: 13px; color: #8E9BAE; margin-bottom: 22px;">請輸入您的特勤戰鬥代號以記錄戰績與排名：</p>
-      <input type="text" class="apple-input" id="inputCallsign" placeholder="例如：極光狙擊手" maxlength="10">
-      <button class="apple-btn-primary" id="btnConfirmLogin">進入戰術大廳選關</button>
+      <p style="font-size: 13px; color: #8E9BAE; margin-bottom: 20px;">
+        每次連線或陣亡後皆需重新登記姓名，避免成績混淆：
+      </p>
+      <input type="text" class="apple-input" id="inputCallsign" placeholder="請輸入姓名或特警代號 (例如: 王小明)" maxlength="10" autocomplete="off">
+      <button class="apple-btn-primary" id="btnConfirmLogin">確認登記並進入戰術大廳</button>
     </div>
   </div>
 
@@ -237,16 +333,17 @@
     </div>
   </div>
 
+  <!-- 陣亡彈窗：死亡後必須重新輸入名字出擊 -->
   <div class="modal-overlay" id="gameOverModal" style="display: none;">
-    <div class="modal-card" style="border-color: #FF3344;">
-      <div style="font-size: 42px; margin-bottom: 8px;">💀</div>
+    <div class="modal-card" style="border-color: #FF3344; box-shadow: 0 0 40px rgba(255, 51, 68, 0.4);">
+      <div style="font-size: 46px; margin-bottom: 8px;">💀</div>
       <h2 style="font-size: 22px; font-weight: 900; color: #FF3344; margin-bottom: 6px;">特警作戰失敗 (KIA)</h2>
-      <p style="font-size: 13px; color: #8E9BAE; margin-bottom: 18px;" id="gameOverMsg">生字浮游靶自爆破防！生命值耗盡。</p>
-      <div style="background: rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 14px;">
-        <div>本次得分：<span id="finalScoreVal" style="color: #00FF88; font-weight: 900;">0</span> 分</div>
-        <div style="margin-top: 4px;">最高連擊：<span id="finalComboVal" style="color: #FFDF5D; font-weight: 900;">0</span> 連擊</div>
+      <p style="font-size: 14px; color: #C0D0E0; margin-bottom: 18px;" id="gameOverMsg">生命值耗盡！請重新登記名字後再次出擊。</p>
+      <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 14px; margin-bottom: 22px; font-size: 15px;">
+        <div>本次得分：<span id="finalScoreVal" style="color: #00FF88; font-weight: 900; font-size: 18px;">0</span> 分</div>
+        <div style="margin-top: 6px;">最高連擊：<span id="finalComboVal" style="color: #FFDF5D; font-weight: 900; font-size: 18px;">0</span> 連擊</div>
       </div>
-      <button class="apple-btn-primary" id="btnRestartMission" style="background: #FF3344; color: #FFF;">重新整備出擊</button>
+      <button class="apple-btn-primary" id="btnRestartMission" style="background: #FF3344; color: #FFF;">👤 重新輸入名字出擊</button>
     </div>
   </div>
 
@@ -1396,7 +1493,32 @@ const VOCAB_DATABASE = {
         ctx.restore();
         ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 3.5; const leg = Math.sin(this.runCycle) * 14;
         ctx.beginPath(); ctx.moveTo(-5, 12); ctx.lineTo(-5 - leg, 28); ctx.moveTo(5, 12); ctx.lineTo(5 + leg, 28); ctx.stroke();
-        ctx.font = "bold 11px sans-serif"; ctx.fillStyle = "#00FF88"; ctx.textAlign = "center"; ctx.fillText("特警 PLAYER", 0, -22);
+        // 特警隨身全像生命條 (Floating Player HP Bar)
+        const hpRatio = Math.max(0, Math.min(1, playerHp / 100));
+        const hpBarW = 52, hpBarH = 6;
+        const barX = -hpBarW / 2, barY = 36;
+        
+        ctx.fillStyle = "rgba(4, 8, 14, 0.85)";
+        ctx.fillRect(barX - 1, barY - 1, hpBarW + 2, hpBarH + 2);
+        ctx.strokeStyle = hpRatio <= 0.3 ? "rgba(255, 51, 68, 0.9)" : "rgba(255, 255, 255, 0.45)";
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(barX - 1, barY - 1, hpBarW + 2, hpBarH + 2);
+        
+        let hpFillColor = "#00FF88";
+        if (hpRatio <= 0.3) {
+          hpFillColor = (Date.now() % 350 < 175) ? "#FF0044" : "#FF6677";
+        } else if (hpRatio <= 0.6) {
+          hpFillColor = "#FFB300";
+        }
+        ctx.fillStyle = hpFillColor;
+        ctx.fillRect(barX, barY, hpBarW * hpRatio, hpBarH);
+
+        // 特警姓名與代號 (畫在特警正上方)
+        const charName = (typeof userProfile !== 'undefined' && userProfile && userProfile.callsign) ? userProfile.callsign : "特警幹員";
+        ctx.font = "bold 12px 'PingFang TC', sans-serif";
+        ctx.fillStyle = hpRatio <= 0.3 ? "#FF6677" : "#00FF88";
+        ctx.textAlign = "center";
+        ctx.fillText(charName, 0, -26);
         ctx.restore();
       }
     };
@@ -1521,6 +1643,22 @@ const VOCAB_DATABASE = {
     function addFloatingText(x, y, text, color) {
       floatingTexts.push({ x, y, text, color, alpha: 1, vy: -2.2 });
     }
+    function drawCriticalVignette() {
+      if (typeof playerHp === 'undefined' || playerHp > 30 || !isGameActive) return;
+      const pulse = 0.28 + Math.sin(Date.now() * 0.009) * 0.16;
+      const grad = ctx.createRadialGradient(screenW / 2, screenH / 2, Math.min(screenW, screenH) * 0.28, screenW / 2, screenH / 2, Math.max(screenW, screenH) * 0.68);
+      grad.addColorStop(0, "rgba(255, 0, 40, 0)");
+      grad.addColorStop(1, `rgba(255, 0, 40, ${pulse})`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, screenW, screenH);
+
+      ctx.save();
+      ctx.fillStyle = "rgba(255, 51, 68, 0.95)";
+      ctx.font = "900 15px 'PingFang TC', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("⚠️ 裝甲破防臨界！生命值低於 30%！請迅速擊毀目標！", screenW / 2, 105);
+      ctx.restore();
+    }
 
 // ==========================================
 // 戰術邏輯、防作弊遮蔽、戰情總部 (part_admin.js)
@@ -1528,11 +1666,11 @@ const VOCAB_DATABASE = {
 // ==========================================
 // 三角洲字點：循序漸進特警射擊引擎 (part_admin.js)
 // 包含：
-// 1. 特警登入登記 ➔ 戰術出擊選關大廳 (1~13課 & 終極綜合)
-// 2. 每課獨立排名 ＋ 🔥 終極綜合榮譽榜 & 後台指揮總部篩選
-// 3. 人類視覺專家 4 色舒適防作弊靶機配色
-// 4. 生字特訓 ➔ 生詞語境裝甲艦 循序漸進獵殺
-// 5. 待機安全防線：未選定出擊前絕不扣血或突襲
+// 1. 特警登記管理：重新進入連結或死亡後強制重新輸入名字，杜絕前一使用者名字殘留
+// 2. 生命值大幅增強：230px 大型計量槽、內嵌 100/100 HP 數值、隨身全像生命條、破防紅邊危險預警
+// 3. 戰術選關大廳 (1~13課 & 🔥終極綜合)
+// 4. 每課獨立排名 ＋ 終極綜合總榜 (公開榜單與指揮官後台)
+// 5. 人類視覺專家 4 色舒適防作弊配色
 // ==========================================
 
 // 1. 專家建議：人因工學 4 色平衡色彩陣列 (Ergonomic 4-Palette)
@@ -1738,13 +1876,13 @@ function updatePhaseUI() {
     badge.innerText = "階段一：生字辨析特訓";
     badge.style.color = "#00D2DC";
     badge.style.borderColor = "#00D2DC";
-    badge.style.background = "rgba(0, 210, 220, 0.15)";
+    badge.style.background = "rgba(0, 210, 220, 0.18)";
     if (subhint) subhint.innerText = "請鎖定正確生字浮游靶機，嚴防逼近自爆！";
   } else {
     badge.innerText = "階段二：生詞語境獵殺 (難度升級)";
     badge.style.color = "#FFB300";
     badge.style.borderColor = "#FFB300";
-    badge.style.background = "rgba(255, 179, 0, 0.18)";
+    badge.style.background = "rgba(255, 179, 0, 0.2)";
     if (subhint) subhint.innerText = "鎖定正確生詞裝甲艦，識破錯別詞偽裝！(航速提升135%)";
   }
 }
@@ -1988,7 +2126,7 @@ function updateAndDrawFloatingTexts() {
       continue;
     }
     ctx.globalAlpha = Math.max(0, ft.alpha);
-    ctx.font = "bold 16px 'PingFang TC', sans-serif";
+    ctx.font = "bold 17px 'PingFang TC', sans-serif";
     ctx.fillStyle = ft.color;
     ctx.textAlign = "center";
     ctx.fillText(ft.text, ft.x, ft.y);
@@ -2037,6 +2175,11 @@ function gameLoop() {
   updateAndDrawParticles();
   updateAndDrawFloatingTexts();
 
+  // 若生命值低於 30%，渲染破防邊緣危險預警光暈
+  if (typeof drawCriticalVignette === "function") {
+    drawCriticalVignette();
+  }
+
   ctx.restore();
 
   requestAnimationFrame(gameLoop);
@@ -2075,12 +2218,12 @@ function initDock() {
 function syncModeButtons() {
   const btn1 = document.getElementById("btnToggleMode");
   const btn2 = document.getElementById("btnLobbyToggleMode");
-  let text = "⚡ 循序(字➔詞)", color = "#FFDF5D";
+  let text = "⚡ 循序", color = "#FFDF5D";
   if (currentMode === "char_only") {
-    text = "🎯 僅生字特訓";
+    text = "🎯 僅生字";
     color = "#00D2DC";
   } else if (currentMode === "phrase_only") {
-    text = "🚀 僅生詞獵殺";
+    text = "🚀 僅生詞";
     color = "#FFB300";
   }
   [btn1, btn2].forEach(btn => {
@@ -2265,7 +2408,7 @@ if (btnCloseLobby) {
 }
 
 // ==========================================
-// 學員檔案與 HUD 狀態更新 (進入前安全待機)
+// 學員檔案與 HUD 狀態更新 (生命值強化 & 每次登入重置)
 // ==========================================
 const KEY_USER = "delta_shooter_user";
 const KEY_RECORDS = "delta_shooter_records";
@@ -2274,33 +2417,56 @@ const KEY_ERRORS = "delta_shooter_errors";
 function updateHUD() {
   document.getElementById("scoreVal").innerText = score;
   document.getElementById("comboVal").innerText = combo + "x";
+
   const hpFill = document.getElementById("hpBarFill");
-  const hp = Math.max(0, Math.min(100, playerHp));
-  hpFill.style.width = hp + "%";
-  if (hp > 55) {
-    hpFill.style.background = "linear-gradient(90deg, #00D2DC, #34C759)";
+  const hpText = document.getElementById("hpText");
+  const hpBadge = document.getElementById("hpBadge");
+  const hpOuter = document.getElementById("hpBarOuter");
+
+  const hp = Math.max(0, Math.min(100, Math.round(playerHp)));
+  if (hpFill) hpFill.style.width = hp + "%";
+  if (hpText) hpText.innerText = `${hp} / 100 HP`;
+  if (hpBadge) hpBadge.innerText = `❤️ ${hp}%`;
+
+  if (hp > 60) {
+    if (hpFill) {
+      hpFill.style.background = "linear-gradient(90deg, #00D2DC, #00FF88)";
+      hpFill.style.boxShadow = "0 0 16px rgba(0, 255, 136, 0.75)";
+    }
+    if (hpBadge) {
+      hpBadge.style.color = "#00FF88";
+      hpBadge.style.background = "rgba(0, 255, 136, 0.18)";
+    }
+    if (hpOuter) hpOuter.classList.remove("hp-danger-pulse");
   } else if (hp > 25) {
-    hpFill.style.background = "linear-gradient(90deg, #FFDF5D, #FFB300)";
+    if (hpFill) {
+      hpFill.style.background = "linear-gradient(90deg, #FFDF5D, #FF9500)";
+      hpFill.style.boxShadow = "0 0 16px rgba(255, 179, 0, 0.75)";
+    }
+    if (hpBadge) {
+      hpBadge.style.color = "#FFB300";
+      hpBadge.style.background = "rgba(255, 179, 0, 0.18)";
+    }
+    if (hpOuter) hpOuter.classList.remove("hp-danger-pulse");
   } else {
-    hpFill.style.background = "linear-gradient(90deg, #FF3344, #FF0055)";
+    if (hpFill) {
+      hpFill.style.background = "linear-gradient(90deg, #FF3344, #FF0055)";
+      hpFill.style.boxShadow = "0 0 24px rgba(255, 51, 68, 0.95)";
+    }
+    if (hpBadge) {
+      hpBadge.style.color = "#FF3344";
+      hpBadge.style.background = "rgba(255, 51, 68, 0.28)";
+    }
+    if (hpOuter) hpOuter.classList.add("hp-danger-pulse");
   }
 }
 
+// 每次進入連結或刷新：強制要求重新輸入姓名，絕不自動套用前一個使用者的名字！
 function loadUserProfile() {
-  const saved = localStorage.getItem(KEY_USER);
-  if (saved) {
-    try {
-      userProfile = JSON.parse(saved);
-      document.getElementById("userCallsign").innerText = userProfile.callsign;
-      document.getElementById("avatarChar").innerText = userProfile.callsign.charAt(0) || "特";
-      // 學生已有登入紀錄：打開戰術選關大廳供其自選出擊！不盲目開打
-      openMissionLobby();
-    } catch(e) {
-      showLoginModal();
-    }
-  } else {
-    showLoginModal();
-  }
+  userProfile = null;
+  document.getElementById("userCallsign").innerText = "等待登記...";
+  document.getElementById("avatarChar").innerText = "警";
+  showLoginModal();
 }
 
 function showLoginModal() {
@@ -2308,18 +2474,20 @@ function showLoginModal() {
   targets = [];
   bullets = [];
   document.getElementById("loginModal").style.display = "flex";
-  document.getElementById("inputCallsign").value = userProfile ? userProfile.callsign : "";
+
+  // 每次打開登入登記：清空輸入欄位，絕不殘留舊使用者名字！
+  const input = document.getElementById("inputCallsign");
+  if (input) {
+    input.value = "";
+    setTimeout(() => input.focus(), 120);
+  }
   document.getElementById("missionPrompt").innerText = "等待特警登入登記...";
   document.getElementById("remainVal").innerText = "0";
-  setTimeout(() => {
-    const input = document.getElementById("inputCallsign");
-    if (input) input.focus();
-  }, 100);
 }
 
 document.getElementById("btnConfirmLogin").onclick = () => {
   const name = document.getElementById("inputCallsign").value.trim();
-  if (!name) return alert("請輸入特警呼號代號！");
+  if (!name) return alert("請輸入您的姓名或特警代號！");
   userProfile = { callsign: name, updatedAt: new Date().toISOString() };
   localStorage.setItem(KEY_USER, JSON.stringify(userProfile));
   document.getElementById("userCallsign").innerText = name;
@@ -2327,7 +2495,7 @@ document.getElementById("btnConfirmLogin").onclick = () => {
   document.getElementById("loginModal").style.display = "none";
   sound.init();
 
-  // 打完名字進入後：引導進入選關大廳，自由選擇第幾課或終極綜合！
+  // 登記完成後進入戰術出擊選關大廳
   openMissionLobby();
 };
 
@@ -2335,6 +2503,7 @@ document.getElementById("btnSwitchUser").onclick = () => {
   isGameActive = false;
   targets = [];
   bullets = [];
+  userProfile = null;
   showLoginModal();
 };
 
@@ -2391,10 +2560,13 @@ function handleGameOver() {
   document.getElementById("gameOverModal").style.display = "flex";
 }
 
+// 死亡後重新出擊：依使用者要求，必須重新輸入名字！
 document.getElementById("btnRestartMission").onclick = () => {
   document.getElementById("gameOverModal").style.display = "none";
-  isGameActive = true;
-  switchLesson(currentLessonKey);
+  userProfile = null;
+  document.getElementById("userCallsign").innerText = "等待登記...";
+  document.getElementById("avatarChar").innerText = "警";
+  showLoginModal();
 };
 
 function handleVictory() {
@@ -2807,7 +2979,7 @@ player.update = function() {
 };
 
 // ==========================================
-// 啟動主迴圈與初始化遊戲 (登入與選關前嚴格待機)
+// 啟動主迴圈與初始化遊戲 (每次進入連結強制登記名字)
 // ==========================================
 initDock();
 loadUserProfile();
