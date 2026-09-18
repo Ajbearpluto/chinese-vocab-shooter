@@ -86,7 +86,7 @@
     /* 按鈕樣式 */
     .hud-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 7px 14px; font-size: 12px; font-weight: 800; color: #FFF; cursor: pointer; transition: all 0.2s; }
     .hud-btn:hover { background: #FFF; color: #000; box-shadow: 0 0 14px rgba(255, 255, 255, 0.4); }
-    .admin-btn { border-color: #0071E3 !important; color: #64B5F6 !important; background: rgba(0, 113, 227, 0.15) !important; }
+    .admin-btn { border-color: #0071E3 !important; color: #64B5F6 !important; background: rgba(0, 113, 227, 0.18) !important; }
     .admin-btn:hover { background: #0071E3 !important; color: #FFF !important; }
     
     /* 底部導覽列 */
@@ -100,7 +100,7 @@
 
     /* 彈窗樣式 */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 6, 10, 0.86); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .modal-card { background: #0E1520; border: 1px solid rgba(0, 255, 136, 0.3); width: 90%; max-width: 450px; border-radius: 20px; padding: 32px 28px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85); }
+    .modal-card { background: #0E1520; border: 1px solid rgba(0, 255, 136, 0.3); width: 90%; max-width: 460px; border-radius: 20px; padding: 32px 28px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85); }
     .apple-input { width: 100%; height: 48px; background: rgba(255, 255, 255, 0.06); border: 1.5px solid rgba(255, 255, 255, 0.25); border-radius: 12px; padding: 0 16px; font-size: 16px; font-weight: 700; color: #FFF; outline: none; margin-bottom: 18px; }
     .apple-input:focus { border-color: #00D2DC; box-shadow: 0 0 14px rgba(0, 210, 220, 0.4); }
     .apple-btn-primary { width: 100%; height: 48px; background: #00FF88; color: #040806; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
@@ -195,16 +195,23 @@
     </div>
   </div>
 
-  <!-- 特警登記彈窗：每次進入或陣亡後強制要求輸入名字 -->
+  <!-- 特警登記彈窗：支援學員打名字進入 ＆ 老師免打名字直接看後台/榜單 -->
   <div class="modal-overlay" id="loginModal" style="display: none;">
     <div class="modal-card">
       <div style="font-size: 44px; margin-bottom: 10px;">🎖️</div>
       <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 8px;">特警作戰登記</h2>
-      <p style="font-size: 13px; color: #8E9BAE; margin-bottom: 20px;">
-        每次連線或陣亡後皆需重新登記姓名，避免成績混淆：
+      <p style="font-size: 13px; color: #8E9BAE; margin-bottom: 18px;">
+        學員請輸入姓名登記出擊；老師可直接點擊下方後台查榜：
       </p>
       <input type="text" class="apple-input" id="inputCallsign" placeholder="請輸入姓名或特警代號 (例如: 王小明)" maxlength="10" autocomplete="off">
       <button class="apple-btn-primary" id="btnConfirmLogin">確認登記並進入戰術大廳</button>
+
+      <!-- 老師/指揮官直通後台與榜單快捷鍵 -->
+      <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; justify-content: center;">
+        <button class="hud-btn admin-btn" id="btnLoginOpenAdmin" style="flex: 1; padding: 11px 12px; font-size: 13px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800;">🔐 指揮官後台</button>
+        <button class="hud-btn" id="btnLoginOpenLeaderboard" style="flex: 1; padding: 11px 12px; font-size: 13px; border-radius: 12px; border-color: #FFDF5D; color: #FFDF5D; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800;">🏆 榮譽榜單</button>
+      </div>
+      <div style="font-size: 11px; color: #6A7888; margin-top: 8px;">老師免登記學員代號，點選「🔐 指揮官後台」即可直達戰情總部 (密碼: 8888)</div>
     </div>
   </div>
 
@@ -220,6 +227,8 @@
           <p style="font-size: 13px; color: #8E9BAE; margin-top: 3px;">請選擇出擊課次或挑戰終極綜合生存戰役：</p>
         </div>
         <div style="display: flex; gap: 8px;">
+          <button class="hud-btn admin-btn" id="btnLobbyOpenAdmin">🔐 後台</button>
+          <button class="hud-btn" id="btnLobbyOpenLeaderboard" style="border-color: #FFDF5D; color: #FFDF5D;">🏆 榜單</button>
           <button class="hud-btn" id="btnLobbyToggleMode" style="border-color: #FFDF5D; color: #FFDF5D;">⚡ 循序(字➔詞)</button>
           <button class="hud-btn" id="btnCloseLobby">✕ 關閉</button>
         </div>
@@ -1537,12 +1546,16 @@ const VOCAB_DATABASE = {
         this.width = this.isPhrase ? Math.max(104, word.length * 36 + 28) : 72;
         this.height = 54;
         this.radius = this.isPhrase ? (this.width / 2) : 36;
-        const dist = Math.min(screenW, screenH) * 0.38 + (this.isPhrase ? 75 : 60);
+        // 人因認知調速：擴展生成半徑，預留更多反應視野 (增長距離)
+        const dist = Math.min(screenW, screenH) * 0.44 + (this.isPhrase ? 90 : 75);
         this.x = player.x + Math.cos(angleSlot) * dist;
         this.y = player.y + Math.sin(angleSlot) * dist;
-        this.x = Math.max(60, Math.min(screenW - 60, this.x));
-        this.y = Math.max(130, Math.min(screenH - 70, this.y));
-        this.speed = (1.15 + Math.random() * 0.45) * speedMult;
+        this.x = Math.max(50, Math.min(screenW - 50, this.x));
+        this.y = Math.max(115, Math.min(screenH - 75, this.y));
+        // 人因反應調速：為識字慢的學童增加 2.5 ~ 3.2 秒反應時間
+        // 航速由原本 ~1.38 像素/幀 調降至 ~0.68 像素/幀，撞擊抵達時間大幅延展至 5.2 ~ 6.0 秒！
+        const rawSpeed = (0.62 + Math.random() * 0.12) * speedMult;
+        this.speed = Math.min(1.2, Math.max(0.48, rawSpeed));
         this.hp = 1;
         this.wobble = Math.random() * 10;
       }
@@ -1667,10 +1680,11 @@ const VOCAB_DATABASE = {
 // 三角洲字點：循序漸進特警射擊引擎 (part_admin.js)
 // 包含：
 // 1. 特警登記管理：重新進入連結或死亡後強制重新輸入名字，杜絕前一使用者名字殘留
-// 2. 生命值大幅增強：230px 大型計量槽、內嵌 100/100 HP 數值、隨身全像生命條、破防紅邊危險預警
-// 3. 戰術選關大廳 (1~13課 & 🔥終極綜合)
-// 4. 每課獨立排名 ＋ 終極綜合總榜 (公開榜單與指揮官後台)
-// 5. 人類視覺專家 4 色舒適防作弊配色
+// 2. 登入畫面直達通道：老師可免輸入學生名字，在登入視窗直接點擊進入「🔐指揮官後台」或「🏆榮譽榜單」查看各課與終極排名
+// 3. 生命值大幅增強：230px 大型計量槽、內嵌 100/100 HP 數值、隨身全像生命條、破防紅邊危險預警
+// 4. 戰術選關大廳 (1~13課 & 🔥終極綜合)
+// 5. 每課獨立排名 ＋ 終極綜合總榜 (公開榜單與指揮官後台)
+// 6. 人類視覺專家 4 色舒適防作弊配色
 // ==========================================
 
 // 1. 專家建議：人因工學 4 色平衡色彩陣列 (Ergonomic 4-Palette)
@@ -1877,13 +1891,13 @@ function updatePhaseUI() {
     badge.style.color = "#00D2DC";
     badge.style.borderColor = "#00D2DC";
     badge.style.background = "rgba(0, 210, 220, 0.18)";
-    if (subhint) subhint.innerText = "請鎖定正確生字浮游靶機，嚴防逼近自爆！";
+    if (subhint) subhint.innerText = "請鎖定正確生字浮游靶（人因調速：充裕 6 秒時間仔細觀察形似字）";
   } else {
     badge.innerText = "階段二：生詞語境獵殺 (難度升級)";
     badge.style.color = "#FFB300";
     badge.style.borderColor = "#FFB300";
     badge.style.background = "rgba(255, 179, 0, 0.2)";
-    if (subhint) subhint.innerText = "鎖定正確生詞裝甲艦，識破錯別詞偽裝！(航速提升135%)";
+    if (subhint) subhint.innerText = "鎖定正確生詞裝甲艦，識破錯別詞陷阱（約 5 秒辨讀思考時間）";
   }
 }
 
@@ -1920,7 +1934,8 @@ function spawnWave() {
       { word: activeQuestion.word, isCorrect: true, isPhrase: false },
       ...distractors.map(w => ({ word: w, isCorrect: false, isPhrase: false }))
     ];
-    speedMult = (currentLessonKey === "hell" ? 1.5 : 1.0) + Math.min(combo * 0.03, 0.4);
+    const comboBoost = Math.min(combo * 0.01, 0.18);
+    speedMult = (currentLessonKey === "hell" ? 1.25 : 1.0) + comboBoost;
   } else {
     // 【階段二：生詞】
     document.getElementById("missionPrompt").innerText = activeQuestion.prompt;
@@ -1930,14 +1945,14 @@ function spawnWave() {
       { word: activeQuestion.phrase, isCorrect: true, isPhrase: true },
       ...distractors.map(w => ({ word: w, isCorrect: false, isPhrase: true }))
     ];
-    speedMult = (currentLessonKey === "hell" ? 1.75 : 1.35) + Math.min(combo * 0.04, 0.45);
+    const comboBoost = Math.min(combo * 0.012, 0.22);
+    speedMult = (currentLessonKey === "hell" ? 1.38 : 1.15) + comboBoost;
   }
 
   // 1. 隨機打散選項順序 (正解隨機落於 0~3 號槽位)
   waveItems.sort(() => Math.random() - 0.5);
 
   // 2. 隨機打散 4 款人因舒適配色，確保 4 個選項擁有 4 種不同舒適顏色
-  // 色彩與「是否為答案」完全無關，徹底消除色差作弊！
   const shuffledPalettes = [...TARGET_PALETTES].sort(() => Math.random() - 0.5);
 
   const baseAngle = Math.random() * Math.PI * 2;
@@ -1987,7 +2002,6 @@ function updateBulletsAndCollisions() {
           recordAnswer(t.word, true, currentPhase === 1 ? "生字辨析" : "生詞填空");
           updateHUD();
 
-          // 其餘靶機散退消散
           targets.forEach(ot => {
             if (ot !== t) createExplosion(ot.x, ot.y, ot.palette.beacon, 10);
           });
@@ -2403,6 +2417,8 @@ if (btnCloseLobby) {
     if (userProfile && playerHp > 0) {
       isGameActive = true;
       if (targets.length === 0) spawnWave();
+    } else if (!userProfile) {
+      showLoginModal();
     }
   };
 }
@@ -2595,16 +2611,32 @@ document.getElementById("btnNextLesson").onclick = () => {
 // ==========================================
 // 榮譽榜單：支援每課獨立排名與終極綜合排名
 // ==========================================
-document.getElementById("btnLeaderboard").onclick = () => {
+function openLeaderboardView(fromModal = null) {
   isGameActive = false;
+  if (fromModal) fromModal.style.display = "none";
   initLeaderboardFilterBar();
   renderPublicLeaderboard();
   document.getElementById("leaderboardModal").style.display = "flex";
-};
+}
+
+// 支援頂部 HUD、登入視窗與選關大廳直接開啟榜單
+["btnLeaderboard", "btnLoginOpenLeaderboard", "btnLobbyOpenLeaderboard"].forEach(id => {
+  const btn = document.getElementById(id);
+  if (btn) {
+    btn.onclick = () => {
+      const loginModal = document.getElementById("loginModal");
+      const lobbyModal = document.getElementById("missionSelectModal");
+      const fromModal = (loginModal && loginModal.style.display === "flex") ? loginModal : ((lobbyModal && lobbyModal.style.display === "flex") ? lobbyModal : null);
+      openLeaderboardView(fromModal);
+    };
+  }
+});
 
 document.getElementById("btnCloseLeaderboard").onclick = () => {
   document.getElementById("leaderboardModal").style.display = "none";
-  if (userProfile && playerHp > 0) {
+  if (!userProfile) {
+    showLoginModal();
+  } else if (playerHp > 0) {
     isGameActive = true;
     if (targets.length === 0) spawnWave();
   }
@@ -2681,15 +2713,37 @@ function renderPublicLeaderboard() {
 // ==========================================
 // 指揮官戰情總部 (Admin 8888)：支援每課獨立排名與篩選
 // ==========================================
-document.getElementById("btnOpenAdmin").onclick = () => {
+function promptAdminAuth(fromModal = null) {
   isGameActive = false;
+  if (fromModal) fromModal.style.display = "none";
   document.getElementById("inputAdminPass").value = "";
   document.getElementById("adminAuthModal").style.display = "flex";
-};
+  setTimeout(() => {
+    const input = document.getElementById("inputAdminPass");
+    if (input) input.focus();
+  }, 100);
+}
+
+// 支援頂部 HUD、登入視窗與選關大廳直通後台
+["btnOpenAdmin", "btnLoginOpenAdmin", "btnLobbyOpenAdmin"].forEach(id => {
+  const btn = document.getElementById(id);
+  if (btn) {
+    btn.onclick = () => {
+      const loginModal = document.getElementById("loginModal");
+      const lobbyModal = document.getElementById("missionSelectModal");
+      const fromModal = (loginModal && loginModal.style.display === "flex") ? loginModal : ((lobbyModal && lobbyModal.style.display === "flex") ? lobbyModal : null);
+      promptAdminAuth(fromModal);
+    };
+  }
+});
 
 document.getElementById("btnCancelAdminAuth").onclick = () => {
   document.getElementById("adminAuthModal").style.display = "none";
-  if (userProfile && playerHp > 0) isGameActive = true;
+  if (!userProfile) {
+    showLoginModal();
+  } else if (playerHp > 0) {
+    isGameActive = true;
+  }
 };
 
 document.getElementById("btnConfirmAdminAuth").onclick = () => {
@@ -2702,9 +2756,20 @@ document.getElementById("btnConfirmAdminAuth").onclick = () => {
   }
 };
 
+const passInput = document.getElementById("inputAdminPass");
+if (passInput) {
+  passInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      document.getElementById("btnConfirmAdminAuth").click();
+    }
+  });
+}
+
 document.getElementById("btnCloseAdminDashboard").onclick = () => {
   document.getElementById("adminDashboardModal").style.display = "none";
-  if (userProfile && playerHp > 0) {
+  if (!userProfile) {
+    showLoginModal();
+  } else if (playerHp > 0) {
     isGameActive = true;
     if (targets.length === 0) spawnWave();
   }
