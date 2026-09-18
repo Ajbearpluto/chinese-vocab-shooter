@@ -1360,7 +1360,8 @@ const VOCAB_DATABASE = {
         ctx.save();
         ctx.translate(this.x, this.y + Math.sin(this.wobble) * 4);
         ctx.fillStyle = "rgba(18, 28, 38, 0.95)";
-        ctx.strokeStyle = this.isCorrect ? "rgba(0, 255, 136, 0.85)" : "rgba(255, 170, 0, 0.7)";
+        // 統一戰術青藍裝甲邊框，絕對無顏色洩漏，嚴格考驗學員識字實力！
+        ctx.strokeStyle = "rgba(0, 210, 255, 0.85)";
         ctx.lineWidth = 3;
 
         if (!this.isPhrase) {
@@ -1375,6 +1376,7 @@ const VOCAB_DATABASE = {
           ctx.fill();
           ctx.stroke();
 
+          // 頂部信標指示燈 - 統一為金黃色信標
           ctx.fillStyle = "#FFDF5D";
           ctx.beginPath();
           ctx.arc(0, -this.radius, 3.5, 0, Math.PI * 2);
@@ -1398,10 +1400,12 @@ const VOCAB_DATABASE = {
           ctx.fill();
           ctx.stroke();
 
-          ctx.fillStyle = this.isCorrect ? "#00FF88" : "#FFAA00";
+          // 兩側推進噴射翼 - 統一為戰術青藍微光，無任何正誤色差
+          ctx.fillStyle = "rgba(0, 210, 255, 0.65)";
           ctx.fillRect(-w/2 - 4, -8, 4, 16);
           ctx.fillRect(w/2, -8, 4, 16);
 
+          // 頂部導航指示信標 - 統一為金黃色
           ctx.fillStyle = "#FFDF5D";
           ctx.beginPath();
           ctx.arc(0, -h/2, 3.5, 0, Math.PI * 2);
@@ -1438,6 +1442,7 @@ const VOCAB_DATABASE = {
 // ==========================================
 // 三角洲字點：循序漸進特警射擊引擎 (part_admin.js)
 // 難度進階：階段一(生字辨析) ➔ 階段二(生詞語境獵殺)
+// 修正：進入前絕不開打扣血、選項色調統一杜絕作弊
 // ==========================================
 
 // 1. 五年級國語全冊形似字/同音字/易混淆字字典 (Confusables Map)
@@ -1513,6 +1518,7 @@ for (const lKey in VOCAB_DATABASE) {
 let currentMode = "progressive";
 let currentPhase = 1; // 1: 生字特訓, 2: 生詞獵殺
 let isWaveTransition = false;
+let isGameActive = false; // 關鍵控制開關：進入戰場前絕不發動、彈窗開啟時暫停
 
 // 取得生字干擾字（3個）
 function getCharDistractors(targetWord, count = 3) {
@@ -1594,7 +1600,7 @@ function triggerPhaseUpgrade() {
   }
 
   setTimeout(() => {
-    if (playerHp > 0) spawnWave();
+    if (isGameActive && playerHp > 0) spawnWave();
   }, 900);
 }
 
@@ -1620,7 +1626,7 @@ function updatePhaseUI() {
 
 // 生成新一波次靶機
 function spawnWave() {
-  if (playerHp <= 0) return;
+  if (!isGameActive || playerHp <= 0) return;
   isWaveTransition = false;
   targets = [];
 
@@ -1723,7 +1729,7 @@ function updateBulletsAndCollisions() {
 
           isWaveTransition = true;
           setTimeout(() => {
-            if (playerHp > 0) spawnWave();
+            if (isGameActive && playerHp > 0) spawnWave();
           }, 420);
         } else {
           combo = 0;
@@ -1755,7 +1761,7 @@ function updateBulletsAndCollisions() {
 
 // 檢查浮游靶自爆破防
 function checkDeadTargets() {
-  if (isWaveTransition) return;
+  if (isWaveTransition || !isGameActive) return;
   let correctDestroyed = false;
   for (let ti = targets.length - 1; ti >= 0; ti--) {
     if (targets[ti].hp <= 0) {
@@ -1770,7 +1776,7 @@ function checkDeadTargets() {
   if (correctDestroyed && playerHp > 0 && !isWaveTransition) {
     isWaveTransition = true;
     setTimeout(() => {
-      if (playerHp > 0) spawnWave();
+      if (isGameActive && playerHp > 0) spawnWave();
     }, 500);
   }
 }
@@ -1779,6 +1785,7 @@ function checkDeadTargets() {
 window.addEventListener("keydown", e => {
   if (e.code === "Space") {
     e.preventDefault();
+    if (!isGameActive || playerHp <= 0) return;
     sound.init();
     player.shoot();
   }
@@ -1861,7 +1868,7 @@ function updateAndDrawFloatingTexts() {
   ctx.restore();
 }
 
-// 遊戲渲染主迴圈
+// 遊戲渲染主迴圈：嚴格遵循 isGameActive 控制
 function gameLoop() {
   let sx = 0, sy = 0;
   if (screenShake > 0) {
@@ -1879,17 +1886,28 @@ function gameLoop() {
 
   drawTacticalGrid();
 
-  player.update();
+  // 僅在進行中才更新玩家走位
+  if (isGameActive) {
+    player.update();
+  }
   player.draw();
 
-  updateBulletsAndCollisions();
+  // 僅在進行中才更新子彈與碰撞
+  if (isGameActive) {
+    updateBulletsAndCollisions();
+  }
   drawBullets();
 
+  // 僅在進行中才逼近飛行，未開始前靜態顯示或無靶機
   for (let i = 0; i < targets.length; i++) {
-    targets[i].update();
+    if (isGameActive) {
+      targets[i].update();
+    }
     targets[i].draw();
   }
-  checkDeadTargets();
+  if (isGameActive) {
+    checkDeadTargets();
+  }
 
   updateAndDrawParticles();
   updateAndDrawFloatingTexts();
@@ -1911,7 +1929,9 @@ function initDock() {
     btn.className = `dock-pill ${i === currentLessonKey ? "active" : ""}`;
     btn.innerText = `第 ${i} 課`;
     btn.dataset.lesson = i;
-    btn.onclick = () => switchLesson(i);
+    btn.onclick = () => {
+      if (isGameActive) switchLesson(i);
+    };
     dockStrip.appendChild(btn);
   }
 
@@ -1919,7 +1939,9 @@ function initDock() {
   hellBtn.className = `dock-pill hell-mode ${currentLessonKey === "hell" ? "active" : ""}`;
   hellBtn.innerText = "🔥 全冊地獄生存戰";
   hellBtn.dataset.lesson = "hell";
-  hellBtn.onclick = () => switchLesson("hell");
+  hellBtn.onclick = () => {
+    if (isGameActive) switchLesson("hell");
+  };
   dockStrip.appendChild(hellBtn);
 }
 
@@ -1943,7 +1965,7 @@ if (btnToggleMode) {
       btnToggleMode.style.borderColor = "#FFDF5D";
       btnToggleMode.style.color = "#FFDF5D";
     }
-    switchLesson(currentLessonKey);
+    if (isGameActive) switchLesson(currentLessonKey);
   };
 }
 
@@ -1997,11 +2019,13 @@ function switchLesson(lessonKey) {
   player.y = screenH / 2;
 
   updateHUD();
-  spawnWave();
+  if (isGameActive) {
+    spawnWave();
+  }
 }
 
 // ==========================================
-// 學員檔案與 HUD 狀態更新
+// 學員檔案與 HUD 狀態更新 (進入前安全防線)
 // ==========================================
 const KEY_USER = "delta_shooter_user";
 const KEY_RECORDS = "delta_shooter_records";
@@ -2029,17 +2053,30 @@ function loadUserProfile() {
       userProfile = JSON.parse(saved);
       document.getElementById("userCallsign").innerText = userProfile.callsign;
       document.getElementById("avatarChar").innerText = userProfile.callsign.charAt(0) || "特";
+      // 已有註冊特警呼號，正式啟動遊戲進入戰場
+      isGameActive = true;
+      switchLesson(1);
     } catch(e) {
       showLoginModal();
     }
   } else {
+    // 首次進入：跳出登入視窗，此時絕對不生成敵人、不開打扣血！
     showLoginModal();
   }
 }
 
 function showLoginModal() {
+  isGameActive = false;
+  targets = [];
+  bullets = [];
   document.getElementById("loginModal").style.display = "flex";
   document.getElementById("inputCallsign").value = userProfile ? userProfile.callsign : "";
+  document.getElementById("missionPrompt").innerText = "等待特警登入登記...";
+  document.getElementById("remainVal").innerText = "0";
+  setTimeout(() => {
+    const input = document.getElementById("inputCallsign");
+    if (input) input.focus();
+  }, 100);
 }
 
 document.getElementById("btnConfirmLogin").onclick = () => {
@@ -2051,9 +2088,18 @@ document.getElementById("btnConfirmLogin").onclick = () => {
   document.getElementById("avatarChar").innerText = name.charAt(0);
   document.getElementById("loginModal").style.display = "none";
   sound.init();
+
+  // 正式進入戰場並開始第一波生字靶機
+  isGameActive = true;
+  switchLesson(currentLessonKey || 1);
 };
 
-document.getElementById("btnSwitchUser").onclick = () => showLoginModal();
+document.getElementById("btnSwitchUser").onclick = () => {
+  isGameActive = false;
+  targets = [];
+  bullets = [];
+  showLoginModal();
+};
 
 // ==========================================
 // 數據分析、歷史存檔與勝負結算
@@ -2093,6 +2139,7 @@ function saveRoundRecord(completed = false) {
 }
 
 function handleGameOver() {
+  isGameActive = false;
   saveRoundRecord(false);
   document.getElementById("finalScoreVal").innerText = score;
   document.getElementById("finalComboVal").innerText = maxCombo;
@@ -2101,10 +2148,12 @@ function handleGameOver() {
 
 document.getElementById("btnRestartMission").onclick = () => {
   document.getElementById("gameOverModal").style.display = "none";
+  isGameActive = true;
   switchLesson(currentLessonKey);
 };
 
 function handleVictory() {
+  isGameActive = false;
   saveRoundRecord(true);
   const vModal = document.getElementById("victoryModal");
   if (vModal) {
@@ -2122,6 +2171,7 @@ document.getElementById("btnNextLesson").onclick = () => {
   document.getElementById("victoryModal").style.display = "none";
   let next = currentLessonKey === "hell" ? 1 : Number(currentLessonKey) + 1;
   if (next > 13) next = "hell";
+  isGameActive = true;
   switchLesson(next);
 };
 
@@ -2129,12 +2179,14 @@ document.getElementById("btnNextLesson").onclick = () => {
 // 榮譽榜單與指揮官戰情總部 (Admin 8888)
 // ==========================================
 document.getElementById("btnLeaderboard").onclick = () => {
+  isGameActive = false;
   renderPublicLeaderboard();
   document.getElementById("leaderboardModal").style.display = "flex";
 };
 
 document.getElementById("btnCloseLeaderboard").onclick = () => {
   document.getElementById("leaderboardModal").style.display = "none";
+  isGameActive = true;
 };
 
 function renderPublicLeaderboard() {
@@ -2160,12 +2212,14 @@ function renderPublicLeaderboard() {
 }
 
 document.getElementById("btnOpenAdmin").onclick = () => {
+  isGameActive = false;
   document.getElementById("inputAdminPass").value = "";
   document.getElementById("adminAuthModal").style.display = "flex";
 };
 
 document.getElementById("btnCancelAdminAuth").onclick = () => {
   document.getElementById("adminAuthModal").style.display = "none";
+  isGameActive = true;
 };
 
 document.getElementById("btnConfirmAdminAuth").onclick = () => {
@@ -2180,6 +2234,7 @@ document.getElementById("btnConfirmAdminAuth").onclick = () => {
 
 document.getElementById("btnCloseAdminDashboard").onclick = () => {
   document.getElementById("adminDashboardModal").style.display = "none";
+  isGameActive = true;
 };
 
 let currentAdminTab = "ranking";
@@ -2394,7 +2449,7 @@ window.saveWebhookUrl = function() {
 // 特警射擊與移動保護：開啟彈窗或陣亡時禁止操作
 const origShoot = player.shoot.bind(player);
 player.shoot = function() {
-  if (playerHp <= 0) return;
+  if (!isGameActive || playerHp <= 0) return;
   const openModal = document.querySelector(".modal-overlay[style*='display: flex']");
   if (openModal) return;
   origShoot();
@@ -2402,18 +2457,17 @@ player.shoot = function() {
 
 const origPlayerUpdate = player.update.bind(player);
 player.update = function() {
-  if (playerHp <= 0) return;
+  if (!isGameActive || playerHp <= 0) return;
   const openModal = document.querySelector(".modal-overlay[style*='display: flex']");
   if (openModal) return;
   origPlayerUpdate();
 };
 
 // ==========================================
-// 啟動主迴圈與初始化遊戲
+// 啟動主迴圈與初始化遊戲 (登入前嚴格待機)
 // ==========================================
 initDock();
 loadUserProfile();
-switchLesson(1);
 requestAnimationFrame(gameLoop);
 </script>
 </body>
