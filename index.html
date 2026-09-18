@@ -135,6 +135,29 @@
     .filter-pill.hell.active { background: #FF3344; color: #FFF; border-color: #FF3344; }
     .apple-select { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; color: #FFF; padding: 6px 12px; font-size: 13px; font-weight: 700; outline: none; cursor: pointer; }
     .apple-select option { background: #0E1520; color: #FFF; }
+  
+    /* 後台課次篩選導覽列與戰情卡片 */
+    .admin-lesson-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
+    .admin-lesson-pills::-webkit-scrollbar { display: none; }
+    .admin-pill { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.04); color: #A0B0C0; cursor: pointer; transition: all 0.2s; }
+    .admin-pill:hover { background: rgba(255, 255, 255, 0.1); color: #FFF; }
+    .admin-pill.active { background: #0071E3; color: #FFF; border-color: #0071E3; box-shadow: 0 0 14px rgba(0, 113, 227, 0.5); }
+    .admin-pill.hell { border-color: rgba(255, 69, 58, 0.4); color: #FF6677; }
+    .admin-pill.hell.active { background: #FF3344; color: #FFF; border-color: #FF3344; box-shadow: 0 0 16px rgba(255, 51, 68, 0.6); }
+
+    /* 生字掌握度診斷熱力晶片 */
+    .word-matrix-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; }
+    .word-matrix-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .word-diag-chip { padding: 6px 12px; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; border: 1px solid rgba(255, 255, 255, 0.12); }
+    .word-diag-chip.mastered { background: rgba(0, 255, 136, 0.1); border-color: rgba(0, 255, 136, 0.4); color: #00FF88; }
+    .word-diag-chip.warning { background: rgba(255, 179, 0, 0.12); border-color: rgba(255, 179, 0, 0.5); color: #FFB300; }
+    .word-diag-chip.danger { background: rgba(255, 51, 68, 0.15); border-color: rgba(255, 51, 68, 0.6); color: #FF6677; }
+
+    /* 後台課次總覽大廳網格 (與出擊大廳風格一致) */
+    .admin-overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .admin-lesson-card { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px; }
+    .admin-lesson-card:hover { background: rgba(0, 113, 227, 0.1); border-color: #0071E3; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 113, 227, 0.25); }
+
   </style>
 </head>
 <body>
@@ -280,33 +303,21 @@
         <div class="kpi-box"><div style="font-size: 12px; color: #8E9BAE;">全班平均命中精度</div><div style="font-size: 22px; font-weight: 900; color: #00FF88;" id="kpiAvgAccuracy">94%</div></div>
         <div class="kpi-box"><div style="font-size: 12px; color: #8E9BAE;">全班最易誤擊干擾字</div><div style="font-size: 22px; font-weight: 900; color: #FF3344;" id="kpiHardestWord">瘧 (42%錯)</div></div>
       </div>
+      <!-- 後台功能分頁與課次戰情切換 -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <div class="admin-tabs" style="margin-bottom: 0;">
-          <button class="tab-btn active" id="tabBtnRanking">🏆 學員戰術總排行</button>
-          <button class="tab-btn" id="tabBtnErrors">📊 易錯生字弱點熱力圖</button>
-          <button class="tab-btn" id="tabBtnCloud">☁️ 跨裝置 Google 試算表同步</button>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 14px; font-weight: 900; color: #FFF;">📚 課次戰況與識字診斷：</span>
+          <span style="font-size: 12px; color: #8E9BAE;">(點選課次查看生字掌握度與學員名冊)</span>
         </div>
-        <div id="adminFilterContainer" style="display: flex; align-items: center; gap: 6px;">
-          <span style="font-size: 12px; color: #8E9BAE;">排行篩選：</span>
-          <select class="apple-select" id="adminLessonFilter">
-            <option value="all">🌟 全體關卡總排行</option>
-            <option value="hell">🔥 終極綜合排行</option>
-            <option value="1">第 1 課排行</option>
-            <option value="2">第 2 課排行</option>
-            <option value="3">第 3 課排行</option>
-            <option value="4">第 4 課排行</option>
-            <option value="5">第 5 課排行</option>
-            <option value="6">第 6 課排行</option>
-            <option value="7">第 7 課排行</option>
-            <option value="8">第 8 課排行</option>
-            <option value="9">第 9 課排行</option>
-            <option value="10">第 10 課排行</option>
-            <option value="11">第 11 課排行</option>
-            <option value="12">第 12 課排行</option>
-            <option value="13">第 13 課排行</option>
-          </select>
+        <div class="admin-tabs" style="margin-bottom: 0;">
+          <button class="tab-btn active" id="tabBtnRanking">🏆 各課成績與識字診斷</button>
+          <button class="tab-btn" id="tabBtnErrors">📊 全年級常錯字分析</button>
+          <button class="tab-btn" id="tabBtnCloud">☁️ 試算表同步</button>
         </div>
       </div>
+
+      <!-- 大廳風格課次選擇橫條 (分課切換，一目了然！) -->
+      <div class="admin-lesson-pills" id="adminLessonFilterBar"></div>
       <div class="admin-content" id="adminContentArea"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
         <div style="display: flex; gap: 8px;">
@@ -1677,17 +1688,18 @@ const VOCAB_DATABASE = {
 // 戰術邏輯、防作弊遮蔽、戰情總部 (part_admin.js)
 // ==========================================
 // ==========================================
-// 三角洲字點：循序漸進特警射擊引擎 (part_admin.js)
+// 三角洲字點：特警射擊引擎與全功能後台 (part_admin.js)
 // 包含：
-// 1. 特警登記管理：重新進入連結或死亡後強制重新輸入名字，杜絕前一使用者名字殘留
-// 2. 登入畫面直達通道：老師可免輸入學生名字，在登入視窗直接點擊進入「🔐指揮官後台」或「🏆榮譽榜單」查看各課與終極排名
-// 3. 生命值大幅增強：230px 大型計量槽、內嵌 100/100 HP 數值、隨身全像生命條、破防紅邊危險預警
-// 4. 戰術選關大廳 (1~13課 & 🔥終極綜合)
-// 5. 每課獨立排名 ＋ 終極綜合總榜 (公開榜單與指揮官後台)
-// 6. 人類視覺專家 4 色舒適防作弊配色
+// 1. 每課獨立戰情與全體生字掌握度熱力診斷（綠色完全掌握 / 黃色需加強 / 紅色高危盲點）
+// 2. 課次總覽大廳（第 1 ~ 13 課 ＋ 🔥 終極綜合）戰況卡片網格
+// 3. 學員成績名冊新增【🎯 生字掌握狀況 / 錯別字診斷】欄位，精準看出每位學生會不會字
+// 4. 當局錯題追蹤 (roundMistakes) 與豐富示範資料注入
+// 5. 特警登記管理：進入連結或死亡後強制重新輸入名字
+// 6. 登入畫面直達通道：免登入直接進入「🔐 指揮官後台」或「🏆 榮譽榜單」
+// 7. 人因工學 4 色防作弊平衡配色與調速
 // ==========================================
 
-// 1. 專家建議：人因工學 4 色平衡色彩陣列 (Ergonomic 4-Palette)
+// 1. 人因工學 4 色平衡色彩陣列 (Ergonomic 4-Palette)
 const TARGET_PALETTES = [
   {
     name: "天青藍 (Azure Cyan)",
@@ -1719,7 +1731,7 @@ const TARGET_PALETTES = [
   }
 ];
 
-// 2. 五年級國語全冊形似字/同音字/易混淆字字典 (Confusables Map)
+// 2. 五年級國語全冊形似字/同音字/易混淆字字典
 const CONFUSABLES = {
   "蚊": ["紋", "雯", "玟"], "帳": ["張", "脹", "漲", "棚"], "洲": ["州", "舟", "周"],
   "瘧": ["虐", "瘋", "痕"], "疾": ["嫉", "級", "及", "急"], "死": ["歹", "殘", "列"],
@@ -1787,17 +1799,18 @@ for (const lKey in VOCAB_DATABASE) {
   }
 }
 
-// 模式與階段狀態
+// 模式與狀態管理
 let currentMode = "progressive"; // "progressive", "char_only", "phrase_only"
 let currentPhase = 1; // 1: 生字特訓, 2: 生詞獵殺
 let isWaveTransition = false;
-let isGameActive = false; // 嚴格待機守門員：登入與選關前絕不發動
+let isGameActive = false; // 嚴格待機守門員
+let roundMistakes = []; // 當局答錯與盲點記錄
 
-// 排行榜與後台過濾狀態
-let currentLbFilter = "all"; // "all", "hell", "1" ~ "13"
-let currentAdminLessonFilter = "all"; // "all", "hell", "1" ~ "13"
+// 篩選狀態
+let currentLbFilter = "all"; // 公開榜單篩選 ("all", "hell", "1" ~ "13")
+let currentAdminLessonFilter = "all"; // 指揮官後台課次篩選 ("all", "hell", "1" ~ "13")
 
-// 取得生字干擾字（3個）
+// 取得生字干擾字
 function getCharDistractors(targetWord, count = 3) {
   const result = [];
   if (CONFUSABLES[targetWord]) {
@@ -1817,11 +1830,9 @@ function getCharDistractors(targetWord, count = 3) {
   return result.slice(0, count);
 }
 
-// 取得生詞干擾詞（3個：包含高擬真錯別字詞陷阱 + 同課生詞）
+// 取得生詞干擾詞
 function getPhraseDistractors(targetPhrase, targetWord, count = 3) {
   const result = [];
-
-  // 1. 錯別字詞陷阱（例如：瘧疾 ➔ 虐疾 / 帳篷 ➔ 帳棚）
   if (CONFUSABLES[targetWord]) {
     for (const cw of CONFUSABLES[targetWord]) {
       const typo = targetPhrase.replaceAll(targetWord, cw);
@@ -1831,33 +1842,28 @@ function getPhraseDistractors(targetPhrase, targetWord, count = 3) {
       }
     }
   }
-
-  // 2. 當前課堂的其他生詞
   const curLessonPhrases = (LESSON_PHRASES[currentLessonKey] || []).map(x => x.phrase).filter(p => p !== targetPhrase);
   curLessonPhrases.sort(() => Math.random() - 0.5);
   for (const p of curLessonPhrases) {
     if (result.length >= count) break;
     if (!result.includes(p)) result.push(p);
   }
-
-  // 3. 全年級生詞補足
   const shuffled = [...ALL_PHRASES].map(x => x.phrase).filter(p => p !== targetPhrase);
   shuffled.sort(() => Math.random() - 0.5);
   for (const p of shuffled) {
     if (result.length >= count) break;
     if (!result.includes(p)) result.push(p);
   }
-
   return result.slice(0, count);
 }
 
-// 題目語意格式化：防作弊遮蔽
+// 題目語意格式化
 function formatDirective(word, rawPrompt) {
   if (!rawPrompt) return "語境提示載入中...";
   return rawPrompt.replaceAll(word, " ＿ ");
 }
 
-// 階段切換指示特效
+// 階段切換特效
 function triggerPhaseUpgrade() {
   sound.playHitCorrect(12);
   screenShake = 16;
@@ -1869,7 +1875,6 @@ function triggerPhaseUpgrade() {
   currentPhase = 2;
   updatePhaseUI();
 
-  // 載入第二階段生詞題庫
   if (currentLessonKey === "hell") {
     currentPool = [...ALL_PHRASES].sort(() => Math.random() - 0.5);
   } else {
@@ -1891,7 +1896,7 @@ function updatePhaseUI() {
     badge.style.color = "#00D2DC";
     badge.style.borderColor = "#00D2DC";
     badge.style.background = "rgba(0, 210, 220, 0.18)";
-    if (subhint) subhint.innerText = "請鎖定正確生字浮游靶（人因調速：充裕 6 秒時間仔細觀察形似字）";
+    if (subhint) subhint.innerText = "請鎖定正確生字浮游靶（人因調速：充裕 5.5~6 秒時間觀察形似字）";
   } else {
     badge.innerText = "階段二：生詞語境獵殺 (難度升級)";
     badge.style.color = "#FFB300";
@@ -1901,13 +1906,12 @@ function updatePhaseUI() {
   }
 }
 
-// 生成新一波次靶機：4 個選項隨機分派 4 種舒適人因色彩！
+// 生成新一波次靶機：4 個選項隨機分派 4 種舒適人因色彩
 function spawnWave() {
   if (!isGameActive || playerHp <= 0) return;
   isWaveTransition = false;
   targets = [];
 
-  // 若當前池已清空
   if (!currentPool || currentPool.length === 0) {
     if (currentPhase === 1 && currentMode === "progressive") {
       triggerPhaseUpgrade();
@@ -1925,7 +1929,6 @@ function spawnWave() {
   let speedMult = 1.0;
 
   if (currentPhase === 1) {
-    // 【階段一：生字】
     const maskedPrompt = formatDirective(activeQuestion.word, activeQuestion.prompt);
     document.getElementById("missionPrompt").innerText = maskedPrompt;
 
@@ -1937,7 +1940,6 @@ function spawnWave() {
     const comboBoost = Math.min(combo * 0.01, 0.18);
     speedMult = (currentLessonKey === "hell" ? 1.25 : 1.0) + comboBoost;
   } else {
-    // 【階段二：生詞】
     document.getElementById("missionPrompt").innerText = activeQuestion.prompt;
 
     const distractors = getPhraseDistractors(activeQuestion.phrase, activeQuestion.word, 3);
@@ -1949,10 +1951,7 @@ function spawnWave() {
     speedMult = (currentLessonKey === "hell" ? 1.38 : 1.15) + comboBoost;
   }
 
-  // 1. 隨機打散選項順序 (正解隨機落於 0~3 號槽位)
   waveItems.sort(() => Math.random() - 0.5);
-
-  // 2. 隨機打散 4 款人因舒適配色，確保 4 個選項擁有 4 種不同舒適顏色
   const shuffledPalettes = [...TARGET_PALETTES].sort(() => Math.random() - 0.5);
 
   const baseAngle = Math.random() * Math.PI * 2;
@@ -1963,7 +1962,7 @@ function spawnWave() {
   });
 }
 
-// 更新子彈與碰撞檢測
+// 更新子彈與碰撞檢測（即時記錄錯字）
 function updateBulletsAndCollisions() {
   for (let bi = bullets.length - 1; bi >= 0; bi--) {
     const b = bullets[bi];
@@ -1996,7 +1995,6 @@ function updateBulletsAndCollisions() {
           sound.playHitCorrect(combo);
           screenShake = t.isPhrase ? 12 : 9;
 
-          // 以該靶機專屬色彩綻放勝利爆破粒子！
           createExplosion(t.x, t.y, t.palette.beacon, t.isPhrase ? 36 : 28);
           addFloatingText(t.x, t.y, `+${points} ${t.isPhrase ? '生詞獵殺!' : '精準命中!'}`, t.palette.beacon);
           recordAnswer(t.word, true, currentPhase === 1 ? "生字辨析" : "生詞填空");
@@ -2021,6 +2019,14 @@ function updateBulletsAndCollisions() {
           createExplosion(t.x, t.y, "#FF3344", 26);
           addFloatingText(t.x, t.y, `誤擊「${t.word}」 -${dmg}HP!`, "#FF3344");
           const correctTarget = currentPhase === 1 ? activeQuestion.word : activeQuestion.phrase;
+          
+          // 記錄錯誤到全域易錯表與當局錯字陣列
+          roundMistakes.push({
+            target: correctTarget,
+            picked: t.word,
+            isPhrase: t.isPhrase,
+            detail: `誤擊「${t.word}」`
+          });
           recordAnswer(t.word, false, `誤將「${t.word}」當作「${correctTarget}」`);
           updateHUD();
 
@@ -2039,7 +2045,7 @@ function updateBulletsAndCollisions() {
   }
 }
 
-// 檢查浮游靶自爆破防
+// 檢查浮游靶自爆破防（記錄逼近自爆字詞）
 function checkDeadTargets() {
   if (isWaveTransition || !isGameActive) return;
   let correctDestroyed = false;
@@ -2048,6 +2054,12 @@ function checkDeadTargets() {
       if (targets[ti].isCorrect) {
         correctDestroyed = true;
         const correctTarget = currentPhase === 1 ? activeQuestion.word : activeQuestion.phrase;
+        roundMistakes.push({
+          target: correctTarget,
+          picked: "逼近自爆",
+          isPhrase: targets[ti].isPhrase,
+          detail: "逼近自爆破防"
+        });
         recordAnswer(correctTarget, false, "浮游靶逼近自爆破防");
       }
       targets.splice(ti, 1);
@@ -2088,7 +2100,7 @@ function drawTacticalGrid() {
   ctx.stroke();
 }
 
-// 繪製特警子彈與曳光軌跡
+// 繪製特警子彈
 function drawBullets() {
   ctx.save();
   for (const b of bullets) {
@@ -2189,7 +2201,6 @@ function gameLoop() {
   updateAndDrawParticles();
   updateAndDrawFloatingTexts();
 
-  // 若生命值低於 30%，渲染破防邊緣危險預警光暈
   if (typeof drawCriticalVignette === "function") {
     drawCriticalVignette();
   }
@@ -2204,6 +2215,7 @@ function gameLoop() {
 // ==========================================
 function initDock() {
   const dockStrip = document.getElementById("dockStrip");
+  if (!dockStrip) return;
   dockStrip.innerHTML = "";
 
   for (let i = 1; i <= 13; i++) {
@@ -2269,6 +2281,7 @@ if (btnLobbyToggleMode) btnLobbyToggleMode.onclick = cycleMode;
 
 function switchLesson(lessonKey) {
   currentLessonKey = lessonKey;
+  roundMistakes = []; // 重設當局錯字記錄
 
   document.querySelectorAll(".dock-pill").forEach(p => {
     p.classList.toggle("active", p.dataset.lesson == lessonKey);
@@ -2324,7 +2337,7 @@ function switchLesson(lessonKey) {
 // 戰術出擊選關大廳 (Mission Select Lobby)
 // ==========================================
 function openMissionLobby() {
-  isGameActive = false; // 嚴格待機守門員
+  isGameActive = false;
   targets = [];
   bullets = [];
 
@@ -2357,7 +2370,6 @@ function renderMissionGrid() {
     const charCount = (lData.words || []).length;
     const phraseCount = (LESSON_PHRASES[i] || []).length;
 
-    // 取得個人在該課的最佳歷史成績
     const lessonRecords = records.filter(r => r.lessonKey == String(i) && (!userProfile || r.callsign === userProfile.callsign));
     const bestScore = lessonRecords.length > 0 ? Math.max(...lessonRecords.map(r => r.score || 0)) : 0;
 
@@ -2393,7 +2405,6 @@ window.selectLessonAndLaunch = function(lessonKey) {
   switchLesson(lessonKey);
 };
 
-// 綁定終極綜合生存戰卡片點擊出擊
 const cardSelectUltimate = document.getElementById("cardSelectUltimate");
 if (cardSelectUltimate) {
   cardSelectUltimate.onclick = () => {
@@ -2401,7 +2412,6 @@ if (cardSelectUltimate) {
   };
 }
 
-// 頂部 HUD 選關按鈕
 const btnOpenLobby = document.getElementById("btnOpenLobby");
 if (btnOpenLobby) {
   btnOpenLobby.onclick = () => {
@@ -2409,7 +2419,6 @@ if (btnOpenLobby) {
   };
 }
 
-// 大廳關閉按鈕
 const btnCloseLobby = document.getElementById("btnCloseLobby");
 if (btnCloseLobby) {
   btnCloseLobby.onclick = () => {
@@ -2424,7 +2433,7 @@ if (btnCloseLobby) {
 }
 
 // ==========================================
-// 學員檔案與 HUD 狀態更新 (生命值強化 & 每次登入重置)
+// 學員檔案與 HUD 狀態更新
 // ==========================================
 const KEY_USER = "delta_shooter_user";
 const KEY_RECORDS = "delta_shooter_records";
@@ -2477,7 +2486,7 @@ function updateHUD() {
   }
 }
 
-// 每次進入連結或刷新：強制要求重新輸入姓名，絕不自動套用前一個使用者的名字！
+// 每次進入連結或刷新：強制重新登記名字
 function loadUserProfile() {
   userProfile = null;
   document.getElementById("userCallsign").innerText = "等待登記...";
@@ -2491,7 +2500,6 @@ function showLoginModal() {
   bullets = [];
   document.getElementById("loginModal").style.display = "flex";
 
-  // 每次打開登入登記：清空輸入欄位，絕不殘留舊使用者名字！
   const input = document.getElementById("inputCallsign");
   if (input) {
     input.value = "";
@@ -2511,7 +2519,6 @@ document.getElementById("btnConfirmLogin").onclick = () => {
   document.getElementById("loginModal").style.display = "none";
   sound.init();
 
-  // 登記完成後進入戰術出擊選關大廳
   openMissionLobby();
 };
 
@@ -2524,7 +2531,7 @@ document.getElementById("btnSwitchUser").onclick = () => {
 };
 
 // ==========================================
-// 數據分析、歷史存檔與勝負結算 (支援每課獨立標記)
+// 數據分析、歷史存檔與勝負結算
 // ==========================================
 function recordAnswer(word, isCorrect, detail = "") {
   try {
@@ -2551,7 +2558,7 @@ function saveRoundRecord(completed = false) {
     records.push({
       id: Date.now(),
       callsign: userProfile ? userProfile.callsign : "匿名特警",
-      lessonKey: String(currentLessonKey), // "1" ~ "13" 或 "hell"
+      lessonKey: String(currentLessonKey),
       lesson: `${lessonTitle} [${modeLabel}]`,
       lessonName: lessonTitle,
       mode: currentMode,
@@ -2560,6 +2567,7 @@ function saveRoundRecord(completed = false) {
       maxCombo: maxCombo,
       accuracy: acc,
       completed: completed,
+      mistakes: [...roundMistakes],
       date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString().slice(0, 5)
     });
 
@@ -2619,7 +2627,6 @@ function openLeaderboardView(fromModal = null) {
   document.getElementById("leaderboardModal").style.display = "flex";
 }
 
-// 支援頂部 HUD、登入視窗與選關大廳直接開啟榜單
 ["btnLeaderboard", "btnLoginOpenLeaderboard", "btnLobbyOpenLeaderboard"].forEach(id => {
   const btn = document.getElementById(id);
   if (btn) {
@@ -2645,7 +2652,6 @@ document.getElementById("btnCloseLeaderboard").onclick = () => {
 function initLeaderboardFilterBar() {
   const bar = document.getElementById("lbFilterBar");
   if (!bar) return;
-
   bar.innerHTML = "";
 
   const createPill = (label, filterVal, isHell = false) => {
@@ -2672,7 +2678,6 @@ function renderPublicLeaderboard() {
   const listEl = document.getElementById("leaderboardList");
   if (!listEl) return;
 
-  // 依據篩選過濾課次
   let filtered = allRecords;
   if (currentLbFilter === "hell") {
     filtered = allRecords.filter(r => r.lessonKey === "hell" || (r.lesson && r.lesson.includes("地獄")) || (r.lesson && r.lesson.includes("終極")));
@@ -2691,7 +2696,6 @@ function renderPublicLeaderboard() {
     return;
   }
 
-  // 取該分類前 10 名
   listEl.innerHTML = filtered.slice(0, 10).map((r, i) => `
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; margin-bottom: 6px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid ${i === 0 ? '#FFDF5D' : i === 1 ? '#E0E0E0' : i === 2 ? '#CD7F32' : 'transparent'};">
       <div style="display: flex; align-items: center; gap: 10px;">
@@ -2711,7 +2715,7 @@ function renderPublicLeaderboard() {
 }
 
 // ==========================================
-// 指揮官戰情總部 (Admin 8888)：支援每課獨立排名與篩選
+// 指揮官戰情總部 (Admin 8888)：分課名冊與生字診斷
 // ==========================================
 function promptAdminAuth(fromModal = null) {
   isGameActive = false;
@@ -2724,7 +2728,6 @@ function promptAdminAuth(fromModal = null) {
   }, 100);
 }
 
-// 支援頂部 HUD、登入視窗與選關大廳直通後台
 ["btnOpenAdmin", "btnLoginOpenAdmin", "btnLobbyOpenAdmin"].forEach(id => {
   const btn = document.getElementById(id);
   if (btn) {
@@ -2780,17 +2783,7 @@ let currentAdminTab = "ranking";
 function openAdminDashboard() {
   document.getElementById("adminDashboardModal").style.display = "flex";
   refreshAdminKPIs();
-
-  // 綁定後台課次篩選下拉選單事件
-  const filterSelect = document.getElementById("adminLessonFilter");
-  if (filterSelect) {
-    filterSelect.value = currentAdminLessonFilter;
-    filterSelect.onchange = (e) => {
-      currentAdminLessonFilter = e.target.value;
-      renderAdminTab("ranking");
-    };
-  }
-
+  renderAdminLessonFilterBar();
   renderAdminTab(currentAdminTab);
 }
 
@@ -2820,6 +2813,31 @@ function refreshAdminKPIs() {
   document.getElementById("kpiHardestWord").innerText = hardestWord;
 }
 
+// 渲染後台大廳風格課次膠囊導覽條
+function renderAdminLessonFilterBar() {
+  const bar = document.getElementById("adminLessonFilterBar");
+  if (!bar) return;
+  bar.innerHTML = "";
+
+  const createPill = (label, key, isHell = false) => {
+    const btn = document.createElement("button");
+    btn.className = `admin-pill ${isHell ? 'hell' : ''} ${currentAdminLessonFilter === key ? 'active' : ''}`;
+    btn.innerText = label;
+    btn.onclick = () => {
+      currentAdminLessonFilter = key;
+      renderAdminLessonFilterBar();
+      renderAdminTab("ranking");
+    };
+    bar.appendChild(btn);
+  };
+
+  createPill("🌟 課次總覽大廳", "all");
+  createPill("🔥 終極綜合", "hell", true);
+  for (let i = 1; i <= 13; i++) {
+    createPill(`第 ${i} 課`, String(i));
+  }
+}
+
 document.getElementById("tabBtnRanking").onclick = () => {
   currentAdminTab = "ranking";
   setAdminTabActive("tabBtnRanking");
@@ -2840,64 +2858,308 @@ document.getElementById("tabBtnCloud").onclick = () => {
 
 function setAdminTabActive(activeId) {
   ["tabBtnRanking", "tabBtnErrors", "tabBtnCloud"].forEach(id => {
-    document.getElementById(id).classList.toggle("active", id === activeId);
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("active", id === activeId);
   });
-  // 僅在 ranking 分頁顯示課次篩選下拉選單
-  const filterContainer = document.getElementById("adminFilterContainer");
-  if (filterContainer) {
-    filterContainer.style.display = (activeId === "tabBtnRanking") ? "flex" : "none";
+  const filterBar = document.getElementById("adminLessonFilterBar");
+  if (filterBar) {
+    filterBar.style.display = (activeId === "tabBtnRanking") ? "flex" : "none";
   }
 }
 
+window.selectAdminLesson = function(lKey) {
+  currentAdminLessonFilter = String(lKey);
+  renderAdminLessonFilterBar();
+  renderAdminTab("ranking");
+};
+
 function renderAdminTab(tab) {
   const container = document.getElementById("adminContentArea");
+  if (!container) return;
+
   if (tab === "ranking") {
     const allRecords = JSON.parse(localStorage.getItem(KEY_RECORDS) || "[]");
 
-    // 依照下拉選單過濾課次
-    let filtered = allRecords;
-    if (currentAdminLessonFilter === "hell") {
-      filtered = allRecords.filter(r => r.lessonKey === "hell" || (r.lesson && r.lesson.includes("地獄")) || (r.lesson && r.lesson.includes("終極")));
-    } else if (currentAdminLessonFilter !== "all") {
-      filtered = allRecords.filter(r => r.lessonKey === currentAdminLessonFilter || (r.lesson && r.lesson.includes(`第 ${currentAdminLessonFilter} 課`)));
-    }
+    // ============================================
+    // 模式 A：課次總覽大廳 (Lobby Overview Grid)
+    // ============================================
+    if (currentAdminLessonFilter === "all") {
+      let overviewCardsHtml = "";
 
-    if (filtered.length === 0) {
+      // 產生 1 ~ 13 課大廳卡片
+      for (let i = 1; i <= 13; i++) {
+        const lData = VOCAB_DATABASE[i] || {};
+        const charCount = (lData.words || []).length;
+        const phraseCount = (LESSON_PHRASES[i] || []).length;
+        const lRecords = allRecords.filter(r => r.lessonKey === String(i) || (r.lesson && r.lesson.includes(`第 ${i} 課`)));
+        const studentCount = new Set(lRecords.map(r => r.callsign)).size;
+        const avgAcc = lRecords.length > 0 ? Math.round(lRecords.reduce((sum, r) => sum + (r.accuracy || 0), 0) / lRecords.length) : 0;
+
+        // 計算該課最常錯字
+        const mistakeWordCounts = {};
+        lRecords.forEach(r => {
+          (r.mistakes || []).forEach(m => {
+            const tw = m.target || m.word;
+            mistakeWordCounts[tw] = (mistakeWordCounts[tw] || 0) + 1;
+          });
+        });
+        let topMistakeWord = "";
+        let maxCount = 0;
+        for (const w in mistakeWordCounts) {
+          if (mistakeWordCounts[w] > maxCount) {
+            maxCount = mistakeWordCounts[w];
+            topMistakeWord = `「${w}」(${maxCount}次)`;
+          }
+        }
+
+        overviewCardsHtml += `
+          <div class="admin-lesson-card" onclick="selectAdminLesson('${i}')">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 11px; font-weight: 800; color: #00D2DC;">LESSON // ${i}</span>
+                <span style="font-size: 10px; background: rgba(0, 210, 220, 0.15); color: #00D2DC; padding: 2px 6px; border-radius: 4px;">
+                  ${studentCount} 位特警出擊
+                </span>
+              </div>
+              <div style="font-size: 18px; font-weight: 900; color: #FFF; margin-bottom: 4px;">第 ${i} 課</div>
+              <div style="font-size: 12px; color: #8E9BAE;">
+                生字 <b style="color: #FFF;">${charCount}</b> 字 · 生詞 <b style="color: #FFF;">${phraseCount}</b> 詞
+              </div>
+              <div style="margin-top: 8px; font-size: 11px; color: ${avgAcc > 0 ? '#FFDF5D' : '#6A7888'};">
+                ${avgAcc > 0 ? `平均準度: ${avgAcc}%` : '尚無出擊紀錄'}
+              </div>
+              <div style="font-size: 11px; margin-top: 3px; color: ${topMistakeWord ? '#FF6677' : (avgAcc > 0 ? '#00FF88' : '#6A7888')};">
+                ${topMistakeWord ? `⚠️ 易錯字: ${topMistakeWord}` : (avgAcc > 0 ? '✅ 生字掌握良好' : '點擊查看生字')}
+              </div>
+            </div>
+            <div style="margin-top: 14px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.06); display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 11px; color: #8E9BAE;">診斷分析</span>
+              <span style="font-size: 12px; font-weight: 800; color: #00FF88;">檢視識字名冊 ▶</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // 產生終極綜合卡片
+      const hellRecords = allRecords.filter(r => r.lessonKey === "hell" || (r.lesson && r.lesson.includes("地獄")) || (r.lesson && r.lesson.includes("終極")));
+      const hellStudentCount = new Set(hellRecords.map(r => r.callsign)).size;
+      const hellAvgAcc = hellRecords.length > 0 ? Math.round(hellRecords.reduce((sum, r) => sum + (r.accuracy || 0), 0) / hellRecords.length) : 0;
+
+      overviewCardsHtml += `
+        <div class="admin-lesson-card" style="border-color: rgba(255, 51, 68, 0.35); background: rgba(255, 51, 68, 0.05);" onclick="selectAdminLesson('hell')">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 800; color: #FF6677;">SURVIVAL // HELL</span>
+              <span style="font-size: 10px; background: rgba(255, 51, 68, 0.2); color: #FF6677; padding: 2px 6px; border-radius: 4px;">
+                ${hellStudentCount} 位特警出擊
+              </span>
+            </div>
+            <div style="font-size: 18px; font-weight: 900; color: #FF4455; margin-bottom: 4px;">🔥 終極綜合生存戰</div>
+            <div style="font-size: 12px; color: #8E9BAE;">
+              全冊 <b style="color: #FFF;">${allGradeWords.length}</b> 生字 ＋ 錯別詞大亂鬥
+            </div>
+            <div style="margin-top: 8px; font-size: 11px; color: ${hellAvgAcc > 0 ? '#FFDF5D' : '#6A7888'};">
+              ${hellAvgAcc > 0 ? `平均準度: ${hellAvgAcc}%` : '尚無出擊紀錄'}
+            </div>
+            <div style="font-size: 11px; margin-top: 3px; color: #FFB300;">
+              跨課綜合抗壓能力檢定
+            </div>
+          </div>
+          <div style="margin-top: 14px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.06); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 11px; color: #8E9BAE;">總合榜單</span>
+            <span style="font-size: 12px; font-weight: 800; color: #FF6677;">檢視全冊戰況 ▶</span>
+          </div>
+        </div>
+      `;
+
       container.innerHTML = `
-        <div style='padding: 36px 20px; text-align: center; color: #8E9BAE;'>
-          <div style="font-size: 24px; margin-bottom: 8px;">📊</div>
-          ${currentAdminLessonFilter === "hell" ? "🔥 終極綜合生存戰" : currentAdminLessonFilter === "all" ? "全體關卡" : `第 ${currentAdminLessonFilter} 課`} 尚無學員成績紀錄。<br>
-          <span style="font-size: 11px; color: #58A6FF; margin-top: 6px; display: inline-block;">可點擊下方「🎲 產生示範學員資料」立即預覽排行榜！</span>
+        <div style="margin-bottom: 14px; padding: 12px 16px; background: rgba(0, 113, 227, 0.1); border: 1px solid rgba(0, 113, 227, 0.3); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 14px; font-weight: 900; color: #FFF;">🌟 課次戰況總覽大廳（第 1 課 ~ 第 13 課 ＋ 🔥 終極綜合）</div>
+            <div style="font-size: 12px; color: #8E9BAE; margin-top: 2px;">
+              點擊任一課次卡片，即可精準查看該課「全體生字掌握熱力晶片」與「學員識字名冊」
+            </div>
+          </div>
+          <div style="font-size: 12px; color: #00D2DC; font-weight: 800;">
+            13 課 ＋ 終極生存戰
+          </div>
+        </div>
+        <div class="admin-overview-grid">
+          ${overviewCardsHtml}
         </div>
       `;
       return;
     }
 
-    let html = `
+    // ============================================
+    // 模式 B：特定課次生字診斷與名冊 (1~13課 & 終極)
+    // ============================================
+    let filtered = allRecords;
+    const isHell = currentAdminLessonFilter === "hell";
+    if (isHell) {
+      filtered = allRecords.filter(r => r.lessonKey === "hell" || (r.lesson && r.lesson.includes("地獄")) || (r.lesson && r.lesson.includes("終極")));
+    } else {
+      filtered = allRecords.filter(r => r.lessonKey === currentAdminLessonFilter || (r.lesson && r.lesson.includes(`第 ${currentAdminLessonFilter} 課`)));
+    }
+
+    // 1. 本課生字掌握度熱力分析
+    let wordDiagnosticHtml = "";
+    if (!isHell) {
+      const lessonWords = (VOCAB_DATABASE[currentAdminLessonFilter]?.words || []).map(item => item.word);
+      const wordMistakeMap = {};
+      lessonWords.forEach(w => { wordMistakeMap[w] = 0; });
+
+      filtered.forEach(r => {
+        (r.mistakes || []).forEach(m => {
+          const targetW = m.target || m.word;
+          lessonWords.forEach(lw => {
+            if (targetW && targetW.includes(lw)) {
+              wordMistakeMap[lw] = (wordMistakeMap[lw] || 0) + 1;
+            }
+          });
+        });
+      });
+
+      let masteredCount = 0;
+      let warningCount = 0;
+      let dangerCount = 0;
+
+      const chipsHtml = lessonWords.map(w => {
+        const errCount = wordMistakeMap[w] || 0;
+        if (errCount === 0) {
+          masteredCount++;
+          return `<div class="word-diag-chip mastered" title="全班無人答錯"><span>✅ ${w}</span> <span style="font-size: 10px; opacity: 0.85;">100% 掌握</span></div>`;
+        } else if (errCount <= 2) {
+          warningCount++;
+          return `<div class="word-diag-chip warning" title="偶有誤選 (${errCount}次)"><span>⚠️ ${w}</span> <span style="font-size: 10px;">${errCount}次誤選</span></div>`;
+        } else {
+          dangerCount++;
+          return `<div class="word-diag-chip danger" title="核心高頻盲點 (${errCount}次)"><span>❌ ${w}</span> <span style="font-size: 10px; font-weight: 800;">${errCount}次盲點!</span></div>`;
+        }
+      }).join("");
+
+      wordDiagnosticHtml = `
+        <div class="word-matrix-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 14px; font-weight: 900; color: #FFF;">🎯 第 ${currentAdminLessonFilter} 課 全班生字掌握度熱力診斷：</span>
+              <span style="font-size: 11px; color: #8E9BAE;">(綠色: 完全掌握 ｜ 黃色: 偶有誤選 ｜ 紅色: 核心易錯盲點)</span>
+            </div>
+            <div style="font-size: 12px; color: #A0B0C0;">
+              本課生字共 <b style="color: #FFF;">${lessonWords.length}</b> 字 ｜ 
+              <span style="color: #00FF88;">🟢 完全掌握: <b>${masteredCount}</b></span> ｜ 
+              <span style="color: #FFB300;">🟡 待加強: <b>${warningCount}</b></span> ｜ 
+              <span style="color: #FF6677;">🔴 核心盲點: <b>${dangerCount}</b></span>
+            </div>
+          </div>
+          <div class="word-matrix-grid">
+            ${chipsHtml || '<div style="color: #8E9BAE; font-size: 12px;">本課生字資料載入中...</div>'}
+          </div>
+        </div>
+      `;
+    } else {
+      // 終極綜合診斷熱力
+      wordDiagnosticHtml = `
+        <div class="word-matrix-box" style="border-color: rgba(255, 51, 68, 0.4); background: rgba(255, 51, 68, 0.05);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 14px; font-weight: 900; color: #FF4455;">🔥 全冊終極綜合 生存對決戰情室：</span>
+              <span style="font-size: 11px; color: #8E9BAE;">(涵蓋 5 年級上學期全 13 課生字與錯別詞大亂鬥)</span>
+            </div>
+            <div style="font-size: 12px; color: #FFDF5D;">
+              出擊紀錄: <b>${filtered.length}</b> 場
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 2. 名冊導覽橫條（含返回大廳按鈕）
+    const headerBar = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button class="apple-btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="selectAdminLesson('all')">◀ 返回課次總覽大廳</button>
+          <span style="font-size: 16px; font-weight: 900; color: #FFF;">
+            ${isHell ? "🔥 全冊終極綜合生存戰" : `第 ${currentAdminLessonFilter} 課`} 學員成績名冊與生字診斷
+          </span>
+        </div>
+        <div style="font-size: 12px; color: #8E9BAE;">
+          共 <b>${filtered.length}</b> 筆作戰紀錄
+        </div>
+      </div>
+    `;
+
+    // 3. 名冊表格（增設「🎯 生字掌握狀況 / 錯別字診斷」關鍵欄位！）
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        ${wordDiagnosticHtml}
+        ${headerBar}
+        <div style='padding: 36px 20px; text-align: center; color: #8E9BAE; background: rgba(255,255,255,0.02); border-radius: 12px;'>
+          <div style="font-size: 28px; margin-bottom: 8px;">🎯</div>
+          ${isHell ? "🔥 終極綜合生存戰" : `第 ${currentAdminLessonFilter} 課`} 尚無學員成績紀錄。<br>
+          <span style="font-size: 11px; color: #58A6FF; margin-top: 6px; display: inline-block;">可點選左下方「🎲 產生示範學員資料」立即預覽名冊與生字診斷！</span>
+        </div>
+      `;
+      return;
+    }
+
+    let tableHtml = `
       <table class="admin-table">
         <thead>
           <tr>
-            <th>名次</th><th>特警呼號</th><th>出擊關卡與模式</th><th>作戰積分</th><th>最高連擊</th><th>命中率</th><th>狀態</th><th>作戰時間</th>
+            <th>名次</th>
+            <th>特警姓名</th>
+            <th>模式</th>
+            <th>積分</th>
+            <th>連擊</th>
+            <th>命中率</th>
+            <th style="min-width: 240px;">🎯 生字掌握狀況 / 錯別字診斷</th>
+            <th>狀態</th>
+            <th>時間</th>
           </tr>
         </thead>
         <tbody>
     `;
+
     filtered.forEach((r, idx) => {
-      html += `
+      const hasMistakes = r.mistakes && r.mistakes.length > 0;
+      let masteryContent = "";
+
+      if (hasMistakes) {
+        masteryContent = `
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <span style="color: #FF6677; font-weight: 800; font-size: 11px;">❌ 未掌握 (${r.mistakes.length}處盲點)：</span>
+            <div style="font-size: 11px; color: #FFD56B; line-height: 1.4;">
+              ${r.mistakes.map(m => `「${m.target || m.word}」<span style="color: #8E9BAE; font-size: 10px;">(${m.detail || '誤選'})</span>`).join("、")}
+            </div>
+          </div>
+        `;
+      } else {
+        masteryContent = `
+          <span style="color: #00FF88; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+            🟢 🌟 ${isHell ? '全冊生字' : '本課生字'}全數掌握
+          </span>
+        `;
+      }
+
+      tableHtml += `
         <tr>
           <td><span style="font-weight: 800; color: ${idx === 0 ? '#FFDF5D' : idx === 1 ? '#E0E0E0' : idx === 2 ? '#CD7F32' : '#8E9BAE'};">#${idx + 1}</span></td>
           <td style="font-weight: 700; color: #FFF;">${r.callsign}</td>
-          <td><span style="color: ${r.lessonKey === 'hell' ? '#FF6677' : '#64B5F6'};">${r.lesson}</span></td>
+          <td><span style="color: #64B5F6; font-size: 11px;">${r.modeLabel || r.mode || '循序'}</span></td>
           <td style="font-weight: 900; color: #00D2DC;">${r.score}</td>
           <td><span style="color: #FFDF5D;">${r.maxCombo}x</span></td>
           <td>${r.accuracy}%</td>
-          <td>${r.completed ? '<span style="color: #00FF88;">完全制霸</span>' : '<span style="color: #FF3344;">陣亡</span>'}</td>
+          <td>${masteryContent}</td>
+          <td>${r.completed ? '<span style="color: #00FF88; font-weight: 800;">完全制霸</span>' : '<span style="color: #FF3344;">陣亡</span>'}</td>
           <td style="color: #8E9BAE; font-size: 11px;">${r.date}</td>
         </tr>
       `;
     });
-    html += `</tbody></table>`;
-    container.innerHTML = html;
+
+    tableHtml += `</tbody></table>`;
+    container.innerHTML = wordDiagnosticHtml + headerBar + tableHtml;
+
   } else if (tab === "errors") {
     const errors = JSON.parse(localStorage.getItem(KEY_ERRORS) || "{}");
     const errList = Object.values(errors).sort((a, b) => b.count - a.count);
@@ -2935,7 +3197,7 @@ function renderAdminTab(tab) {
         <ol style="margin-left: 20px; margin-top: 8px; margin-bottom: 14px;">
           <li>建立 Google 試算表，進入「擴充功能」>「Apps Script」。</li>
           <li>部署為網頁應用程式 (Web App)，並將存取權設為「任何人」。</li>
-          <li>將取得的 Webhook 網址填入下方，作戰結束後成績將自動上傳同步！</li>
+          <li>將取得的 Webhook 網址填入下方，作戰結束後成績與錯字診斷將自動上傳同步！</li>
         </ol>
         <div style="display: flex; gap: 8px; max-width: 600px;">
           <input type="text" class="apple-input" id="inputWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" style="margin-bottom: 0;">
@@ -2946,66 +3208,148 @@ function renderAdminTab(tab) {
   }
 }
 
+// 匯出 CSV：包含生字掌握狀況
 document.getElementById("btnExportCSV").onclick = () => {
   const records = JSON.parse(localStorage.getItem(KEY_RECORDS) || "[]");
   if (records.length === 0) return alert("目前尚無成績紀錄可供匯出！");
 
   let csvContent = "\uFEFF";
-  csvContent += "名次,學員呼號,出擊關卡與模式,作戰積分,最高連擊,命中率,狀態,作戰時間\n";
+  csvContent += "名次,學員姓名,出擊課次與模式,作戰積分,最高連擊,命中率,生字掌握狀況,狀態,作戰時間\n";
 
   records.forEach((r, idx) => {
-    csvContent += `"${idx + 1}","${r.callsign}","${r.lesson}","${r.score}","${r.maxCombo}","${r.accuracy}%","${r.completed ? '完全制霸' : '陣亡'}","${r.date}"\n`;
+    let diag = "全數掌握";
+    if (r.mistakes && r.mistakes.length > 0) {
+      diag = "未掌握: " + r.mistakes.map(m => `「${m.target || m.word}」(${m.detail || '誤擊'})`).join("、");
+    }
+    csvContent += `"${idx + 1}","${r.callsign}","${r.lesson}","${r.score}","${r.maxCombo}","${r.accuracy}%","${diag}","${r.completed ? '完全制霸' : '陣亡'}","${r.date}"\n`;
   });
 
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `三角洲字點_分課戰績_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `三角洲字點_學員生字診斷名冊_${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 };
 
+// 注入各課豐富示範學員資料 (包含具體錯字診斷，讓老師一目了然！)
 document.getElementById("btnSeedMockData").onclick = () => {
   const now = new Date();
   const mockStudents = [
-    // 終極綜合排行
-    { callsign: "雷霆先鋒", lessonKey: "hell", lesson: "🔥 終極綜合生存戰 [循序(字+詞)]", score: 9240, maxCombo: 28, accuracy: 96, completed: true },
-    { callsign: "幻影幽靈", lessonKey: "hell", lesson: "🔥 終極綜合生存戰 [僅生詞]", score: 7850, maxCombo: 22, accuracy: 93, completed: false },
-    { callsign: "天鷹巡航", lessonKey: "hell", lesson: "🔥 終極綜合生存戰 [僅生字]", score: 6920, maxCombo: 19, accuracy: 91, completed: true },
     // 第 1 課排行
-    { callsign: "極光狙擊手", lessonKey: "1", lesson: "第 1 課 [循序(字+詞)]", score: 6280, maxCombo: 18, accuracy: 96, completed: true },
-    { callsign: "獵隼特警", lessonKey: "1", lesson: "第 1 課 [循序(字+詞)]", score: 5840, maxCombo: 15, accuracy: 94, completed: true },
-    { callsign: "星盾衛士", lessonKey: "1", lesson: "第 1 課 [僅生字]", score: 4120, maxCombo: 12, accuracy: 92, completed: true },
+    { 
+      callsign: "極光狙擊手", lessonKey: "1", lesson: "第 1 課 [循序(字+詞)]", score: 6420, maxCombo: 18, accuracy: 97, completed: true,
+      mistakes: [] 
+    },
+    { 
+      callsign: "獵隼特警", lessonKey: "1", lesson: "第 1 課 [循序(字+詞)]", score: 5840, maxCombo: 15, accuracy: 94, completed: true,
+      mistakes: [
+        { target: "瘧", picked: "虐", detail: "誤選形似字「虐」" }
+      ]
+    },
+    { 
+      callsign: "星盾衛士", lessonKey: "1", lesson: "第 1 課 [僅生字]", score: 4120, maxCombo: 12, accuracy: 91, completed: true,
+      mistakes: [
+        { target: "帳", picked: "棚", detail: "誤選「帳棚」" },
+        { target: "瘧", picked: "逼近自爆", detail: "逼近自爆破防" }
+      ]
+    },
+    { 
+      callsign: "破浪射手", lessonKey: "1", lesson: "第 1 課 [循序(字+詞)]", score: 3650, maxCombo: 8, accuracy: 86, completed: false,
+      mistakes: [
+        { target: "洲", picked: "州", detail: "誤選同音字「州」" },
+        { target: "瘧", picked: "虐", detail: "誤選形似字「虐」" }
+      ]
+    },
     // 第 2 課排行
-    { callsign: "幽靈影刃", lessonKey: "2", lesson: "第 2 課 [僅生詞]", score: 5420, maxCombo: 14, accuracy: 90, completed: false },
-    { callsign: "赤焰獵手", lessonKey: "2", lesson: "第 2 課 [循序(字+詞)]", score: 4980, maxCombo: 13, accuracy: 89, completed: true },
+    { 
+      callsign: "幽靈影刃", lessonKey: "2", lesson: "第 2 課 [僅生詞]", score: 5680, maxCombo: 16, accuracy: 95, completed: true,
+      mistakes: []
+    },
+    { 
+      callsign: "赤焰獵手", lessonKey: "2", lesson: "第 2 課 [循序(字+詞)]", score: 4980, maxCombo: 13, accuracy: 89, completed: true,
+      mistakes: [
+        { target: "臍", picked: "齊", detail: "誤選「臍帶」" }
+      ]
+    },
+    { 
+      callsign: "晨曦守衛", lessonKey: "2", lesson: "第 2 課 [循序(字+詞)]", score: 3820, maxCombo: 9, accuracy: 85, completed: false,
+      mistakes: [
+        { target: "巒", picked: "蠻", detail: "誤選「山巒」" },
+        { target: "禍", picked: "鍋", detail: "誤選「車禍」" }
+      ]
+    },
     // 第 3 課排行
-    { callsign: "蒼狼隊員", lessonKey: "3", lesson: "第 3 課 [僅生字]", score: 3860, maxCombo: 10, accuracy: 92, completed: true },
-    { callsign: "疾風突擊手", lessonKey: "3", lesson: "第 3 課 [循序(字+詞)]", score: 3540, maxCombo: 9, accuracy: 88, completed: false }
+    { 
+      callsign: "蒼狼隊員", lessonKey: "3", lesson: "第 3 課 [僅生字]", score: 5120, maxCombo: 14, accuracy: 92, completed: true,
+      mistakes: [
+        { target: "聳", picked: "耳", detail: "誤選「聳立」" }
+      ]
+    },
+    { 
+      callsign: "疾風突擊手", lessonKey: "3", lesson: "第 3 課 [循序(字+詞)]", score: 3540, maxCombo: 9, accuracy: 88, completed: false,
+      mistakes: [
+        { target: "峭", picked: "悄", detail: "誤選「峭壁」" }
+      ]
+    },
+    // 第 4 課排行
+    {
+      callsign: "鐵壁衛士", lessonKey: "4", lesson: "第 4 課 [循序(字+詞)]", score: 4800, maxCombo: 12, accuracy: 93, completed: true,
+      mistakes: []
+    },
+    {
+      callsign: "迅捷飛鷹", lessonKey: "4", lesson: "第 4 課 [僅生詞]", score: 3950, maxCombo: 10, accuracy: 87, completed: false,
+      mistakes: [
+        { target: "挫", picked: "座", detail: "誤選「挫折」" }
+      ]
+    },
+    // 🔥 終極綜合排行
+    { 
+      callsign: "雷霆先鋒", lessonKey: "hell", lesson: "🔥 終極綜合生存戰 [循序(字+詞)]", score: 9540, maxCombo: 28, accuracy: 96, completed: true,
+      mistakes: [
+        { target: "瘧", picked: "虐", detail: "誤擊「虐」" }
+      ]
+    },
+    { 
+      callsign: "幻影幽靈", lessonKey: "hell", lesson: "🔥 終極綜合生存戰 [僅生詞]", score: 7850, maxCombo: 22, accuracy: 93, completed: false,
+      mistakes: [
+        { target: "帳", picked: "張", detail: "誤擊「張」" },
+        { target: "出乎意料", picked: "出呼意料", detail: "誤選「呼」" }
+      ]
+    },
+    { 
+      callsign: "天鷹巡航", lessonKey: "hell", lesson: "🔥 終極綜合生存戰 [僅生字]", score: 6920, maxCombo: 19, accuracy: 91, completed: true,
+      mistakes: []
+    }
   ];
 
   const records = mockStudents.map((s, idx) => ({
     id: Date.now() - idx * 100000,
     ...s,
+    modeLabel: s.lesson.match(/\[(.*?)\]/)?.[1] || "循序",
     date: now.toLocaleDateString() + " " + now.toLocaleTimeString().slice(0, 5)
   }));
   records.sort((a, b) => b.score - a.score);
   localStorage.setItem(KEY_RECORDS, JSON.stringify(records));
 
   const mockErrors = {
-    "虐疾": { word: "虐疾", count: 8, confused: { "誤當作正解「瘧疾」": 8 } },
-    "瘧": { word: "瘧", count: 6, confused: { "誤擊干擾字「虐」": 4, "自爆破防": 2 } },
+    "瘧": { word: "瘧", count: 8, confused: { "誤擊干擾字「虐」": 6, "自爆破防": 2 } },
+    "帳": { word: "帳", count: 5, confused: { "誤選「棚」": 3, "誤選「張」": 2 } },
+    "虐疾": { word: "虐疾", count: 7, confused: { "誤當作正解「瘧疾」": 7 } },
     "帳棚": { word: "帳棚", count: 5, confused: { "誤當作正解「帳篷」": 5 } },
-    "出呼意料": { word: "出呼意料", count: 4, confused: { "誤當作正解「出乎意料」": 4 } }
+    "出呼意料": { word: "出呼意料", count: 4, confused: { "誤當作正解「出乎意料」": 4 } },
+    "山蠻": { word: "山蠻", count: 3, confused: { "誤當作正解「山巒」": 3 } },
+    "聳": { word: "聳", count: 3, confused: { "誤選「耳」": 3 } }
   };
   localStorage.setItem(KEY_ERRORS, JSON.stringify(mockErrors));
 
   refreshAdminKPIs();
+  renderAdminLessonFilterBar();
   renderAdminTab(currentAdminTab);
-  alert("示範學員作戰紀錄已成功注入！包含各課獨立排名與終極綜合排名數據。");
+  alert("示範學員資料已成功注入！包含各課獨立生字診斷名冊與終極綜合榜單。");
 };
 
 document.getElementById("btnClearRecords").onclick = () => {
@@ -3013,6 +3357,7 @@ document.getElementById("btnClearRecords").onclick = () => {
     localStorage.removeItem(KEY_RECORDS);
     localStorage.removeItem(KEY_ERRORS);
     refreshAdminKPIs();
+    renderAdminLessonFilterBar();
     renderAdminTab(currentAdminTab);
     alert("戰情數據已全數重置！");
   }
@@ -3043,9 +3388,7 @@ player.update = function() {
   origPlayerUpdate();
 };
 
-// ==========================================
-// 啟動主迴圈與初始化遊戲 (每次進入連結強制登記名字)
-// ==========================================
+// 初始化
 initDock();
 loadUserProfile();
 requestAnimationFrame(gameLoop);
